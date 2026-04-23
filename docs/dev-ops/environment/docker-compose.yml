@@ -169,6 +169,26 @@ services:
       TZ: "Asia/Shanghai"
       NAMESRV_ADDR: "rocketmq:9876"
 
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: agent-postgres
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: agent_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456"
+    volumes:
+      - ./sql/init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - my-network
+
 networks:
   my-network:
     driver: bridge
