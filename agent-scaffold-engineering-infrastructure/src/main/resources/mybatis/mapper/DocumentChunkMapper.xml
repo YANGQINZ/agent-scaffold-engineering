@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IDocumentChunkDao">
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO document_chunk (doc_id, base_id, content, embedding, metadata, chunk_index)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.docId}, #{item.baseId}, #{item.content}, #{item.embedding}::vector, #{item.metadata}, #{item.chunkIndex})
+        </foreach>
+    </insert>
+
+    <select id="vectorSearch" resultType="com.ai.agent.infrastructure.persistent.po.DocumentChunkPO">
+        SELECT chunk_id, doc_id, base_id, content, metadata, chunk_index,
+               1 - (embedding <![CDATA[<=>]]> #{embedding}::vector) AS score
+        FROM document_chunk WHERE base_id = #{baseId}
+        ORDER BY embedding <![CDATA[<=>]]> #{embedding}::vector
+        LIMIT #{topK}
+    </select>
+
+    <select id="bm25Search" resultType="com.ai.agent.infrastructure.persistent.po.DocumentChunkPO">
+        SELECT chunk_id, doc_id, base_id, content, metadata, chunk_index,
+               ts_rank_cd(content_tsv, plainto_tsquery('simple', #{query})) AS score
+        FROM document_chunk WHERE base_id = #{baseId}
+            AND content_tsv @@ plainto_tsquery('simple', #{query})
+        ORDER BY ts_rank_cd(content_tsv, plainto_tsquery('simple', #{query})) DESC
+        LIMIT #{topK}
+    </select>
+
+</mapper>

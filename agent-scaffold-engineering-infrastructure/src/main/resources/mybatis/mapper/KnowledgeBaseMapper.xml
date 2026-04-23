@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IKnowledgeBaseDao">
+
+    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.KnowledgeBasePO">
+        INSERT INTO knowledge_base (base_id, name, description, owner_type, owner_id, doc_count, created_at)
+        VALUES (#{baseId}, #{name}, #{description}, #{ownerType}, #{ownerId}, #{docCount}, #{createdAt})
+    </insert>
+
+    <select id="selectById" resultType="com.ai.agent.infrastructure.persistent.po.KnowledgeBasePO">
+        SELECT base_id, name, description, owner_type, owner_id, doc_count, created_at
+        FROM knowledge_base WHERE base_id = #{baseId}
+    </select>
+
+</mapper>

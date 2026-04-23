@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IChatMessageDao">
+
+    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.ChatMessagePO">
+        INSERT INTO chat_message (session_id, role, content, token_count, created_at)
+        VALUES (#{sessionId}, #{role}, #{content}, #{tokenCount}, #{createdAt})
+    </insert>
+
+    <select id="selectBySessionId" resultType="com.ai.agent.infrastructure.persistent.po.ChatMessagePO">
+        SELECT message_id, session_id, role, content, token_count, created_at
+        FROM chat_message WHERE session_id = #{sessionId} ORDER BY created_at ASC
+    </select>
+
+</mapper>

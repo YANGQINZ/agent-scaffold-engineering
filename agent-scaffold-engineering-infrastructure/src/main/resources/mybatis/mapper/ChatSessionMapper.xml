@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IChatSessionDao">
+
+    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
+        INSERT INTO chat_session (session_id, user_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at)
+        VALUES (#{sessionId}, #{userId}, #{mode}, #{agentMode}, #{ragEnabled}, #{knowledgeBaseId}, #{createdAt}, #{updatedAt}, #{ttlExpireAt})
+    </insert>
+
+    <select id="selectById" resultType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
+        SELECT session_id, user_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
+        FROM chat_session WHERE session_id = #{sessionId}
+    </select>
+
+    <update id="updateTtl">
+        UPDATE chat_session SET updated_at = NOW() WHERE session_id = #{sessionId}
+    </update>
+
+</mapper>
