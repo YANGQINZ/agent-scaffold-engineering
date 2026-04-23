@@ -43,6 +43,6 @@ build/
 /mvnw
 /mvnw.cmd
 /.mvn/
-/.idea/
-/.claude/
+/.claude
+/.idea
 .env.example
