@@ -132,11 +132,11 @@
                 <scope>import</scope>
             </dependency>
 
-            <!--<dependency>
+            <dependency>
                 <groupId>org.springaicommunity</groupId>
                 <artifactId>spring-ai-agent-utils</artifactId>
                 <version>0.4.2</version>
-            </dependency>-->
+            </dependency>
 
             <!-- 设计模式框架 -->
             <dependency>

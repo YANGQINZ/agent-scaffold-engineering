@@ -40,3 +40,8 @@ build/
 
 ### Superpowers brainstorming ###
 .superpowers/
+/mvnw
+/mvnw.cmd
+/.mvn/
+/.idea/
+/.claude/
