@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -72,6 +73,19 @@ public class StreamEvent {
         data.put("nodeName", nodeName);
         return StreamEvent.builder()
                 .type(StreamEventType.NODE_END)
+                .data(data)
+                .sessionId(sessionId)
+                .build();
+    }
+
+    /**
+     * RAG检索事件 — 推送检索到的文档片段和来源
+     */
+    public static StreamEvent ragRetrieve(List<SourceRef> sources, String sessionId) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("sources", sources);
+        return StreamEvent.builder()
+                .type(StreamEventType.RAG_RETRIEVE)
                 .data(data)
                 .sessionId(sessionId)
                 .build();

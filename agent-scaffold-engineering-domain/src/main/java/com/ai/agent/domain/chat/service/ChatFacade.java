@@ -5,6 +5,7 @@ import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
 import com.ai.agent.domain.chat.service.strategy.ChatStrategy;
 import com.ai.agent.domain.chat.service.strategy.RagDecorator;
+import com.ai.agent.domain.knowledge.service.RagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -17,9 +18,11 @@ import reactor.core.publisher.Flux;
 public class ChatFacade {
 
     private final ModeRouter modeRouter;
+    private final RagService ragService;
 
-    public ChatFacade(ModeRouter modeRouter) {
+    public ChatFacade(ModeRouter modeRouter, RagService ragService) {
         this.modeRouter = modeRouter;
+        this.ragService = ragService;
     }
 
     /**
@@ -28,9 +31,9 @@ public class ChatFacade {
     public ChatResponse chat(ChatRequest request) {
         ChatStrategy strategy = modeRouter.route(request.getMode());
 
-        // 如果启用RAG，用RagDecorator包装策略
+        // 如果启用RAG，用RagDecorator包装策略（注入RagService实现RAG检索增强）
         if (Boolean.TRUE.equals(request.getRagEnabled())) {
-            strategy = new RagDecorator(strategy);
+            strategy = new RagDecorator(strategy, ragService);
         }
 
         return strategy.execute(request);
@@ -42,9 +45,9 @@ public class ChatFacade {
     public Flux<StreamEvent> chatStream(ChatRequest request) {
         ChatStrategy strategy = modeRouter.route(request.getMode());
 
-        // 如果启用RAG，用RagDecorator包装策略
+        // 如果启用RAG，用RagDecorator包装策略（注入RagService实现RAG检索增强）
         if (Boolean.TRUE.equals(request.getRagEnabled())) {
-            strategy = new RagDecorator(strategy);
+            strategy = new RagDecorator(strategy, ragService);
         }
 
         return strategy.executeStream(request);

@@ -90,10 +90,19 @@ public class AgentOrchestratorStrategy implements ChatStrategy {
     }
 
     /**
-     * 解析Agent定义 — 从注册中心获取或创建默认定义
+     * 解析Agent定义 — 优先按agentId查找，未指定则按agentMode查找，均未找到则创建默认定义
      */
     private AgentDefinition resolveAgentDefinition(ChatRequest request) {
-        // 当前从注册中心查找，未找到则构建默认Agent定义
+        // 优先按请求中指定的agentId查找（YAML配置加载的Agent定义）
+        if (request.getAgentId() != null && !request.getAgentId().isBlank()) {
+            AgentDefinition agentDef = agentRegistry.get(request.getAgentId());
+            if (agentDef != null) {
+                return agentDef;
+            }
+            log.warn("未找到指定agentId的Agent定义: agentId={}，回退到agentMode查找", request.getAgentId());
+        }
+
+        // 按agentMode枚举名查找（兼容原有逻辑）
         AgentDefinition agentDef = agentRegistry.get(request.getAgentMode().name());
         if (agentDef == null) {
             log.info("未找到Agent定义: agentId={}，创建默认定义", request.getAgentMode().name());

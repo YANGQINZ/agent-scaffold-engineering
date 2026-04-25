@@ -35,4 +35,7 @@ public class DocumentChunk {
     /** 分块索引 */
     private Integer chunkIndex;
 
+    /** 检索相关性得分（搜索结果返回时填充） */
+    private Double score;
+
 }

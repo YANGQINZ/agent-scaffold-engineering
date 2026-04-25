@@ -1,0 +1,40 @@
+agents:
+  # Hybrid模式示例：深度研究助手（外层Workflow + 内层ReAct）
+  - id: "research-hybrid"
+    name: "研究助手"
+    mode: HYBRID
+    instruction: "你是一个深度研究分析助手，能够进行深度搜索和总结。"
+    model:
+      name: "qwq-plus"
+      temperature: 0.5
+    workflow:
+      entry: "research"
+      nodes:
+        - id: "research"
+          reactAgentId: "deep-researcher"
+          next: "summarize"
+        - id: "summarize"
+          agentId: "summarizer"
+
+  # 子Agent: 深度研究（ReAct模式，含工具）
+  - id: "deep-researcher"
+    name: "深度研究员"
+    mode: REACT
+    instruction: "你是深度研究员，使用工具进行深入搜索和分析。请尽可能全面地收集信息。"
+    tools:
+      - name: "getWeather"
+        type: FUNCTION
+        description: "查询天气信息（模拟搜索工具）"
+        className: "com.ai.agent.domain.agent.tools.WeatherTool"
+    model:
+      name: "qwq-plus"
+      temperature: 0.7
+
+  # 子Agent: 摘要总结
+  - id: "summarizer"
+    name: "摘要总结员"
+    mode: REACT
+    instruction: "你是摘要总结员，将研究结果整理成清晰、有条理的摘要报告。请用中文输出。"
+    model:
+      name: "qwq-plus"
+      temperature: 0.3

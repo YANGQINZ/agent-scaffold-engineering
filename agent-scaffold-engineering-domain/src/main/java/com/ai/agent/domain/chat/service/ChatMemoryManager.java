@@ -59,7 +59,9 @@ public class ChatMemoryManager {
         // 超过最大轮数的2倍时淘汰最旧的消息（2倍是因为每轮包含USER+ASSISTANT两条消息）
         int maxMessages = MAX_ROUNDS_PER_SESSION * 2;
         while (messages.size() > maxMessages) {
-            messages.removeFirst();
+            // LRU淘汰时先将最旧消息写回数据库再移除，防止数据丢失
+            ChatMessage evicted = messages.removeFirst();
+            asyncPersistMessage(evicted);
         }
 
         // 异步持久化

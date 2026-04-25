@@ -37,4 +37,7 @@ public class ChatRequest {
     /** 知识库ID（RAG启用时指定） */
     private String knowledgeBaseId;
 
+    /** 指定要使用的Agent ID（YAML配置中的agent定义标识） */
+    private String agentId;
+
 }

@@ -105,3 +105,17 @@ logging:
   level:
     root: info
   config: classpath:logback-spring.xml
+
+# Reranking精排配置
+rerank:
+  enabled: true
+  model: "qwen3-rerank"
+  top-n: 5
+  retry-count: 3
+  instruct: "Given a web search query, retrieve relevant passages that answer the query."
+
+# MMR多样性重排配置
+mmr:
+  enabled: true
+  lambda: 0.7
+  top-k: 5

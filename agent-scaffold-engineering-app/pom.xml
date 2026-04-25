@@ -101,6 +101,18 @@
             <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         </dependency>
 
+        <!-- Apache Tika 文档解析框架（支持PDF/Word/TXT等格式） -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers-standard-package</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
 
 
         <!-- 工程模块；启动依赖 trigger->domain, infrastructure-->

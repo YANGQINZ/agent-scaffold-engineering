@@ -65,6 +65,7 @@ public class DocumentChunkRepositoryImpl implements IDocumentChunkRepository {
                 .content(po.getContent())
                 .metadata(po.getMetadata())
                 .chunkIndex(po.getChunkIndex())
+                .score(po.getScore())
                 .build();
     }
 
