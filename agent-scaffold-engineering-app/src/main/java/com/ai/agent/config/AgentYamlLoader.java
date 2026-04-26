@@ -1,12 +1,15 @@
 package com.ai.agent.config;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
+import com.ai.agent.domain.agent.model.entity.AgentscopeAgentConfig;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
+import com.ai.agent.domain.agent.model.entity.McpServerConfig;
 import com.ai.agent.domain.agent.model.entity.ToolConfig;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.ModelConfig;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.types.enums.AgentMode;
+import com.ai.agent.types.enums.EngineType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -75,7 +78,7 @@ public class AgentYamlLoader {
         // 打印加载结果
         log.info("Agent YAML加载完成: 共加载{}个Agent定义", agentRegistry.getAll().size());
         agentRegistry.getAll().forEach(agent ->
-                log.info("  已注册Agent: agentId={}, name={}, mode={}", agent.getAgentId(), agent.getName(), agent.getMode()));
+                log.info("  已注册Agent: agentId={}, name={}, engine={}", agent.getAgentId(), agent.getName(), agent.getEngine()));
     }
 
     /**
@@ -110,6 +113,19 @@ public class AgentYamlLoader {
         AgentMode mode = AgentMode.valueOf(modeStr.toUpperCase());
         String instruction = node.path("instruction").asText("");
 
+        // 解析引擎类型（新增，缺省时根据 mode 推断，无 mode 时默认 GRAPH）
+        String engineStr = node.path("engine").asText(null);
+        EngineType engine;
+        if (engineStr != null && !engineStr.isBlank()) {
+            engine = EngineType.valueOf(engineStr.toUpperCase());
+        } else {
+            // 兼容旧 YAML：根据 mode 推断 engine
+            engine = switch (mode) {
+                case GRAPH, HYBRID -> EngineType.valueOf(modeStr.toUpperCase());
+                case REACT, WORKFLOW -> EngineType.GRAPH;
+            };
+        }
+
         // 解析模型配置
         ModelConfig modelConfig = parseModelConfig(node.path("model"));
 
@@ -120,6 +136,7 @@ public class AgentYamlLoader {
                 .agentId(id)
                 .name(name)
                 .mode(mode)
+                .engine(engine)
                 .instruction(instruction)
                 .modelConfig(modelConfig)
                 .tools(tools);
@@ -137,6 +154,40 @@ public class AgentYamlLoader {
             builder.graphStart(graphNode.path("start").asText(null));
             builder.graphNodes(parseWorkflowNodes(graphNode.path("nodes")));
             builder.graphEdges(parseGraphEdges(graphNode.path("edges")));
+        }
+
+        // 解析AgentScope配置（engine=agentscope 时生效）
+        if (node.has("agentscope")) {
+            JsonNode agentscopeNode = node.get("agentscope");
+            builder.agentscopePipelineType(agentscopeNode.path("pipeline").asText("sequential"));
+            builder.agentscopeAgents(parseAgentscopeAgentConfigs(agentscopeNode.path("agents")));
+        }
+
+        // 解析Hybrid子引擎映射（engine=hybrid 时生效）
+        if (node.has("hybrid")) {
+            JsonNode hybridNode = node.get("hybrid");
+            // hybrid.graph 复用 graph 解析逻辑
+            if (hybridNode.has("graph")) {
+                JsonNode graphNode = hybridNode.get("graph");
+                builder.graphStart(graphNode.path("start").asText(null));
+                builder.graphNodes(parseWorkflowNodes(graphNode.path("nodes")));
+                builder.graphEdges(parseGraphEdges(graphNode.path("edges")));
+            }
+            // subEngines 映射：nodeId → EngineType
+            if (hybridNode.has("subEngines")) {
+                Map<String, EngineType> subEngines = new HashMap<>();
+                Iterator<Map.Entry<String, JsonNode>> fields = hybridNode.get("subEngines").fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    subEngines.put(entry.getKey(), EngineType.valueOf(entry.getValue().asText().toUpperCase()));
+                }
+                builder.subEngines(subEngines);
+            }
+        }
+
+        // 解析MCP Server配置（跨引擎通用）
+        if (node.has("mcpServers")) {
+            builder.mcpServers(parseMcpServerConfigs(node.get("mcpServers")));
         }
 
         return builder.build();
@@ -210,6 +261,72 @@ public class AgentYamlLoader {
                     .build());
         }
         return edges;
+    }
+
+    /**
+     * 解析AgentScope Agent配置列表
+     */
+    private List<AgentscopeAgentConfig> parseAgentscopeAgentConfigs(JsonNode node) {
+        if (node.isMissingNode() || !node.isArray()) {
+            return List.of();
+        }
+        List<AgentscopeAgentConfig> agents = new ArrayList<>();
+        for (JsonNode agentNode : node) {
+            AgentscopeAgentConfig config = AgentscopeAgentConfig.builder()
+                    .agentId(agentNode.path("agentId").asText())
+                    .mcpServers(parseMcpServerConfigs(agentNode.path("mcpServers")))
+                    .build();
+            // 解析 enableTools 列表
+            if (agentNode.has("enableTools") && agentNode.get("enableTools").isArray()) {
+                List<String> enableTools = new ArrayList<>();
+                for (JsonNode toolNode : agentNode.get("enableTools")) {
+                    enableTools.add(toolNode.asText());
+                }
+                config.setEnableTools(enableTools);
+            }
+            agents.add(config);
+        }
+        return agents;
+    }
+
+    /**
+     * 解析MCP Server配置列表
+     */
+    private List<McpServerConfig> parseMcpServerConfigs(JsonNode node) {
+        if (node.isMissingNode() || !node.isArray()) {
+            return List.of();
+        }
+        List<McpServerConfig> servers = new ArrayList<>();
+        for (JsonNode serverNode : node) {
+            McpServerConfig.McpServerConfigBuilder builder = McpServerConfig.builder()
+                    .name(serverNode.path("name").asText())
+                    .transport(serverNode.path("transport").asText("stdio"));
+
+            if (serverNode.has("command")) {
+                builder.command(serverNode.path("command").asText());
+            }
+            if (serverNode.has("args") && serverNode.get("args").isArray()) {
+                List<String> args = new ArrayList<>();
+                for (JsonNode argNode : serverNode.get("args")) {
+                    args.add(argNode.asText());
+                }
+                builder.args(args);
+            }
+            if (serverNode.has("url")) {
+                builder.url(serverNode.path("url").asText());
+            }
+            if (serverNode.has("headers") && serverNode.get("headers").isObject()) {
+                Map<String, String> headers = new HashMap<>();
+                Iterator<Map.Entry<String, JsonNode>> fields = serverNode.get("headers").fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    headers.put(entry.getKey(), entry.getValue().asText());
+                }
+                builder.headers(headers);
+            }
+            servers.add(builder.build());
+        }
+        return servers;
     }
 
     /**

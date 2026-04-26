@@ -2,6 +2,7 @@ agents:
   - id: "weather-assistant"
     name: "天气助手"
     mode: REACT
+    engine: graph
     instruction: "你是一个天气查询助手，可以帮助用户查询城市天气信息。请用中文回答。"
     model:
       name: "qwq-plus"

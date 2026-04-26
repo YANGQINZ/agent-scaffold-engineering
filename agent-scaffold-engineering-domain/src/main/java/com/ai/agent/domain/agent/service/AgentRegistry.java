@@ -34,8 +34,8 @@ public class AgentRegistry {
      */
     public void register(AgentDefinition agentDefinition) {
         registry.put(agentDefinition.getAgentId(), agentDefinition);
-        log.info("注册Agent定义: agentId={}, name={}, mode={}",
-                agentDefinition.getAgentId(), agentDefinition.getName(), agentDefinition.getMode());
+        log.info("注册Agent定义: agentId={}, name={}, engine={}",
+                agentDefinition.getAgentId(), agentDefinition.getName(), agentDefinition.getEngine());
     }
 
     /**

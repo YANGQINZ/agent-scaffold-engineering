@@ -20,6 +20,7 @@ public class Constants {
         public static final String AGENT_NOT_FOUND = "AGENT_2001";
         public static final String AGENT_ORCHESTRATION_FAILED = "AGENT_2002";
         public static final String AGENT_MODE_UNSUPPORTED = "AGENT_2003";
+        public static final String AGENT_ENGINE_INVALID = "AGENT_2004";
 
         public static final String KNOW_UPLOAD_FAILED = "KNOW_3001";
         public static final String KNOW_PROCESSING_FAILED = "KNOW_3002";

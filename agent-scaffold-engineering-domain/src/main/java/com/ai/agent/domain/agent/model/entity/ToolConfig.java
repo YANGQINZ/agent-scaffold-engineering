@@ -7,7 +7,11 @@ import lombok.NoArgsConstructor;
 
 /**
  * 工具配置实体
+ *
+ * @deprecated 已被 MCP 工具协议替代，请使用 McpServerConfig + McpToolProvider。
+ *             短期保留以兼容旧 YAML，优先使用 MCP 协议调用。
  */
+@Deprecated
 @Data
 @Builder
 @NoArgsConstructor

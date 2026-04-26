@@ -3,6 +3,7 @@ agents:
   - id: "travel-planner"
     name: "旅行规划师"
     mode: WORKFLOW
+    engine: graph
     instruction: "你是一个旅行规划助手，帮助用户规划完整的旅行行程。"
     model:
       name: "qwq-plus"

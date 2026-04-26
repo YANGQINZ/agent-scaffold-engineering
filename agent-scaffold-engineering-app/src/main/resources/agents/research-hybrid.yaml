@@ -3,6 +3,7 @@ agents:
   - id: "research-hybrid"
     name: "研究助手"
     mode: HYBRID
+    engine: hybrid
     instruction: "你是一个深度研究分析助手，能够进行深度搜索和总结。"
     model:
       name: "qwq-plus"

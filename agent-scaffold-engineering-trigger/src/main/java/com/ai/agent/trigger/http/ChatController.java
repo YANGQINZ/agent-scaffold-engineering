@@ -45,6 +45,18 @@ public class ChatController {
         return chatFacade.chatStream(request).map(this::convertStreamEvent);
     }
 
+    /**
+     * 删除会话上下文 — 会话清理
+     */
+    @DeleteMapping("/session/{sessionId}")
+    public Response<Void> removeSession(@PathVariable String sessionId) {
+        chatFacade.removeSession(sessionId);
+        return Response.<Void>builder()
+                .code(Constants.ResponseCode.SUCCESS.getCode())
+                .info(Constants.ResponseCode.SUCCESS.getInfo())
+                .build();
+    }
+
     private ChatRequest convertRequest(ChatRequestDTO dto) {
         return ChatRequest.builder()
                 .userId(dto.getUserId())

@@ -1,6 +1,9 @@
 package com.ai.agent.domain.chat.service;
 
+import com.ai.agent.domain.agent.service.TaskRuntime;
 import com.ai.agent.domain.chat.service.strategy.ChatStrategy;
+import com.ai.agent.domain.chat.service.strategy.MultiTurnChatStrategy;
+import com.ai.agent.domain.chat.service.strategy.SimpleChatStrategy;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.exception.ChatException;
@@ -23,11 +26,11 @@ public class ModeRouter {
     public ModeRouter(List<ChatStrategy> strategies) {
         this.strategyMap = new HashMap<>();
         for (ChatStrategy strategy : strategies) {
-            if (strategy instanceof com.ai.agent.domain.chat.service.strategy.SimpleChatStrategy) {
+            if (strategy instanceof SimpleChatStrategy) {
                 strategyMap.put(ChatMode.SIMPLE, strategy);
-            } else if (strategy instanceof com.ai.agent.domain.chat.service.strategy.MultiTurnChatStrategy) {
+            } else if (strategy instanceof MultiTurnChatStrategy) {
                 strategyMap.put(ChatMode.MULTI_TURN, strategy);
-            } else if (strategy instanceof com.ai.agent.domain.chat.service.strategy.AgentOrchestratorStrategy) {
+            } else if (strategy instanceof TaskRuntime) {
                 strategyMap.put(ChatMode.AGENT, strategy);
             }
         }

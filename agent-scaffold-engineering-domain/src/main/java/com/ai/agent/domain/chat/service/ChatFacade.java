@@ -1,5 +1,6 @@
 package com.ai.agent.domain.chat.service;
 
+import com.ai.agent.domain.agent.service.ContextStoreFactory;
 import com.ai.agent.domain.chat.model.valobj.ChatRequest;
 import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
@@ -19,10 +20,12 @@ public class ChatFacade {
 
     private final ModeRouter modeRouter;
     private final RagService ragService;
+    private final ContextStoreFactory contextStoreFactory;
 
-    public ChatFacade(ModeRouter modeRouter, RagService ragService) {
+    public ChatFacade(ModeRouter modeRouter, RagService ragService, ContextStoreFactory contextStoreFactory) {
         this.modeRouter = modeRouter;
         this.ragService = ragService;
+        this.contextStoreFactory = contextStoreFactory;
     }
 
     /**
@@ -51,6 +54,15 @@ public class ChatFacade {
         }
 
         return strategy.executeStream(request);
+    }
+
+    /**
+     * 移除会话上下文（会话清理）
+     *
+     * @param sessionId 会话ID
+     */
+    public void removeSession(String sessionId) {
+        contextStoreFactory.remove(sessionId);
     }
 
 }

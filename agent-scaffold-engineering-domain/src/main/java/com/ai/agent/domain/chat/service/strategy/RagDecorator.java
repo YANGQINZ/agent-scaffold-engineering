@@ -4,8 +4,10 @@ import com.ai.agent.domain.chat.model.valobj.ChatRequest;
 import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.SourceRef;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import com.ai.agent.domain.knowledge.model.valobj.RagResult;
 import com.ai.agent.domain.knowledge.service.RagService;
+import com.ai.agent.types.enums.StreamEventType;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
@@ -82,7 +84,7 @@ public class RagDecorator implements ChatStrategy {
             return delegate.executeStream(request)
                     .map(event -> {
                         // 在最终的DONE事件中标记降级
-                        if (event.getType() == com.ai.agent.types.enums.StreamEventType.DONE) {
+                        if (event.getType() == StreamEventType.DONE) {
                             event.getData().put("ragDegraded", true);
                         }
                         return event;
@@ -141,7 +143,7 @@ public class RagDecorator implements ChatStrategy {
     /**
      * 将DocumentChunk列表转换为ChatResponse.Source列表
      */
-    private List<ChatResponse.Source> buildSources(List<com.ai.agent.domain.knowledge.model.entity.DocumentChunk> chunks) {
+    private List<ChatResponse.Source> buildSources(List<DocumentChunk> chunks) {
         return chunks.stream()
                 .map(chunk -> ChatResponse.Source.builder()
                         .docName(chunk.getDocId())
