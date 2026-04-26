@@ -1,4 +1,4 @@
-package com.ai.agent.infrastructure.persistent.repository;
+package com.ai.agent.config;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
@@ -19,7 +19,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Agent YAML配置加载器 — 启动时扫描classpath:agents/目录下所有YAML文件，

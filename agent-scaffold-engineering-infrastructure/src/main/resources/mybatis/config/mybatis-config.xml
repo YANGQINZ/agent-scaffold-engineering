@@ -4,4 +4,9 @@
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
+    <typeHandlers>
+        <typeHandler handler="com.ai.agent.infrastructure.persistent.handler.StringArrayTypeHandler"/>
+        <typeHandler handler="com.ai.agent.infrastructure.persistent.handler.LongArrayTypeHandler"/>
+        <typeHandler handler="com.ai.agent.infrastructure.persistent.handler.JsonbTypeHandler"/>
+    </typeHandlers>
 </configuration>

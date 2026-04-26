@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IMemoryItemDao">
+
+    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.MemoryItemPO">
+        INSERT INTO memory_item (session_id, content, embedding, importance, tags, source_msg_ids, metadata)
+        VALUES (#{sessionId}, #{content}, #{embedding}::vector, #{importance},
+                #{tags,jdbcType=ARRAY,typeHandler=com.ai.agent.infrastructure.persistent.handler.StringArrayTypeHandler},
+                #{sourceMsgIds,jdbcType=ARRAY,typeHandler=com.ai.agent.infrastructure.persistent.handler.LongArrayTypeHandler},
+                #{metadata,jdbcType=OTHER,typeHandler=com.ai.agent.infrastructure.persistent.handler.JsonbTypeHandler})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO memory_item (session_id, content, embedding, importance, tags, source_msg_ids, metadata)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.sessionId}, #{item.content}, #{item.embedding}::vector, #{item.importance},
+             #{item.tags,jdbcType=ARRAY,typeHandler=com.ai.agent.infrastructure.persistent.handler.StringArrayTypeHandler},
+             #{item.sourceMsgIds,jdbcType=ARRAY,typeHandler=com.ai.agent.infrastructure.persistent.handler.LongArrayTypeHandler},
+             #{item.metadata,jdbcType=OTHER,typeHandler=com.ai.agent.infrastructure.persistent.handler.JsonbTypeHandler})
+        </foreach>
+    </insert>
+
+    <select id="vectorSearch" resultType="com.ai.agent.infrastructure.persistent.po.MemoryItemPO">
+        SELECT id, session_id, content, importance,
+               tags,
+               source_msg_ids,
+               created_at,
+               metadata,
+               1 - (embedding <![CDATA[<=>]]> #{embedding}::vector) AS score
+        FROM memory_item
+        WHERE session_id = #{sessionId}
+        ORDER BY embedding <![CDATA[<=>]]> #{embedding}::vector
+        LIMIT #{topK}
+    </select>
+
+    <select id="findLatestSummary" resultType="com.ai.agent.infrastructure.persistent.po.MemoryItemPO">
+        SELECT id, session_id, content, importance, tags, source_msg_ids, created_at, metadata
+        FROM memory_item
+        WHERE session_id = #{sessionId}
+          AND tags @> ARRAY['summary']::TEXT[]
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="findBySessionId" resultType="com.ai.agent.infrastructure.persistent.po.MemoryItemPO">
+        SELECT id, session_id, content, importance, tags, source_msg_ids, created_at, metadata
+        FROM memory_item
+        WHERE session_id = #{sessionId}
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>

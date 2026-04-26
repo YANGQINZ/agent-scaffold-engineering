@@ -33,27 +33,26 @@ spring:
       api-key: ${AI_DASHSCOPE_API_KEY}
       embedding:
         options:
-          model: text-embedding-v1
+          model: text-embedding-v3
 
 mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
   config-location: classpath:/mybatis/config/mybatis-config.xml
 
 # Redis
-#redis:
-#  sdk:
-#    config:
-#      host: 127.0.0.1
-#      port: 6379
-#      password: 123456
-#      pool-size: 10
-#      min-idle-size: 5
-#      idle-timeout: 30000
-#      connect-timeout: 5000
-#      retry-attempts: 3
-#      retry-interval: 1000
-#      ping-interval: 60000
-#      keep-alive: true
+redis:
+  sdk:
+    config:
+      host: 127.0.0.1
+      port: 16379
+      pool-size: 10
+      min-idle-size: 5
+      idle-timeout: 30000
+      connect-timeout: 5000
+      retry-attempts: 3
+      retry-interval: 1000
+      ping-interval: 60000
+      keep-alive: true
 
 ## RocketMQ 配置，在docs/dev-ops下，有创建 xfg-group 脚本，也有场景mq消息的脚本
 #rocketmq:
@@ -119,3 +118,14 @@ mmr:
   enabled: true
   lambda: 0.7
   top-k: 5
+
+# 记忆系统配置
+memory:
+  compression:
+    threshold: 0.8
+    context-window: 32768
+    keep-recent: 10
+  assembly:
+    max-memory-tokens: 2000
+  hot:
+    ttl-hours: 2

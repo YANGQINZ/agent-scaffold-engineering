@@ -20,7 +20,7 @@ public class EmbeddingModelConfig {
 
         return new OpenAiEmbeddingModel(openAiApi, MetadataMode.ALL,
                 OpenAiEmbeddingOptions.builder()
-                        .model("text-embedding-v1")
+                        .model("text-embedding-v3")
                         .dimensions(1536)
                         .build());
     }

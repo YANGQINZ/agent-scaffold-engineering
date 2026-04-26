@@ -105,12 +105,3 @@ Redis、RocketMQ 和 XXL-Job 的配置存在于 YAML 和代码中，但已被注
 - 基础设施中的 PO 类与域实体对应，用于持久化映射。
 
 - MyBatis 映射器 XML 文件位于 `infrastructure/src/main/resources/mybatis/mapper/`。
-
-<!-- SPECKIT START -->
-## Active Implementation Plan
-
-**Feature**: 后续迭代项完整实现
-**Plan**: `specs/001-iteration-items/plan.md`
-**Spec**: `specs/001-iteration-items/spec.md`
-**Branch**: `001-iteration-items`
-<!-- SPECKIT END -->

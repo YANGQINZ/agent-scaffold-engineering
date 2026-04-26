@@ -1,22 +1,18 @@
 package com.ai.agent.domain.chat.service.strategy;
 
-import com.ai.agent.domain.chat.model.entity.ChatMessage;
 import com.ai.agent.domain.chat.model.valobj.ChatRequest;
 import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
-import com.ai.agent.domain.chat.service.ChatMemoryManager;
+import com.ai.agent.domain.memory.service.MemoryFacade;
 import com.ai.agent.types.common.Constants;
-import com.ai.agent.types.enums.MessageRole;
 import com.ai.agent.types.exception.ChatException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,16 +21,15 @@ import java.util.UUID;
 public class MultiTurnChatStrategy implements ChatStrategy {
 
     private final ChatModel chatModel;
-    private final ChatMemoryManager memoryManager;
+    private final MemoryFacade memoryFacade;
 
-    public MultiTurnChatStrategy(ChatModel chatModel, ChatMemoryManager memoryManager) {
+    public MultiTurnChatStrategy(ChatModel chatModel, MemoryFacade memoryFacade) {
         this.chatModel = chatModel;
-        this.memoryManager = memoryManager;
+        this.memoryFacade = memoryFacade;
     }
 
     @Override
     public ChatResponse execute(ChatRequest request) {
-        // 如果sessionId为空则生成新的
         String sessionId = request.getSessionId();
         if (sessionId == null || sessionId.isBlank()) {
             sessionId = UUID.randomUUID().toString();
@@ -42,11 +37,9 @@ public class MultiTurnChatStrategy implements ChatStrategy {
         request.setSessionId(sessionId);
 
         try {
-            // 加载历史消息
-            List<ChatMessage> history = memoryManager.load(sessionId);
-
-            // 转换为Spring AI Message列表
-            List<org.springframework.ai.chat.messages.Message> messages = convertToSpringAiMessages(history);
+            // 加载上下文（热层 + 冷层语义检索）
+            List<org.springframework.ai.chat.messages.Message> messages =
+                    memoryFacade.assembleContext(sessionId, request.getQuery());
 
             // 添加当前用户查询
             messages.add(new UserMessage(request.getQuery()));
@@ -56,21 +49,10 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             String answer = aiResponse.getResult().getOutput().getText();
 
             // 保存用户消息和助手消息
-            ChatMessage userMsg = ChatMessage.builder()
-                    .sessionId(sessionId)
-                    .role(MessageRole.USER)
-                    .content(request.getQuery())
-                    .createdAt(java.time.LocalDateTime.now())
-                    .build();
-            memoryManager.save(userMsg);
-
-            ChatMessage assistantMsg = ChatMessage.builder()
-                    .sessionId(sessionId)
-                    .role(MessageRole.ASSISTANT)
-                    .content(answer)
-                    .createdAt(java.time.LocalDateTime.now())
-                    .build();
-            memoryManager.save(assistantMsg);
+            int queryTokens = request.getQuery().length() / 4;
+            int answerTokens = answer.length() / 4;
+            memoryFacade.appendMessage(sessionId, "user", request.getQuery(), queryTokens);
+            memoryFacade.appendMessage(sessionId, "assistant", answer, answerTokens);
 
             return ChatResponse.builder()
                     .answer(answer)
@@ -87,7 +69,6 @@ public class MultiTurnChatStrategy implements ChatStrategy {
 
     @Override
     public Flux<StreamEvent> executeStream(ChatRequest request) {
-        // 如果sessionId为空则生成新的
         String sessionId = request.getSessionId();
         if (sessionId == null || sessionId.isBlank()) {
             sessionId = UUID.randomUUID().toString();
@@ -96,23 +77,16 @@ public class MultiTurnChatStrategy implements ChatStrategy {
         String finalSessionId = sessionId;
 
         return Flux.defer(() -> {
-            // 加载历史消息
-            List<ChatMessage> history = memoryManager.load(finalSessionId);
-
-            // 转换为Spring AI Message列表
-            List<org.springframework.ai.chat.messages.Message> messages = convertToSpringAiMessages(history);
+            // 加载上下文
+            List<org.springframework.ai.chat.messages.Message> messages =
+                    memoryFacade.assembleContext(finalSessionId, request.getQuery());
 
             // 添加当前用户查询
             messages.add(new UserMessage(request.getQuery()));
 
             // 保存用户消息
-            ChatMessage userMsg = ChatMessage.builder()
-                    .sessionId(finalSessionId)
-                    .role(MessageRole.USER)
-                    .content(request.getQuery())
-                    .createdAt(java.time.LocalDateTime.now())
-                    .build();
-            memoryManager.save(userMsg);
+            int queryTokens = request.getQuery().length() / 4;
+            memoryFacade.appendMessage(finalSessionId, "user", request.getQuery(), queryTokens);
 
             StringBuilder answerBuilder = new StringBuilder();
 
@@ -124,34 +98,12 @@ public class MultiTurnChatStrategy implements ChatStrategy {
                         return StreamEvent.textDelta(content, finalSessionId);
                     })
                     .concatWith(Flux.defer(() -> {
-                        // 流结束后保存助手消息
                         String fullAnswer = answerBuilder.toString();
-                        ChatMessage assistantMsg = ChatMessage.builder()
-                                .sessionId(finalSessionId)
-                                .role(MessageRole.ASSISTANT)
-                                .content(fullAnswer)
-                                .createdAt(java.time.LocalDateTime.now())
-                                .build();
-                        memoryManager.save(assistantMsg);
+                        int answerTokens = fullAnswer.length() / 4;
+                        memoryFacade.appendMessage(finalSessionId, "assistant", fullAnswer, answerTokens);
                         return Flux.just(StreamEvent.done(false, null, finalSessionId));
                     }));
         });
-    }
-
-    /**
-     * 将领域ChatMessage转换为Spring AI Message
-     */
-    private List<org.springframework.ai.chat.messages.Message> convertToSpringAiMessages(List<ChatMessage> history) {
-        List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
-        for (ChatMessage msg : history) {
-            if (msg.getRole() == MessageRole.USER) {
-                messages.add(new UserMessage(msg.getContent()));
-            } else if (msg.getRole() == MessageRole.ASSISTANT) {
-                messages.add(new AssistantMessage(msg.getContent()));
-            }
-            // SYSTEM messages are skipped in history for now
-        }
-        return messages;
     }
 
 }

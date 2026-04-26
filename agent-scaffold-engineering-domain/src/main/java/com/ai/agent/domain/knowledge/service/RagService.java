@@ -133,47 +133,42 @@ public class RagService {
     public List<DocumentChunk> fuseAndRerank(List<DocumentChunk> vectorResults,
                                              List<DocumentChunk> bm25Results,
                                              int topK) {
-        // 用chunkId作为key追踪分数和分块
-        Map<Long, Double> scoreMap = new HashMap<>();
-        Map<Long, DocumentChunk> chunkMap = new LinkedHashMap<>();
+        // 默认 RRF 常量，防止排名靠前者权重过大
+        double K = 60.0;
 
-        // 向量搜索结果打分
-        for (int i = 0; i < vectorResults.size(); i++) {
-            DocumentChunk chunk = vectorResults.get(i);
-            long chunkId = chunk.getChunkId();
-            double score = ALPHA / (i + 1.0); // 1/rank加权
-            scoreMap.merge(chunkId, score, Double::sum);
-            chunkMap.putIfAbsent(chunkId, chunk);
-        }
+        int initialCapacity = (int) ((vectorResults.size() + bm25Results.size()) / 0.75) + 1;
+        Map<Long, Double> scoreMap = new HashMap<>(initialCapacity);
+        Map<Long, DocumentChunk> chunkMap = new HashMap<>(initialCapacity);
 
-        // BM25搜索结果打分
-        for (int i = 0; i < bm25Results.size(); i++) {
-            DocumentChunk chunk = bm25Results.get(i);
-            long chunkId = chunk.getChunkId();
-            double score = BETA / (i + 1.0); // 1/rank加权
-            scoreMap.merge(chunkId, score, Double::sum);
-            chunkMap.putIfAbsent(chunkId, chunk);
-        }
+        // 处理检索结果的统一逻辑
+        processResults(vectorResults, scoreMap, chunkMap, ALPHA, K);
+        processResults(bm25Results, scoreMap, chunkMap, BETA, K);
 
-        // 按综合分数降序排列，取topK
         return scoreMap.entrySet().stream()
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
-                .limit(topK)
-                .map(entry -> {
-                    DocumentChunk chunk = chunkMap.get(entry.getKey());
-                    // 将RRF分数写入chunk的score字段
-                    return DocumentChunk.builder()
-                            .chunkId(chunk.getChunkId())
-                            .docId(chunk.getDocId())
-                            .baseId(chunk.getBaseId())
-                            .content(chunk.getContent())
-                            .embedding(chunk.getEmbedding())
-                            .metadata(chunk.getMetadata())
-                            .chunkIndex(chunk.getChunkIndex())
-                            .score(entry.getValue())
-                            .build();
-                })
-                .toList();
+            .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+            .limit(topK)
+            .map(entry -> {
+                DocumentChunk chunk = chunkMap.get(entry.getKey());
+                // 建议使用 shallow copy 或专门的 Score 包装类
+                chunk.setScore(entry.getValue());
+                return chunk;
+            })
+            .toList();
+    }
+
+    private void processResults(List<DocumentChunk> results,
+                                Map<Long, Double> scoreMap,
+                                Map<Long, DocumentChunk> chunkMap,
+                                double weight, double k) {
+        if (results == null) return;
+        for (int i = 0; i < results.size(); i++) {
+            DocumentChunk chunk = results.get(i);
+            long id = chunk.getChunkId();
+            // RRF 核心公式：Weight / (K + rank)
+            double score = weight / (k + i);
+            scoreMap.merge(id, score, Double::sum);
+            chunkMap.putIfAbsent(id, chunk);
+        }
     }
 
     /**

@@ -61,3 +61,25 @@ CREATE INDEX IF NOT EXISTS idx_document_chunk_base_id ON document_chunk(base_id)
 CREATE INDEX IF NOT EXISTS idx_document_chunk_doc_id ON document_chunk(doc_id);
 CREATE INDEX IF NOT EXISTS idx_chunk_embedding ON document_chunk USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS idx_chunk_content_tsv ON document_chunk USING GIN (content_tsv);
+
+-- Memory domain table
+CREATE TABLE IF NOT EXISTS memory_item (
+    id            BIGSERIAL PRIMARY KEY,
+    session_id    VARCHAR(64) NOT NULL REFERENCES chat_session(session_id),
+    content       TEXT NOT NULL,
+    embedding     vector(1536) NOT NULL,
+    importance    FLOAT DEFAULT 0.5,
+    tags          TEXT[] DEFAULT '{}',
+    source_msg_ids BIGINT[] DEFAULT '{}',
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata      JSONB
+);
+
+CREATE INDEX IF NOT EXISTS idx_memory_embedding
+    ON memory_item USING hnsw (embedding vector_cosine_ops);
+
+CREATE INDEX IF NOT EXISTS idx_memory_session_id
+    ON memory_item(session_id);
+
+CREATE INDEX IF NOT EXISTS idx_memory_tags
+    ON memory_item USING GIN (tags);
