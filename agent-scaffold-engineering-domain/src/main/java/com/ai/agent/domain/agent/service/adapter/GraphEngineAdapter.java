@@ -15,8 +15,6 @@ import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
 import com.alibaba.cloud.ai.graph.*;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
-import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
-import com.alibaba.cloud.ai.graph.checkpoint.config.SaverConfig;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +39,8 @@ import static com.alibaba.cloud.ai.graph.action.AsyncEdgeAction.edge_async;
  * Graph引擎适配器 — 封装Spring AI Alibaba StateGraph
  *
  * 职责：根据预定义的流程图(StateGraph)按顺序执行节点任务，
- * 支持条件跳转(策略链评估)、异常重试(指数退避≤3次)、检查点与断点恢复。
- * 每个节点执行前后与ContextStore交互，实现跨引擎状态共享。
+ * 支持条件跳转(策略链评估)、异常重试(指数退避≤3次)。
+ * 记忆上下文在入口处注入1次，最终响应追加历史1次，中间节点不写历史。
  */
 @Slf4j
 @Service
@@ -73,18 +71,27 @@ public class GraphEngineAdapter implements EngineAdapter {
         validateGraphConfig(def);
 
         try {
+            // 入口处注入记忆上下文（1次）
+            String enrichedInput = input.getContent() != null ? input.getContent() : "";
+            String memoryContext = ctx.assembleMemoryContext(enrichedInput);
+            if (!memoryContext.isBlank()) {
+                enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
+            }
             ctx.appendHistory(input);
 
+            // 构建图并执行
             StateGraph graph = buildGraph(def, ctx);
-            CompiledGraph compiled = compileGraph(graph);
+            CompiledGraph compiled = graph.compile();
 
             RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
-            Map<String, Object> graphInput = toGraphInput(input);
+            Map<String, Object> graphInput = new HashMap<>();
+            graphInput.put("output", enrichedInput);
             Optional<OverAllState> result = compiled.invoke(graphInput, config);
 
-            String output = result.map(s -> s.value("output", "")).orElse(input.getContent());
+            String output = result.map(s -> s.value("output").orElse("")).orElse(enrichedInput);
             AgentMessage response = toAgentMessage(output, def.getAgentId(), ctx.getSessionId());
 
+            // 最终响应追加历史（1次）
             ctx.appendHistory(response);
             return response;
 
@@ -106,19 +113,26 @@ public class GraphEngineAdapter implements EngineAdapter {
             validateGraphConfig(def);
 
             try {
+                // 入口处注入记忆上下文（1次）
+                String enrichedInput = input.getContent() != null ? input.getContent() : "";
+                String memoryContext = ctx.assembleMemoryContext(enrichedInput);
+                if (!memoryContext.isBlank()) {
+                    enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
+                }
                 ctx.appendHistory(input);
 
                 StateGraph graph = buildGraph(def, ctx);
-                CompiledGraph compiled = compileGraph(graph);
+                CompiledGraph compiled = graph.compile();
                 RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
-                Map<String, Object> graphInput = toGraphInput(input);
+                Map<String, Object> graphInput = new HashMap<>();
+                graphInput.put("output", enrichedInput);
 
-                String[] finalAnswer = {input.getContent()};
+                String[] finalAnswer = {enrichedInput};
 
                 return compiled.stream(graphInput, config)
                         .flatMap(nodeOutput -> {
                             String nodeName = nodeOutput.node();
-                            String output = nodeOutput.state().value("output", "");
+                            String output = nodeOutput.state().value("output").orElse("");
                             if (output != null && !output.isBlank()) {
                                 finalAnswer[0] = output;
                             }
@@ -130,6 +144,7 @@ public class GraphEngineAdapter implements EngineAdapter {
                         .concatWith(Flux.defer(() -> {
                             AgentMessage response = toAgentMessage(finalAnswer[0],
                                     def.getAgentId(), ctx.getSessionId());
+                            // 最终响应追加历史（1次）
                             ctx.appendHistory(response);
                             return Flux.just(
                                     StreamEvent.textDelta(finalAnswer[0], ctx.getSessionId()),
@@ -159,15 +174,12 @@ public class GraphEngineAdapter implements EngineAdapter {
     // StateGraph 构建
     // ═══════════════════════════════════════════════════════
 
-    /**
-     * 构建 StateGraph — 添加节点、边和条件边
-     */
     private StateGraph buildGraph(AgentDefinition def, ContextStore ctx) throws GraphStateException {
         StateGraph graph = new StateGraph(defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
 
-        // 1. 添加节点（每个节点包含重试逻辑和ContextStore注入）
+        // 1. 添加节点
         for (WorkflowNode node : def.getGraphNodes()) {
             graph.addNode(node.getId(), node_async(buildNodeAction(def, node, ctx)));
         }
@@ -179,7 +191,7 @@ public class GraphEngineAdapter implements EngineAdapter {
         Map<String, List<GraphEdge>> edgeMap = def.getGraphEdges().stream()
                 .collect(Collectors.groupingBy(GraphEdge::getFrom));
 
-        // 4. 收集有出边的节点（用于判断叶子节点）
+        // 4. 收集有出边的节点
         Set<String> nodesWithOutEdges = def.getGraphEdges().stream()
                 .map(GraphEdge::getFrom)
                 .collect(Collectors.toSet());
@@ -196,17 +208,16 @@ public class GraphEngineAdapter implements EngineAdapter {
                     .filter(e -> e.getCondition() == null || e.getCondition().isBlank())
                     .toList();
 
-            // 条件边：使用 ConditionEvaluator 策略链评估
             if (!conditionalEdges.isEmpty()) {
                 Map<String, String> mapping = new HashMap<>();
                 for (GraphEdge edge : conditionalEdges) {
                     mapping.put(edge.getCondition(), edge.getTo());
                 }
-                mapping.put("__no_match__", END);
+                mapping.put("__default__", END);
 
                 graph.addConditionalEdges(fromNode,
                         edge_async(state -> {
-                            String decision = state.value("decision", "");
+                            String decision = state.value("decision").orElse("");
                             for (GraphEdge edge : conditionalEdges) {
                                 if (conditionEvaluator.evaluate(decision, edge.getCondition(), chatModel)) {
                                     log.info("Graph条件路由匹配: {} -> {} (condition={})",
@@ -215,12 +226,11 @@ public class GraphEngineAdapter implements EngineAdapter {
                                 }
                             }
                             log.info("Graph条件路由无匹配边，终止当前分支: nodeId={}", fromNode);
-                            return "__no_match__";
+                            return "__default__";
                         }),
                         mapping);
             }
 
-            // 无条件边
             for (GraphEdge edge : unconditionalEdges) {
                 graph.addEdge(fromNode, edge.getTo());
             }
@@ -237,45 +247,23 @@ public class GraphEngineAdapter implements EngineAdapter {
     }
 
     /**
-     * 构建节点执行动作 — 包含重试逻辑和ContextStore注入
+     * 构建节点执行动作 — 包含重试逻辑
+     *
+     * 设为 protected 供 HybridEngineAdapter 复用。
+     * 中间节点不注入记忆上下文，不追加历史，仅通过 StateGraph state 传递结果。
      */
-    private NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
+    protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
         return state -> {
-            String input = state.value("output", "");
+            String input = state.value("output").orElse("");
             String nodeId = node.getId();
 
             log.info("Graph节点执行: nodeId={}, agentId={}", nodeId, node.getAgentId());
 
-            // 从 ContextStore 注入对话历史到输入
-            String historyText = ctx.buildHistoryText();
-            if (!historyText.isBlank()) {
-                input = "对话历史:\n" + historyText + "\n\n当前输入: " + input;
-            }
-
-            // 注入记忆上下文（摘要 + 语义记忆 + 近期消息）
-            String memoryContext = ctx.assembleMemoryContext(input);
-            if (!memoryContext.isBlank()) {
-                input = "记忆上下文:\n" + memoryContext + "\n\n" + input;
-            }
-
-            // 带重试的节点执行
             String output = executeWithRetry(def, node, input, ctx, nodeId);
 
             Map<String, Object> result = new HashMap<>();
             result.put("output", output);
             result.put("decision", output);
-            result.put("messages", "节点[" + nodeId + "]执行完成");
-
-            // 写回 ContextStore
-            AgentMessage nodeMsg = AgentMessage.builder()
-                    .senderId(nodeId)
-                    .content(output)
-                    .timestamp(System.currentTimeMillis())
-                    .metadata(Map.of("role", "assistant", "engine", EngineType.GRAPH.name()))
-                    .build();
-            ctx.put("node_" + nodeId + "_output", output);
-            ctx.appendHistory(nodeMsg);
-
             return result;
         };
     }
@@ -284,9 +272,6 @@ public class GraphEngineAdapter implements EngineAdapter {
     // 异常重试机制
     // ═══════════════════════════════════════════════════════
 
-    /**
-     * 带重试的节点执行 — 指数退避 1s → 2s → 4s，最多3次
-     */
     private String executeWithRetry(AgentDefinition def, WorkflowNode node,
                                      String input, ContextStore ctx, String nodeId) {
         Exception lastException = null;
@@ -311,22 +296,17 @@ public class GraphEngineAdapter implements EngineAdapter {
             }
         }
 
-        // 重试超限：节点标记 ERROR，返回错误信息（继续流程，不抛异常）
         String errorMsg = "节点[" + nodeId + "]执行失败(重试" + MAX_RETRY + "次): "
                 + (lastException != null ? lastException.getMessage() : "未知错误");
         log.error("Graph节点重试超限: nodeId={}, 返回ERROR标记", nodeId);
         return errorMsg;
     }
 
-    /**
-     * 执行节点核心逻辑 — 查找子Agent执行或直接ChatModel调用
-     */
     private String executeNodeLogic(AgentDefinition def, WorkflowNode node, String input) {
         String subAgentId = node.getAgentId();
         AgentDefinition subAgentDef = agentRegistry.get(subAgentId);
 
         if (subAgentDef != null) {
-            // 子Agent执行：构建带MCP工具的ChatModel调用
             List<ToolCallback> tools = mcpToolProvider.getGraphTools(subAgentId);
             Prompt prompt = new Prompt(List.of(
                     new SystemMessage(subAgentDef.getInstruction()),
@@ -335,7 +315,6 @@ public class GraphEngineAdapter implements EngineAdapter {
             return chatModel.call(prompt).getResult().getOutput().getText();
         }
 
-        // 无子Agent：使用 AgentDefinition 自身的指令 + ChatModel 直接调用
         Prompt prompt = new Prompt(List.of(
                 new SystemMessage(def.getInstruction()),
                 new UserMessage(input)
@@ -347,9 +326,6 @@ public class GraphEngineAdapter implements EngineAdapter {
     // StateGraph 公共方法
     // ═══════════════════════════════════════════════════════
 
-    /**
-     * 创建默认 KeyStrategyFactory：output替换、messages追加、decision替换
-     */
     protected KeyStrategyFactory defaultKeyStrategyFactory(Map<String, KeyStrategy> extraStrategies) {
         return () -> {
             Map<String, KeyStrategy> strategies = new HashMap<>();
@@ -358,21 +334,6 @@ public class GraphEngineAdapter implements EngineAdapter {
             strategies.putAll(extraStrategies);
             return strategies;
         };
-    }
-
-    /**
-     * 编译 StateGraph（带 MemorySaver 检查点）
-     */
-    protected CompiledGraph compileGraph(StateGraph graph) {
-        try {
-            return graph.compile(
-                    CompileConfig.builder()
-                            .saverConfig(SaverConfig.builder().register(new MemorySaver()).build())
-                            .build());
-        } catch (GraphStateException e) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
-                    "StateGraph编译失败: " + e.getMessage(), e);
-        }
     }
 
     protected RunnableConfig buildRunnableConfig(String sessionId) {
@@ -385,18 +346,6 @@ public class GraphEngineAdapter implements EngineAdapter {
     // 消息转换
     // ═══════════════════════════════════════════════════════
 
-    /**
-     * AgentMessage → StateGraph 输入 Map
-     */
-    private Map<String, Object> toGraphInput(AgentMessage msg) {
-        Map<String, Object> input = new HashMap<>();
-        input.put("output", msg.getContent() != null ? msg.getContent() : "");
-        return input;
-    }
-
-    /**
-     * StateGraph 输出 → AgentMessage
-     */
     private AgentMessage toAgentMessage(String output, String agentId, String sessionId) {
         return AgentMessage.builder()
                 .senderId(agentId)
@@ -435,7 +384,7 @@ public class GraphEngineAdapter implements EngineAdapter {
     public CompiledGraph buildAndCompile(AgentDefinition def, ContextStore ctx) {
         try {
             StateGraph graph = buildGraph(def, ctx);
-            return compileGraph(graph);
+            return graph.compile();
         } catch (GraphStateException e) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                     "StateGraph编译失败: " + e.getMessage(), e);
