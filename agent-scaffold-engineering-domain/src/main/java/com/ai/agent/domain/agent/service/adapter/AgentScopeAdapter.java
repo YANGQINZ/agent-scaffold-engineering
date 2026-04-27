@@ -33,11 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AgentScope引擎适配器 — 集成 agentscope-java 实现 Pipeline 编排
- *
  * 职责：处理多个Agent之间的动态协作，支持Pipeline编排（Sequential/Fanout）、
  * MCP工具注入、MsgHub广播模式。
  * 通过 ContextStore.assembleMemoryContext() 在构建输入时注入上下文，实现跨引擎状态传递。
- *
  * 核心集成路径：
  * - ReActAgent.builder() 构建每个子 Agent，注入 sysPrompt/model/toolkit
  * - Pipelines.sequential()/fanout() 编排 Agent 列表
@@ -168,7 +166,6 @@ public class AgentScopeAdapter implements EngineAdapter {
 
     /**
      * 根据 AgentDefinition 构建 ReActAgent 列表
-     *
      * 每个 AgentscopeAgentConfig 对应一个 ReActAgent 实例，
      * 通过 AgentRegistry 查找子 Agent 定义获取指令。
      */
@@ -257,7 +254,7 @@ public class AgentScopeAdapter implements EngineAdapter {
         for (int i = 0; i < results.size(); i++) {
             String content = results.get(i).getTextContent();
             if (content != null && !content.isBlank()) {
-                if (combined.length() > 0) {
+                if (!combined.isEmpty()) {
                     combined.append("\n\n---\n\n");
                 }
                 AgentBase agent = agents.get(i);
@@ -279,7 +276,6 @@ public class AgentScopeAdapter implements EngineAdapter {
 
     /**
      * 获取或创建 agentscope Model 实例
-     *
      * 使用 DashScopeChatModel.builder() 构建，复用 Spring AI 已配置的 API Key。
      * 根据AgentDefinition的modelConfig调整模型参数。
      */
@@ -346,7 +342,6 @@ public class AgentScopeAdapter implements EngineAdapter {
 
     /**
      * 将 AgentMessage 转换为 agentscope Msg
-     *
      * 注入对话历史作为上下文（从 ContextStore 获取），
      * 确保跨引擎状态传递。
      */

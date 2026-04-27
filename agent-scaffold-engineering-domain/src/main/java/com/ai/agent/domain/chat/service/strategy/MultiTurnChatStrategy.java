@@ -169,7 +169,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
     private Prompt buildThinkingPrompt(List<Message> messages, Boolean enableThinking) {
         if (Boolean.TRUE.equals(enableThinking)) {
             DashScopeChatOptions options = DashScopeChatOptions.builder()
-                    .withEnableThinking(true)
+                    .enableThinking(true)
                     .build();
             return new Prompt(messages, options);
         }

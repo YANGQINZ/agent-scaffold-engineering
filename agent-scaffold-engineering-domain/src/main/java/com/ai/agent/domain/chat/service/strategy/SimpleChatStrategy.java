@@ -77,7 +77,7 @@ public class SimpleChatStrategy implements ChatStrategy {
 
         if (Boolean.TRUE.equals(request.getEnableThinking())) {
             DashScopeChatOptions options = DashScopeChatOptions.builder()
-                    .withEnableThinking(true)
+                    .enableThinking(true)
                     .build();
             return new Prompt(messages, options);
         }

@@ -39,7 +39,6 @@ import static com.alibaba.cloud.ai.graph.action.AsyncEdgeAction.edge_async;
 
 /**
  * Graph引擎适配器 — 封装Spring AI Alibaba StateGraph
- *
  * 职责：根据预定义的流程图(StateGraph)按顺序执行节点任务，
  * 支持条件跳转(策略链评估)、异常重试(指数退避≤3次)。
  * 记忆上下文在入口处注入1次，最终响应追加历史1次，中间节点不写历史。
@@ -156,14 +155,12 @@ public class GraphEngineAdapter implements EngineAdapter {
                         .flatMap(nodeOutput -> {
                             String nodeName = nodeOutput.node();
                             String output = (String) nodeOutput.state().value("output").orElse("");
-                            if (output != null && !output.isBlank()) {
+                            if (!output.isBlank()) {
                                 finalAnswer[0] = output;
                             }
                             // 追踪思考内容（REPLACE 策略，最终保留叶子节点的思考）
-                            Object tc = nodeOutput.state().value("thinkingContent").orElse(null);
-                            if (tc != null) {
-                                finalThinking[0] = tc.toString();
-                            }
+                            nodeOutput.state().value("thinkingContent")
+                                .ifPresent(tc -> finalThinking[0] = tc.toString());
                             return Flux.just(
                                     StreamEvent.nodeStart(nodeName, ctx.getSessionId()),
                                     StreamEvent.nodeEnd(nodeName, ctx.getSessionId())
@@ -283,7 +280,6 @@ public class GraphEngineAdapter implements EngineAdapter {
 
     /**
      * 构建节点执行动作 — 包含重试逻辑
-     *
      * 设为 protected 供 HybridEngineAdapter 复用。
      * 中间节点不注入记忆上下文，不追加历史，仅通过 StateGraph state 传递结果。
      */
@@ -343,7 +339,7 @@ public class GraphEngineAdapter implements EngineAdapter {
         }
 
         String errorMsg = "节点[" + nodeId + "]执行失败(重试" + MAX_RETRY + "次): "
-                + (lastException != null ? lastException.getMessage() : "未知错误");
+                + lastException.getMessage();
         log.error("Graph节点重试超限: nodeId={}, 返回ERROR标记", nodeId);
         return new NodeExecuteResult(errorMsg, null);
     }
@@ -355,9 +351,9 @@ public class GraphEngineAdapter implements EngineAdapter {
         String instruction = subAgentDef != null ? subAgentDef.getInstruction() : def.getInstruction();
 
         Prompt prompt;
-        if (Boolean.TRUE.equals(enableThinking)) {
+        if (enableThinking) {
             DashScopeChatOptions options = DashScopeChatOptions.builder()
-                    .withEnableThinking(true)
+                    .enableThinking(true)
                     .build();
             prompt = new Prompt(List.of(
                     new SystemMessage(instruction),
