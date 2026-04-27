@@ -1,8 +1,9 @@
 package com.ai.agent.domain.agent.service;
 
-import com.ai.agent.domain.agent.model.aggregate.SessionContext;
 import com.ai.agent.domain.agent.repository.ContextStore;
 import com.ai.agent.domain.memory.service.MemoryFacade;
+import com.ai.agent.domain.session.model.aggregate.SessionContext;
+import com.ai.agent.types.enums.EngineType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * SessionContext 工厂 — 创建和复用跨引擎共享的上下文实例
+ * SessionContext 工厂 — 创建和复用会话上下文实例
  *
  * 维护 sessionId → SessionContext 的映射，确保同一会话使用同一个实例。
  * SessionContext 中的 MemoryFacade 引用由此工厂注入。
@@ -31,9 +32,6 @@ public class ContextStoreFactory {
 
     /**
      * 获取或创建指定会话的 ContextStore
-     *
-     * @param sessionId 会话ID
-     * @return 对应的 SessionContext 实例（实现 ContextStore）
      */
     public ContextStore getOrCreate(String sessionId) {
         return store.computeIfAbsent(sessionId, this::createDefault);
@@ -41,31 +39,21 @@ public class ContextStoreFactory {
 
     /**
      * 获取或创建指定会话的 ContextStore（带完整参数）
-     *
-     * @param sessionId      会话ID
-     * @param userId         用户ID
-     * @param memoryEnabled  是否启用长期记忆
-     * @param ragEnabled     是否启用RAG
-     * @param knowledgeBaseId 知识库ID
-     * @return 对应的 SessionContext 实例
      */
     public ContextStore getOrCreate(String sessionId, String userId,
-                                     boolean memoryEnabled, boolean ragEnabled,
+                                     EngineType engineType, boolean ragEnabled,
                                      String knowledgeBaseId) {
         return store.computeIfAbsent(sessionId,
-                id -> SessionContext.create(id, userId, memoryEnabled, ragEnabled,
+                id -> SessionContext.create(id, userId, engineType, ragEnabled,
                         knowledgeBaseId, memoryFacade));
     }
 
     /**
      * 移除指定会话的上下文（会话结束时调用）
-     *
-     * @param sessionId 会话ID
      */
     public void remove(String sessionId) {
         SessionContext ctx = store.remove(sessionId);
         if (ctx != null) {
-            ctx.clear();
             log.info("会话上下文已移除: sessionId={}", sessionId);
         }
     }
@@ -75,7 +63,7 @@ public class ContextStoreFactory {
      */
     private SessionContext createDefault(String sessionId) {
         log.debug("创建新SessionContext: sessionId={}", sessionId);
-        return SessionContext.create(sessionId, null, false, false, null, memoryFacade);
+        return SessionContext.create(sessionId, null, EngineType.GRAPH, false, null, memoryFacade);
     }
 
     /**
@@ -88,7 +76,6 @@ public class ContextStoreFactory {
             long idleMs = now - entry.getValue().getLastAccessTime();
             if (idleMs > SESSION_TTL_MS) {
                 log.info("会话上下文TTL淘汰: sessionId={}, 空闲时长={}ms", entry.getKey(), idleMs);
-                entry.getValue().clear();
                 return true;
             }
             return false;
