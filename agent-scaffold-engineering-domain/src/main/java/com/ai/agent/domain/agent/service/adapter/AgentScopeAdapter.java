@@ -1,12 +1,11 @@
 package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
-import com.ai.agent.domain.agent.model.aggregate.SessionContext;
+import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.agent.repository.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.AgentScopeChannel;
-import com.ai.agent.domain.agent.service.engine.ContextSyncHook;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
 import com.ai.agent.types.common.Constants;
@@ -35,11 +34,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * AgentScope引擎适配器 — 集成 agentscope-java 实现 Pipeline 编排
  *
  * 职责：处理多个Agent之间的动态协作，支持Pipeline编排（Sequential/Fanout）、
- * Hook驱动上下文同步、MCP工具注入、MsgHub广播模式。
- * 通过 ContextSyncHook（实现 agentscope Hook 接口）实现零侵入的 ContextStore 跨引擎同步。
+ * MCP工具注入、MsgHub广播模式。
+ * 通过 ContextStore.assembleMemoryContext() 在构建输入时注入上下文，实现跨引擎状态传递。
  *
  * 核心集成路径：
- * - ReActAgent.builder() 构建每个子 Agent，注入 sysPrompt/model/toolkit/hook
+ * - ReActAgent.builder() 构建每个子 Agent，注入 sysPrompt/model/toolkit
  * - Pipelines.sequential()/fanout() 编排 Agent 列表
  * - AgentBase.call(List<Msg>) 执行推理
  * - MsgHub 广播模式支持多 Agent 协作
@@ -73,46 +72,32 @@ public class AgentScopeAdapter implements EngineAdapter {
     public AgentMessage execute(AgentDefinition def, AgentMessage input, ContextStore ctx) {
         log.info("AgentScopeAdapter执行: agentId={}", def.getAgentId());
 
-        EngineType previousEngine = EngineType.GRAPH;
-        boolean engineSwitched = false;
-
         try {
             // 1. 注入输入到 ContextStore
             ctx.appendHistory(input);
 
-            // 2. 保存当前引擎并切换
-            if (ctx instanceof SessionContext sc) {
-                previousEngine = sc.getCurrentEngine();
-                sc.switchEngine(EngineType.AGENTSCOPE);
-                engineSwitched = true;
-            }
-
-            // 3. 获取 agentscope Model
-            io.agentscope.core.model.Model model = getOrCreateModel(def);
-
-            // 4. 构建 ReActAgent 列表
+            // 2. 构建 ReActAgent 列表（不再注入 ContextSyncHook）
             List<AgentBase> agents = buildAgents(def, ctx);
 
-            // 5. 缓存 Agent 实例（供 AgentScopeChannel 使用）
+            // 3. 缓存 Agent 实例
             lastAgentsCache.put(def.getAgentId(), agents);
 
-            // 6. 构建输入 Msg
+            // 4. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
             Msg inputMsg = toInputMsg(input, def, ctx);
 
-            // 7. 根据 Pipeline 类型执行
-            String pipelineType = def.getAgentscopePipelineType();
+            // 5. 根据 Pipeline 类型执行
+            AgentscopeAgentDefinition asDef = (AgentscopeAgentDefinition) def;
+            String pipelineType = asDef.getAgentscopePipelineType();
             String outputContent;
 
             if ("fanout".equalsIgnoreCase(pipelineType) && agents.size() > 1) {
-                outputContent = executeFanout(agents, inputMsg, def);
+                outputContent = executeFanout(agents, inputMsg, def.getAgentId());
             } else {
-                outputContent = executeSequential(agents, inputMsg, def);
+                outputContent = executeSequential(agents, inputMsg, def.getAgentId());
             }
 
-            // 8. 转换输出（ContextSyncHook 已在每个 Agent 的 POST_CALL 中写入历史，
-            // 此处仅构建最终响应消息，不再重复 appendHistory）
+            // 6. 构建最终响应
             AgentMessage response = toAgentMessage(outputContent, def.getAgentId(), ctx.getSessionId());
-
             return response;
 
         } catch (AgentException e) {
@@ -122,11 +107,6 @@ public class AgentScopeAdapter implements EngineAdapter {
                     def.getAgentId(), e.getMessage(), e);
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                     "AgentScope编排执行失败: " + e.getMessage(), e);
-        } finally {
-            // 确保切回之前的引擎（即使子节点异常）
-            if (engineSwitched && ctx instanceof SessionContext sc) {
-                sc.switchEngine(previousEngine);
-            }
         }
     }
 
@@ -165,31 +145,27 @@ public class AgentScopeAdapter implements EngineAdapter {
      *
      * 每个 AgentscopeAgentConfig 对应一个 ReActAgent 实例，
      * 通过 AgentRegistry 查找子 Agent 定义获取指令。
-     * ContextSyncHook 作为 Hook 注入到每个 Agent 中实现跨引擎上下文同步。
      */
     private List<AgentBase> buildAgents(AgentDefinition def, ContextStore ctx) {
+        AgentscopeAgentDefinition asDef = (AgentscopeAgentDefinition) def;
         List<AgentBase> agents = new ArrayList<>();
 
-        if (def.getAgentscopeAgents() != null && !def.getAgentscopeAgents().isEmpty()) {
+        if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
             // 有子 Agent 配置时，逐个构建 ReActAgent
-            for (var agentConfig : def.getAgentscopeAgents()) {
+            for (var agentConfig : asDef.getAgentscopeAgents()) {
                 AgentDefinition subDef = agentRegistry.get(agentConfig.getAgentId());
-                String instruction = subDef != null ? subDef.getInstruction() : def.getInstruction();
+                String instruction = subDef != null ? subDef.getInstruction() : asDef.getInstruction();
                 String agentName = subDef != null ? subDef.getName() : agentConfig.getAgentId();
 
-                // 构建 ContextSyncHook（实现 agentscope Hook 接口）
-                ContextSyncHook syncHook = new ContextSyncHook(ctx, agentConfig.getAgentId());
-
                 // 构建 Toolkit（注入 MCP 工具）
-                Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(agentConfig, def);
+                Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(agentConfig, asDef);
 
                 // 构建 ReActAgent
                 ReActAgent agent = ReActAgent.builder()
                         .name(agentName)
                         .sysPrompt(instruction != null ? instruction : "")
-                        .model(getOrCreateModel(subDef != null ? subDef : def))
+                        .model(getOrCreateModel(subDef != null ? subDef : asDef))
                         .toolkit(toolkit)
-                        .hook(syncHook)
                         .maxIters(10)
                         .build();
 
@@ -199,20 +175,18 @@ public class AgentScopeAdapter implements EngineAdapter {
             }
         } else {
             // 无子 Agent 配置时，构建单 Agent
-            ContextSyncHook syncHook = new ContextSyncHook(ctx, def.getAgentId());
-            Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(null, def);
+            Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(null, asDef);
 
             ReActAgent agent = ReActAgent.builder()
-                    .name(def.getName() != null ? def.getName() : def.getAgentId())
-                    .sysPrompt(def.getInstruction() != null ? def.getInstruction() : "")
-                    .model(getOrCreateModel(def))
+                    .name(asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
+                    .sysPrompt(asDef.getInstruction() != null ? asDef.getInstruction() : "")
+                    .model(getOrCreateModel(asDef))
                     .toolkit(toolkit)
-                    .hook(syncHook)
                     .maxIters(10)
                     .build();
 
             agents.add(agent);
-            log.info("构建单ReActAgent: agentId={}, name={}", def.getAgentId(), def.getName());
+            log.info("构建单ReActAgent: agentId={}, name={}", asDef.getAgentId(), asDef.getName());
         }
 
         return agents;
@@ -228,8 +202,8 @@ public class AgentScopeAdapter implements EngineAdapter {
      * 使用 Pipelines.sequential(agents, msg) 编排，
      * 返回 Mono<Msg>，阻塞获取最终结果。
      */
-    private String executeSequential(List<AgentBase> agents, Msg inputMsg, AgentDefinition def) {
-        log.info("Sequential Pipeline执行: agentId={}, agentCount={}", def.getAgentId(), agents.size());
+    private String executeSequential(List<AgentBase> agents, Msg inputMsg, String agentId) {
+        log.info("Sequential Pipeline执行: agentId={}, agentCount={}", agentId, agents.size());
 
         if (agents.size() == 1) {
             // 单 Agent 直接调用
@@ -249,8 +223,8 @@ public class AgentScopeAdapter implements EngineAdapter {
      * 使用 Pipelines.fanout(agents, msg) 编排，
      * 返回 Mono<List<Msg>>，阻塞获取所有结果后合并。
      */
-    private String executeFanout(List<AgentBase> agents, Msg inputMsg, AgentDefinition def) {
-        log.info("Fanout Pipeline执行: agentId={}, agentCount={}", def.getAgentId(), agents.size());
+    private String executeFanout(List<AgentBase> agents, Msg inputMsg, String agentId) {
+        log.info("Fanout Pipeline执行: agentId={}, agentCount={}", agentId, agents.size());
 
         Mono<List<Msg>> pipeline = Pipelines.fanout(agents, inputMsg);
         List<Msg> results = pipeline.block();
