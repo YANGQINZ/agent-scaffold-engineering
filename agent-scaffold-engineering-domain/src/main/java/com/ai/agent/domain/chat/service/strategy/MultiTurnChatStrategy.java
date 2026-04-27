@@ -6,6 +6,8 @@ import com.ai.agent.domain.agent.service.ContextStoreFactory;
 import com.ai.agent.domain.chat.model.valobj.ChatRequest;
 import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.ChatException;
@@ -54,9 +56,13 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             // 添加当前用户查询
             messages.add(new UserMessage(request.getQuery()));
 
+            // 构建 Prompt
+            Prompt prompt = buildThinkingPrompt(messages, request.getEnableThinking());
+
             // 调用LLM
-            org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(new Prompt(messages));
-            String answer = aiResponse.getResult().getOutput().getText();
+            org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(prompt);
+            ThinkingExtractor.ThinkingResult thinkingResult = ThinkingExtractor.extractFromSpringAi(aiResponse);
+            String answer = thinkingResult.textContent();
 
             // 通过 ContextStore 追加历史
             AgentMessage userInput = AgentMessage.builder()
@@ -77,6 +83,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
 
             return ChatResponse.builder()
                     .answer(answer)
+                    .thinkingContent(thinkingResult.hasThinking() ? thinkingResult.thinkingContent() : null)
                     .sessionId(sessionId)
                     .ragDegraded(false)
                     .build();
@@ -118,12 +125,20 @@ public class MultiTurnChatStrategy implements ChatStrategy {
 
             StringBuilder answerBuilder = new StringBuilder();
 
-            return chatModel.stream(new Prompt(messages))
-                    .map(aiResponse -> {
-                        String content = aiResponse.getResult() != null && aiResponse.getResult().getOutput() != null
-                                ? aiResponse.getResult().getOutput().getText() : "";
+            return chatModel.stream(buildThinkingPrompt(messages, request.getEnableThinking()))
+                    .flatMap(aiResponse -> {
+                        ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(aiResponse);
+                        String content = result.textContent();
                         answerBuilder.append(content);
-                        return StreamEvent.textDelta(content, finalSessionId);
+
+                        Flux<StreamEvent> events = Flux.empty();
+                        if (result.hasThinking()) {
+                            events = events.concatWith(Flux.just(StreamEvent.thinking(result.thinkingContent(), finalSessionId)));
+                        }
+                        if (!content.isEmpty()) {
+                            events = events.concatWith(Flux.just(StreamEvent.textDelta(content, finalSessionId)));
+                        }
+                        return events;
                     })
                     .concatWith(Flux.defer(() -> {
                         String fullAnswer = answerBuilder.toString();
@@ -146,6 +161,19 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             request.setSessionId(sessionId);
         }
         return sessionId;
+    }
+
+    /**
+     * 构建 Prompt — enableThinking=true 时注入 DashScopeChatOptions
+     */
+    private Prompt buildThinkingPrompt(List<Message> messages, Boolean enableThinking) {
+        if (Boolean.TRUE.equals(enableThinking)) {
+            DashScopeChatOptions options = DashScopeChatOptions.builder()
+                    .withEnableThinking(true)
+                    .build();
+            return new Prompt(messages, options);
+        }
+        return new Prompt(messages);
     }
 
 }
