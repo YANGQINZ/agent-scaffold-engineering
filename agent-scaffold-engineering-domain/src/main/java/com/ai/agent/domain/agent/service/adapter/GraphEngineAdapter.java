@@ -11,6 +11,8 @@ import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
 import com.ai.agent.domain.agent.service.engine.GraphChannel;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
@@ -24,7 +26,6 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -59,6 +60,15 @@ public class GraphEngineAdapter implements EngineAdapter {
     /** 指数退避基数（毫秒） */
     private static final long RETRY_BASE_MS = 1000L;
 
+    /**
+     * 节点执行结果 — 同时携带正文和思考内容
+     */
+    private record NodeExecuteResult(String textContent, String thinkingContent) {
+        boolean hasThinking() {
+            return thinkingContent != null && !thinkingContent.isBlank();
+        }
+    }
+
     @Override
     public EngineType getType() {
         return EngineType.GRAPH;
@@ -81,8 +91,10 @@ public class GraphEngineAdapter implements EngineAdapter {
             }
             ctx.appendHistory(input);
 
+            boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
+
             // 构建图并执行
-            StateGraph graph = buildGraph(graphDef, ctx);
+            StateGraph graph = buildGraph(graphDef, ctx, enableThinking);
             CompiledGraph compiled = graph.compile();
 
             RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
@@ -91,7 +103,12 @@ public class GraphEngineAdapter implements EngineAdapter {
             Optional<OverAllState> result = compiled.invoke(graphInput, config);
 
             String output = result.map(s -> (String) s.value("output").orElse("")).orElse(enrichedInput);
-            AgentMessage response = toAgentMessage(output, graphDef.getAgentId(), ctx.getSessionId());
+            // 从 StateGraph state 中提取最终节点的思考内容
+            String thinkingContent = result.map(s -> {
+                Object tc = s.value("thinkingContent").orElse(null);
+                return tc != null ? tc.toString() : null;
+            }).orElse(null);
+            AgentMessage response = toAgentMessage(output, thinkingContent, graphDef.getAgentId(), ctx.getSessionId());
 
             // 最终响应追加历史（1次）
             ctx.appendHistory(response);
@@ -124,13 +141,16 @@ public class GraphEngineAdapter implements EngineAdapter {
                 }
                 ctx.appendHistory(input);
 
-                StateGraph graph = buildGraph(graphDef, ctx);
+                boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
+
+                StateGraph graph = buildGraph(graphDef, ctx, enableThinking);
                 CompiledGraph compiled = graph.compile();
                 RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
                 Map<String, Object> graphInput = new HashMap<>();
                 graphInput.put("output", enrichedInput);
 
                 String[] finalAnswer = {enrichedInput};
+                String[] finalThinking = {null};
 
                 return compiled.stream(graphInput, config)
                         .flatMap(nodeOutput -> {
@@ -139,20 +159,32 @@ public class GraphEngineAdapter implements EngineAdapter {
                             if (output != null && !output.isBlank()) {
                                 finalAnswer[0] = output;
                             }
+                            // 追踪思考内容（REPLACE 策略，最终保留叶子节点的思考）
+                            Object tc = nodeOutput.state().value("thinkingContent").orElse(null);
+                            if (tc != null) {
+                                finalThinking[0] = tc.toString();
+                            }
                             return Flux.just(
                                     StreamEvent.nodeStart(nodeName, ctx.getSessionId()),
                                     StreamEvent.nodeEnd(nodeName, ctx.getSessionId())
                             );
                         })
                         .concatWith(Flux.defer(() -> {
-                            AgentMessage response = toAgentMessage(finalAnswer[0],
+                            AgentMessage response = toAgentMessage(finalAnswer[0], finalThinking[0],
                                 graphDef.getAgentId(), ctx.getSessionId());
                             // 最终响应追加历史（1次）
                             ctx.appendHistory(response);
-                            return Flux.just(
-                                    StreamEvent.textDelta(finalAnswer[0], ctx.getSessionId()),
-                                    StreamEvent.done(false, null, ctx.getSessionId())
-                            );
+
+                            Flux<StreamEvent> thinkingFlux = Flux.empty();
+                            if (finalThinking[0] != null && !finalThinking[0].isBlank()) {
+                                thinkingFlux = Flux.just(StreamEvent.thinking(finalThinking[0], ctx.getSessionId()));
+                            }
+
+                            return thinkingFlux
+                                    .concatWith(Flux.just(
+                                            StreamEvent.textDelta(finalAnswer[0], ctx.getSessionId()),
+                                            StreamEvent.done(false, null, ctx.getSessionId())
+                                    ));
                         }));
 
             } catch (Exception e) {
@@ -177,14 +209,14 @@ public class GraphEngineAdapter implements EngineAdapter {
     // StateGraph 构建
     // ═══════════════════════════════════════════════════════
 
-    private StateGraph buildGraph(GraphAgentDefinition def, ContextStore ctx) throws GraphStateException {
+    private StateGraph buildGraph(GraphAgentDefinition def, ContextStore ctx, boolean enableThinking) throws GraphStateException {
         StateGraph graph = new StateGraph(defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
 
         // 1. 添加节点
         for (WorkflowNode node : def.getGraphNodes()) {
-            graph.addNode(node.getId(), node_async(buildNodeAction(def, node, ctx)));
+            graph.addNode(node.getId(), node_async(buildNodeAction(def, node, ctx, enableThinking)));
         }
 
         // 2. 添加起始边
@@ -255,33 +287,44 @@ public class GraphEngineAdapter implements EngineAdapter {
      * 设为 protected 供 HybridEngineAdapter 复用。
      * 中间节点不注入记忆上下文，不追加历史，仅通过 StateGraph state 传递结果。
      */
-    protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
+    protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx, boolean enableThinking) {
         return state -> {
             String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
 
             log.info("Graph节点执行: nodeId={}, agentId={}", nodeId, node.getAgentId());
 
-            String output = executeWithRetry(def, node, input, ctx, nodeId);
+            NodeExecuteResult execResult = executeWithRetry(def, node, input, ctx, nodeId, enableThinking);
 
             Map<String, Object> result = new HashMap<>();
-            result.put("output", output);
-            result.put("decision", output);
+            result.put("output", execResult.textContent());
+            result.put("decision", execResult.textContent());
+            // 将思考内容写入 state（REPLACE 策略，最终保留叶子节点的思考内容）
+            if (execResult.hasThinking()) {
+                result.put("thinkingContent", execResult.thinkingContent());
+            }
             return result;
         };
+    }
+
+    /**
+     * 构建节点执行动作 — 不启用思考过程（兼容 HybridEngineAdapter 调用）
+     */
+    protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
+        return buildNodeAction(def, node, ctx, false);
     }
 
     // ═══════════════════════════════════════════════════════
     // 异常重试机制
     // ═══════════════════════════════════════════════════════
 
-    private String executeWithRetry(AgentDefinition def, WorkflowNode node,
-                                     String input, ContextStore ctx, String nodeId) {
+    private NodeExecuteResult executeWithRetry(AgentDefinition def, WorkflowNode node,
+                                     String input, ContextStore ctx, String nodeId, boolean enableThinking) {
         Exception lastException = null;
 
         for (int attempt = 1; attempt <= MAX_RETRY; attempt++) {
             try {
-                return executeNodeLogic(def, node, input);
+                return executeNodeLogic(def, node, input, enableThinking);
             } catch (Exception e) {
                 lastException = e;
                 log.warn("Graph节点执行失败(第{}/{}次): nodeId={}, error={}",
@@ -302,27 +345,34 @@ public class GraphEngineAdapter implements EngineAdapter {
         String errorMsg = "节点[" + nodeId + "]执行失败(重试" + MAX_RETRY + "次): "
                 + (lastException != null ? lastException.getMessage() : "未知错误");
         log.error("Graph节点重试超限: nodeId={}, 返回ERROR标记", nodeId);
-        return errorMsg;
+        return new NodeExecuteResult(errorMsg, null);
     }
 
-    private String executeNodeLogic(AgentDefinition def, WorkflowNode node, String input) {
+    private NodeExecuteResult executeNodeLogic(AgentDefinition def, WorkflowNode node, String input, boolean enableThinking) {
         String subAgentId = node.getAgentId();
         AgentDefinition subAgentDef = agentRegistry.get(subAgentId);
 
-        if (subAgentDef != null) {
-            List<ToolCallback> tools = mcpToolProvider.getGraphTools(subAgentId);
-            Prompt prompt = new Prompt(List.of(
-                    new SystemMessage(subAgentDef.getInstruction()),
+        String instruction = subAgentDef != null ? subAgentDef.getInstruction() : def.getInstruction();
+
+        Prompt prompt;
+        if (Boolean.TRUE.equals(enableThinking)) {
+            DashScopeChatOptions options = DashScopeChatOptions.builder()
+                    .withEnableThinking(true)
+                    .build();
+            prompt = new Prompt(List.of(
+                    new SystemMessage(instruction),
+                    new UserMessage(input)
+            ), options);
+        } else {
+            prompt = new Prompt(List.of(
+                    new SystemMessage(instruction),
                     new UserMessage(input)
             ));
-            return chatModel.call(prompt).getResult().getOutput().getText();
         }
 
-        Prompt prompt = new Prompt(List.of(
-                new SystemMessage(def.getInstruction()),
-                new UserMessage(input)
-        ));
-        return chatModel.call(prompt).getResult().getOutput().getText();
+        org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(prompt);
+        ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(aiResponse);
+        return new NodeExecuteResult(result.textContent(), result.hasThinking() ? result.thinkingContent() : null);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -333,6 +383,7 @@ public class GraphEngineAdapter implements EngineAdapter {
         return () -> {
             Map<String, KeyStrategy> strategies = new HashMap<>();
             strategies.put("output", KeyStrategy.REPLACE);
+            strategies.put("thinkingContent", KeyStrategy.REPLACE);
             strategies.put("messages", new AppendStrategy());
             strategies.putAll(extraStrategies);
             return strategies;
@@ -349,10 +400,11 @@ public class GraphEngineAdapter implements EngineAdapter {
     // 消息转换
     // ═══════════════════════════════════════════════════════
 
-    private AgentMessage toAgentMessage(String output, String agentId, String sessionId) {
+    private AgentMessage toAgentMessage(String output, String thinkingContent, String agentId, String sessionId) {
         return AgentMessage.builder()
                 .senderId(agentId)
                 .content(output)
+                .thinkingContent(thinkingContent)
                 .timestamp(System.currentTimeMillis())
                 .metadata(Map.of(
                         "role", "assistant",
@@ -386,7 +438,7 @@ public class GraphEngineAdapter implements EngineAdapter {
      */
     public CompiledGraph buildAndCompile(GraphAgentDefinition graphDef, ContextStore ctx) {
         try {
-            StateGraph graph = buildGraph(graphDef, ctx);
+            StateGraph graph = buildGraph(graphDef, ctx, false);
             return graph.compile();
         } catch (GraphStateException e) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
