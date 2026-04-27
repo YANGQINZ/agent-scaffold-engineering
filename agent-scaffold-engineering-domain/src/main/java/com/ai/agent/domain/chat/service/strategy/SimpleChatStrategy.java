@@ -3,8 +3,10 @@ package com.ai.agent.domain.chat.service.strategy;
 import com.ai.agent.domain.chat.model.valobj.ChatRequest;
 import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.exception.ChatException;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -27,12 +29,14 @@ public class SimpleChatStrategy implements ChatStrategy {
     @Override
     public ChatResponse execute(ChatRequest request) {
         try {
-            org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(
-                    new Prompt(List.of(new UserMessage(request.getQuery())))
-            );
-            String answer = aiResponse.getResult().getOutput().getText();
+            Prompt prompt = buildPrompt(request);
+            org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(prompt);
+
+            ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(aiResponse);
+
             return ChatResponse.builder()
-                    .answer(answer)
+                    .answer(result.textContent())
+                    .thinkingContent(result.hasThinking() ? result.thinkingContent() : null)
                     .sessionId(request.getSessionId())
                     .ragDegraded(false)
                     .build();
@@ -45,13 +49,40 @@ public class SimpleChatStrategy implements ChatStrategy {
     @Override
     public Flux<StreamEvent> executeStream(ChatRequest request) {
         String sessionId = request.getSessionId();
-        return chatModel.stream(new Prompt(List.of(new UserMessage(request.getQuery()))))
-                .map(aiResponse -> {
-                    String content = aiResponse.getResult() != null && aiResponse.getResult().getOutput() != null
-                            ? aiResponse.getResult().getOutput().getText() : "";
-                    return StreamEvent.textDelta(content, sessionId);
+        Prompt prompt = buildPrompt(request);
+
+        return chatModel.stream(prompt)
+                .flatMap(aiResponse -> {
+                    ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(aiResponse);
+                    Flux<StreamEvent> events = Flux.empty();
+
+                    if (result.hasThinking()) {
+                        events = events.concatWith(Flux.just(StreamEvent.thinking(result.thinkingContent(), sessionId)));
+                    }
+                    if (!result.textContent().isEmpty()) {
+                        events = events.concatWith(Flux.just(StreamEvent.textDelta(result.textContent(), sessionId)));
+                    }
+
+                    return events;
                 })
                 .concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
+    }
+
+    /**
+     * 构建 Prompt — enableThinking=true 时注入 DashScopeChatOptions
+     */
+    private Prompt buildPrompt(ChatRequest request) {
+        List<org.springframework.ai.chat.messages.Message> messages =
+                List.of(new UserMessage(request.getQuery()));
+
+        if (Boolean.TRUE.equals(request.getEnableThinking())) {
+            DashScopeChatOptions options = DashScopeChatOptions.builder()
+                    .withEnableThinking(true)
+                    .build();
+            return new Prompt(messages, options);
+        }
+
+        return new Prompt(messages);
     }
 
 }
