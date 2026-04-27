@@ -19,7 +19,7 @@ public interface ISessionRepository {
     /**
      * 根据会话ID查找会话上下文
      */
-    SessionContext findById(String sessionId);
+    SessionContext findSessionContextById(String sessionId);
 
     /**
      * 更新会话TTL

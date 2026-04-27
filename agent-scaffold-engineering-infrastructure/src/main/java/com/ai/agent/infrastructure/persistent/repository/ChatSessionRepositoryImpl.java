@@ -3,6 +3,8 @@ package com.ai.agent.infrastructure.persistent.repository;
 import com.ai.agent.domain.chat.model.aggregate.ChatSession;
 import com.ai.agent.domain.chat.model.entity.ChatMessage;
 import com.ai.agent.domain.chat.repository.IChatSessionRepository;
+import com.ai.agent.domain.session.model.aggregate.SessionContext;
+import com.ai.agent.domain.session.repository.ISessionRepository;
 import com.ai.agent.infrastructure.persistent.dao.IChatMessageDao;
 import com.ai.agent.infrastructure.persistent.dao.IChatSessionDao;
 import com.ai.agent.infrastructure.persistent.po.ChatMessagePO;
@@ -18,11 +20,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 聊天会话仓储实现
+ * 聊天会话仓储实现 — 同时实现 IChatSessionRepository（chat域）和 ISessionRepository（session域）
  */
 @Repository
 @RequiredArgsConstructor
-public class ChatSessionRepositoryImpl implements IChatSessionRepository {
+public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessionRepository {
 
     private final IChatSessionDao chatSessionDao;
     private final IChatMessageDao chatMessageDao;
@@ -102,6 +104,56 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository {
                 .content(po.getContent())
                 .tokenCount(po.getTokenCount())
                 .createdAt(po.getCreatedAt())
+                .build();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ISessionRepository 接口实现（session域）
+    // ═══════════════════════════════════════════════════════
+
+    @Override
+    public void save(SessionContext session) {
+        ChatSessionPO po = new ChatSessionPO();
+        po.setSessionId(session.getSessionId());
+        po.setUserId(session.getUserId());
+        po.setMode(ChatMode.AGENT.name());
+        po.setAgentMode(session.getEngineType().name());
+        po.setRagEnabled(session.isRagEnabled());
+        po.setKnowledgeBaseId(session.getKnowledgeBaseId());
+        po.setCreatedAt(session.getCreatedAt());
+        po.setUpdatedAt(session.getLastActiveAt() != null ? session.getLastActiveAt() : session.getCreatedAt());
+        if (session.getTtlSeconds() > 0 && session.getCreatedAt() != null) {
+            po.setTtlExpireAt(session.getCreatedAt().plusSeconds(session.getTtlSeconds()));
+        }
+        chatSessionDao.insert(po);
+    }
+
+    @Override
+    public SessionContext findSessionContextById(String sessionId) {
+        ChatSessionPO po = chatSessionDao.selectById(sessionId);
+        if (po == null) {
+            return null;
+        }
+        return toSessionContext(po);
+    }
+
+    @Override
+    public void updateTtl(String sessionId, int ttlSeconds) {
+        chatSessionDao.updateTtl(sessionId);
+    }
+
+    /**
+     * ChatSessionPO -> SessionContext 领域对象（session域）
+     */
+    private SessionContext toSessionContext(ChatSessionPO po) {
+        return SessionContext.builder()
+                .sessionId(po.getSessionId())
+                .userId(po.getUserId())
+                .engineType(EngineType.valueOf(po.getAgentMode()))
+                .ragEnabled(po.getRagEnabled() != null ? po.getRagEnabled() : false)
+                .knowledgeBaseId(po.getKnowledgeBaseId())
+                .createdAt(po.getCreatedAt())
+                .lastActiveAt(po.getUpdatedAt())
                 .build();
     }
 
