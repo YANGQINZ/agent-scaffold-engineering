@@ -8,6 +8,7 @@ import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.AgentScopeChannel;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
@@ -77,8 +78,10 @@ public class AgentScopeAdapter implements EngineAdapter {
             // 1. 注入输入到 ContextStore
             ctx.appendHistory(input);
 
+            boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
+
             // 2. 构建 ReActAgent 列表（不再注入 ContextSyncHook）
-            List<AgentBase> agents = buildAgents(asDef);
+            List<AgentBase> agents = buildAgents(asDef, enableThinking);
 
             // 3. 缓存 Agent 实例
             lastAgentsCache.put(asDef.getAgentId(), agents);
@@ -88,16 +91,25 @@ public class AgentScopeAdapter implements EngineAdapter {
 
             // 5. 根据 Pipeline 类型执行
             String pipelineType = asDef.getAgentscopePipelineType();
-            String outputContent;
+            Msg lastMsg;
 
             if ("fanout".equalsIgnoreCase(pipelineType) && agents.size() > 1) {
-                outputContent = executeFanout(agents, inputMsg, asDef.getAgentId());
+                lastMsg = executeFanoutRaw(agents, inputMsg, asDef.getAgentId());
             } else {
-                outputContent = executeSequential(agents, inputMsg, asDef.getAgentId());
+                lastMsg = executeSequentialRaw(agents, inputMsg, asDef.getAgentId());
+            }
+
+            String outputContent = lastMsg != null ? lastMsg.getTextContent() : "";
+
+            // 提取思考内容
+            String thinkingContent = null;
+            if (enableThinking && lastMsg != null) {
+                ThinkingExtractor.ThinkingResult thinkResult = ThinkingExtractor.extractFromAgentScope(lastMsg);
+                thinkingContent = thinkResult.hasThinking() ? thinkResult.thinkingContent() : null;
             }
 
             // 6. 构建最终响应
-            AgentMessage response = toAgentMessage(outputContent, asDef.getAgentId(), ctx.getSessionId());
+            AgentMessage response = toAgentMessage(outputContent, thinkingContent, asDef.getAgentId(), ctx.getSessionId());
 
             // 7. 最终响应追加历史
             ctx.appendHistory(response);
@@ -118,10 +130,21 @@ public class AgentScopeAdapter implements EngineAdapter {
         return Flux.defer(() -> {
             try {
                 AgentMessage result = execute(def, input, ctx);
-                return Flux.just(
-                        StreamEvent.textDelta(result.getContent(), ctx.getSessionId()),
-                        StreamEvent.done(false, null, ctx.getSessionId())
-                );
+                String sessionId = ctx.getSessionId();
+
+                Flux<StreamEvent> events = Flux.empty();
+
+                // 先发射思考过程
+                if (result.getThinkingContent() != null && !result.getThinkingContent().isBlank()) {
+                    events = events.concatWith(Flux.just(
+                            StreamEvent.thinking(result.getThinkingContent(), sessionId)));
+                }
+
+                // 再发射文本内容
+                return events.concatWith(Flux.just(
+                        StreamEvent.textDelta(result.getContent(), sessionId),
+                        StreamEvent.done(false, null, sessionId)
+                ));
             } catch (Exception e) {
                 return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                         "AgentScope流式执行失败: " + e.getMessage(), e));
@@ -149,7 +172,7 @@ public class AgentScopeAdapter implements EngineAdapter {
      * 每个 AgentscopeAgentConfig 对应一个 ReActAgent 实例，
      * 通过 AgentRegistry 查找子 Agent 定义获取指令。
      */
-    private List<AgentBase> buildAgents(AgentscopeAgentDefinition asDef) {
+    private List<AgentBase> buildAgents(AgentscopeAgentDefinition asDef, boolean enableThinking) {
         List<AgentBase> agents = new ArrayList<>();
 
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
@@ -166,7 +189,7 @@ public class AgentScopeAdapter implements EngineAdapter {
                 ReActAgent agent = ReActAgent.builder()
                         .name(agentName)
                         .sysPrompt(instruction != null ? instruction : "")
-                        .model(getOrCreateModel(subDef != null ? subDef : asDef))
+                        .model(getOrCreateModel(subDef != null ? subDef : asDef, enableThinking))
                         .toolkit(toolkit)
                         .maxIters(10)
                         .build();
@@ -182,7 +205,7 @@ public class AgentScopeAdapter implements EngineAdapter {
             ReActAgent agent = ReActAgent.builder()
                     .name(asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
                     .sysPrompt(asDef.getInstruction() != null ? asDef.getInstruction() : "")
-                    .model(getOrCreateModel(asDef))
+                    .model(getOrCreateModel(asDef, enableThinking))
                     .toolkit(toolkit)
                     .maxIters(10)
                     .build();
@@ -200,39 +223,33 @@ public class AgentScopeAdapter implements EngineAdapter {
 
     /**
      * Sequential Pipeline 执行 — Agent 串行调用，前一个输出作为后一个输入
-     *
-     * 使用 Pipelines.sequential(agents, msg) 编排，
-     * 返回 Mono<Msg>，阻塞获取最终结果。
      */
-    private String executeSequential(List<AgentBase> agents, Msg inputMsg, String agentId) {
+    private Msg executeSequentialRaw(List<AgentBase> agents, Msg inputMsg, String agentId) {
         log.info("Sequential Pipeline执行: agentId={}, agentCount={}", agentId, agents.size());
 
         if (agents.size() == 1) {
-            // 单 Agent 直接调用
-            Msg result = agents.get(0).call(List.of(inputMsg)).block();
-            return result != null ? result.getTextContent() : "";
+            return agents.get(0).call(List.of(inputMsg)).block();
         }
 
-        // 多 Agent 串行 Pipeline
         Mono<Msg> pipeline = Pipelines.sequential(agents, inputMsg);
-        Msg result = pipeline.block();
-        return result != null ? result.getTextContent() : "";
+        return pipeline.block();
     }
 
     /**
-     * Fanout Pipeline 执行 — Agent 并行调用，收集所有结果
-     *
-     * 使用 Pipelines.fanout(agents, msg) 编排，
-     * 返回 Mono<List<Msg>>，阻塞获取所有结果后合并。
+     * Fanout Pipeline 执行 — Agent 并行调用，收集所有结果合并
      */
-    private String executeFanout(List<AgentBase> agents, Msg inputMsg, String agentId) {
+    private Msg executeFanoutRaw(List<AgentBase> agents, Msg inputMsg, String agentId) {
         log.info("Fanout Pipeline执行: agentId={}, agentCount={}", agentId, agents.size());
 
         Mono<List<Msg>> pipeline = Pipelines.fanout(agents, inputMsg);
         List<Msg> results = pipeline.block();
 
         if (results == null || results.isEmpty()) {
-            return "";
+            return null;
+        }
+
+        if (results.size() == 1) {
+            return results.get(0);
         }
 
         // 合并所有 Agent 的输出
@@ -249,7 +266,11 @@ public class AgentScopeAdapter implements EngineAdapter {
             }
         }
 
-        return combined.toString();
+        // 返回最后一个 Msg 以便提取 ThinkingBlock
+        return Msg.builder()
+                .role(MsgRole.ASSISTANT)
+                .textContent(combined.toString())
+                .build();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -262,36 +283,39 @@ public class AgentScopeAdapter implements EngineAdapter {
      * 使用 DashScopeChatModel.builder() 构建，复用 Spring AI 已配置的 API Key。
      * 根据AgentDefinition的modelConfig调整模型参数。
      */
-    private Model getOrCreateModel(AgentDefinition def) {
-        // 根据 Agent 的模型配置决定是否使用缓存的默认 Model
+    private Model getOrCreateModel(AgentDefinition def, boolean enableThinking) {
         if (def.getModelConfig() == null || "qwq-plus".equals(def.getModelConfig().getName())) {
-            return getOrCreateDefaultModel();
+            return getOrCreateDefaultModel(enableThinking);
         }
-
-        // 非 qwq-plus 模型，每次创建新实例
-        return buildDashScopeModel(def.getModelConfig().getName(), def.getModelConfig());
+        return buildDashScopeModel(def.getModelConfig().getName(), def.getModelConfig(), enableThinking);
     }
 
     /**
      * 获取默认模型（延迟初始化，线程安全）
      */
-    private Model getOrCreateDefaultModel() {
-        if (agentscopeModel == null) {
+    private Model getOrCreateDefaultModel(boolean enableThinking) {
+        if (!enableThinking && agentscopeModel != null) {
+            return agentscopeModel;
+        }
+        if (!enableThinking) {
             synchronized (this) {
                 if (agentscopeModel == null) {
-                    agentscopeModel = buildDashScopeModel(defaultModelName, null);
+                    agentscopeModel = buildDashScopeModel(defaultModelName, null, false);
                     log.info("初始化默认agentscope Model: modelName={}", defaultModelName);
                 }
             }
+            return agentscopeModel;
         }
-        return agentscopeModel;
+        // enableThinking=true 时创建新实例（不缓存，避免污染默认Model）
+        return buildDashScopeModel(defaultModelName, null, true);
     }
 
     /**
      * 构建 DashScopeChatModel 实例
      */
     private Model buildDashScopeModel(String modelName,
-                                      com.ai.agent.domain.agent.model.valobj.ModelConfig config) {
+                                      com.ai.agent.domain.agent.model.valobj.ModelConfig config,
+                                      boolean enableThinking) {
         GenerateOptions.Builder optionsBuilder = GenerateOptions.builder()
                 .modelName(modelName);
 
@@ -304,11 +328,16 @@ public class AgentScopeAdapter implements EngineAdapter {
             }
         }
 
-        return DashScopeChatModel.builder()
+        DashScopeChatModel.Builder modelBuilder = DashScopeChatModel.builder()
                 .apiKey(dashscopeApiKey)
                 .modelName(modelName)
-                .defaultOptions(optionsBuilder.build())
-                .build();
+                .defaultOptions(optionsBuilder.build());
+
+        if (enableThinking) {
+            modelBuilder.enableThinking(true);
+        }
+
+        return modelBuilder.build();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -340,10 +369,11 @@ public class AgentScopeAdapter implements EngineAdapter {
     /**
      * 构建输出 AgentMessage
      */
-    private AgentMessage toAgentMessage(String output, String agentId, String sessionId) {
+    private AgentMessage toAgentMessage(String output, String thinkingContent, String agentId, String sessionId) {
         return AgentMessage.builder()
                 .senderId(agentId)
                 .content(output)
+                .thinkingContent(thinkingContent)
                 .timestamp(System.currentTimeMillis())
                 .metadata(Map.of(
                         "role", "assistant",
