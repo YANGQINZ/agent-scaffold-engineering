@@ -9,6 +9,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 条件评估器 — 策略链模式
@@ -133,7 +134,7 @@ public class ConditionEvaluator {
                     new SystemMessage("你是一个精确的条件判断器，只回答'是'或'否'。"),
                     new UserMessage(evalPrompt)
             ));
-            String result = chatModel.call(prompt).getResult().getOutput().getText().trim();
+            String result = Objects.requireNonNull(chatModel.call(prompt).getResult().getOutput().getText()).trim();
             boolean matched = result.startsWith("是") || result.toLowerCase().startsWith("yes");
             log.debug("条件匹配(LLM): description={}, matched={}", description, matched);
             return matched;
