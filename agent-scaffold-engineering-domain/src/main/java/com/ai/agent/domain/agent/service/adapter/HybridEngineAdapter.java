@@ -74,8 +74,9 @@ public class HybridEngineAdapter implements EngineAdapter {
                 enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
             }
             ctx.appendHistory(input);
+            boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
-            StateGraph graph = buildHybridGraph(hyDef, ctx);
+            StateGraph graph = buildHybridGraph(hyDef, ctx, enableThinking);
             CompiledGraph compiled = graph.compile();
 
             RunnableConfig config = graphAdapter.buildRunnableConfig(ctx.getSessionId());
@@ -84,7 +85,14 @@ public class HybridEngineAdapter implements EngineAdapter {
             Optional<OverAllState> result = compiled.invoke(graphInput, config);
 
             String output = result.map(s -> (String) s.value("output").orElse("")).orElse(enrichedInput);
-            AgentMessage response = toAgentMessage(output, hyDef.getAgentId(), ctx.getSessionId());
+
+            // 从 StateGraph state 中提取最终节点的思考内容
+            String thinkingContent = result.map(s -> {
+                Object tc = s.value("thinkingContent").orElse(null);
+                return tc != null ? tc.toString() : null;
+            }).orElse(null);
+
+            AgentMessage response = toAgentMessage(output, thinkingContent, hyDef.getAgentId(), ctx.getSessionId());
 
             // 最终响应追加历史（1次）
             ctx.appendHistory(response);
@@ -105,10 +113,21 @@ public class HybridEngineAdapter implements EngineAdapter {
         return Flux.defer(() -> {
             try {
                 AgentMessage result = execute(def, input, ctx);
-                return Flux.just(
-                        StreamEvent.textDelta(result.getContent(), ctx.getSessionId()),
-                        StreamEvent.done(false, null, ctx.getSessionId())
-                );
+                String sessionId = ctx.getSessionId();
+
+                Flux<StreamEvent> events = Flux.empty();
+
+                // 先发射思考过程
+                if (result.getThinkingContent() != null && !result.getThinkingContent().isBlank()) {
+                    events = events.concatWith(Flux.just(
+                            StreamEvent.thinking(result.getThinkingContent(), sessionId)));
+                }
+
+                // 再发射文本内容
+                return events.concatWith(Flux.just(
+                        StreamEvent.textDelta(result.getContent(), sessionId),
+                        StreamEvent.done(false, null, sessionId)
+                ));
             } catch (Exception e) {
                 return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                         "Hybrid流式执行失败: " + e.getMessage(), e));
@@ -133,7 +152,7 @@ public class HybridEngineAdapter implements EngineAdapter {
     // Hybrid StateGraph 构建
     // ═══════════════════════════════════════════════════════
 
-    private StateGraph buildHybridGraph(HybridAgentDefinition hyDef, ContextStore ctx) throws GraphStateException {
+    private StateGraph buildHybridGraph(HybridAgentDefinition hyDef, ContextStore ctx, boolean enableThinking) throws GraphStateException {
         StateGraph graph = new StateGraph(graphAdapter.defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
@@ -143,10 +162,10 @@ public class HybridEngineAdapter implements EngineAdapter {
             EngineType subEngine = hyDef.getSubEngine(node.getId());
 
             if (subEngine == EngineType.AGENTSCOPE) {
-                graph.addNode(node.getId(), node_async(wrapAsGraphAction(hyDef, node, ctx)));
+                graph.addNode(node.getId(), node_async(wrapAsGraphAction(hyDef, node, ctx, enableThinking)));
             } else {
                 // 复用 GraphEngineAdapter 的节点构建方法
-                graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(hyDef, node, ctx)));
+                graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(hyDef, node, ctx, enableThinking)));
             }
         }
 
@@ -211,7 +230,7 @@ public class HybridEngineAdapter implements EngineAdapter {
     /**
      * 将 AgentScope 执行包装为 StateGraph 的 NodeAction
      */
-    private NodeAction wrapAsGraphAction(HybridAgentDefinition hyDef, WorkflowNode node, ContextStore ctx) {
+    private NodeAction wrapAsGraphAction(HybridAgentDefinition hyDef, WorkflowNode node, ContextStore ctx, boolean enableThinking) {
         return state -> {
             String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
@@ -223,7 +242,7 @@ public class HybridEngineAdapter implements EngineAdapter {
                     .senderId("hybrid_" + nodeId)
                     .content(input)
                     .timestamp(System.currentTimeMillis())
-                    .metadata(Map.of("role", "user"))
+                    .metadata(Map.of("role", "user", "enableThinking", enableThinking))
                     .build();
 
             // 委托 AgentScopeAdapter 执行
@@ -253,10 +272,11 @@ public class HybridEngineAdapter implements EngineAdapter {
     // 消息转换
     // ═══════════════════════════════════════════════════════
 
-    private AgentMessage toAgentMessage(String output, String agentId, String sessionId) {
+    private AgentMessage toAgentMessage(String output, String thinkingContent, String agentId, String sessionId) {
         return AgentMessage.builder()
                 .senderId(agentId)
                 .content(output)
+                .thinkingContent(thinkingContent)
                 .timestamp(System.currentTimeMillis())
                 .metadata(Map.of(
                         "role", "assistant",
