@@ -1,6 +1,7 @@
 package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
@@ -65,10 +66,11 @@ public class GraphEngineAdapter implements EngineAdapter {
 
     @Override
     public AgentMessage execute(AgentDefinition def, AgentMessage input, ContextStore ctx) {
+        GraphAgentDefinition graphDef = (GraphAgentDefinition) def;
         log.info("GraphEngineAdapter执行: agentId={}, 节点数={}, 边数={}",
-                def.getAgentId(), def.getGraphNodes().size(), def.getGraphEdges().size());
+                graphDef.getAgentId(), graphDef.getGraphNodes().size(), graphDef.getGraphEdges().size());
 
-        validateGraphConfig(def);
+        validateGraphConfig(graphDef);
 
         try {
             // 入口处注入记忆上下文（1次）
@@ -80,7 +82,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             ctx.appendHistory(input);
 
             // 构建图并执行
-            StateGraph graph = buildGraph(def, ctx);
+            StateGraph graph = buildGraph(graphDef, ctx);
             CompiledGraph compiled = graph.compile();
 
             RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
@@ -88,8 +90,8 @@ public class GraphEngineAdapter implements EngineAdapter {
             graphInput.put("output", enrichedInput);
             Optional<OverAllState> result = compiled.invoke(graphInput, config);
 
-            String output = result.map(s -> s.value("output").orElse("")).orElse(enrichedInput);
-            AgentMessage response = toAgentMessage(output, def.getAgentId(), ctx.getSessionId());
+            String output = result.map(s -> (String) s.value("output").orElse("")).orElse(enrichedInput);
+            AgentMessage response = toAgentMessage(output, graphDef.getAgentId(), ctx.getSessionId());
 
             // 最终响应追加历史（1次）
             ctx.appendHistory(response);
@@ -99,7 +101,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             throw e;
         } catch (Exception e) {
             log.error("GraphEngineAdapter执行失败: agentId={}, error={}",
-                    def.getAgentId(), e.getMessage(), e);
+                    graphDef.getAgentId(), e.getMessage(), e);
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                     "Graph编排执行失败: " + e.getMessage(), e);
         }
@@ -107,10 +109,11 @@ public class GraphEngineAdapter implements EngineAdapter {
 
     @Override
     public Flux<StreamEvent> executeStream(AgentDefinition def, AgentMessage input, ContextStore ctx) {
+        GraphAgentDefinition graphDef = (GraphAgentDefinition) def;
         return Flux.defer(() -> {
-            log.info("GraphEngineAdapter流式执行: agentId={}", def.getAgentId());
+            log.info("GraphEngineAdapter流式执行: agentId={}", graphDef.getAgentId());
 
-            validateGraphConfig(def);
+            validateGraphConfig(graphDef);
 
             try {
                 // 入口处注入记忆上下文（1次）
@@ -121,7 +124,7 @@ public class GraphEngineAdapter implements EngineAdapter {
                 }
                 ctx.appendHistory(input);
 
-                StateGraph graph = buildGraph(def, ctx);
+                StateGraph graph = buildGraph(graphDef, ctx);
                 CompiledGraph compiled = graph.compile();
                 RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
                 Map<String, Object> graphInput = new HashMap<>();
@@ -132,7 +135,7 @@ public class GraphEngineAdapter implements EngineAdapter {
                 return compiled.stream(graphInput, config)
                         .flatMap(nodeOutput -> {
                             String nodeName = nodeOutput.node();
-                            String output = nodeOutput.state().value("output").orElse("");
+                            String output = (String) nodeOutput.state().value("output").orElse("");
                             if (output != null && !output.isBlank()) {
                                 finalAnswer[0] = output;
                             }
@@ -143,7 +146,7 @@ public class GraphEngineAdapter implements EngineAdapter {
                         })
                         .concatWith(Flux.defer(() -> {
                             AgentMessage response = toAgentMessage(finalAnswer[0],
-                                    def.getAgentId(), ctx.getSessionId());
+                                graphDef.getAgentId(), ctx.getSessionId());
                             // 最终响应追加历史（1次）
                             ctx.appendHistory(response);
                             return Flux.just(
@@ -174,7 +177,7 @@ public class GraphEngineAdapter implements EngineAdapter {
     // StateGraph 构建
     // ═══════════════════════════════════════════════════════
 
-    private StateGraph buildGraph(AgentDefinition def, ContextStore ctx) throws GraphStateException {
+    private StateGraph buildGraph(GraphAgentDefinition def, ContextStore ctx) throws GraphStateException {
         StateGraph graph = new StateGraph(defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
@@ -217,7 +220,7 @@ public class GraphEngineAdapter implements EngineAdapter {
 
                 graph.addConditionalEdges(fromNode,
                         edge_async(state -> {
-                            String decision = state.value("decision").orElse("");
+                            String decision = (String) state.value("decision").orElse("");
                             for (GraphEdge edge : conditionalEdges) {
                                 if (conditionEvaluator.evaluate(decision, edge.getCondition(), chatModel)) {
                                     log.info("Graph条件路由匹配: {} -> {} (condition={})",
@@ -254,7 +257,7 @@ public class GraphEngineAdapter implements EngineAdapter {
      */
     protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
         return state -> {
-            String input = state.value("output").orElse("");
+            String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
 
             log.info("Graph节点执行: nodeId={}, agentId={}", nodeId, node.getAgentId());
@@ -363,14 +366,14 @@ public class GraphEngineAdapter implements EngineAdapter {
     // 校验
     // ═══════════════════════════════════════════════════════
 
-    private void validateGraphConfig(AgentDefinition def) {
-        if (def.getGraphNodes() == null || def.getGraphNodes().isEmpty()) {
+    private void validateGraphConfig(GraphAgentDefinition graphDef) {
+        if (graphDef.getGraphNodes() == null || graphDef.getGraphNodes().isEmpty()) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
-                    "Graph配置不完整: 缺少节点定义, agentId=" + def.getAgentId());
+                    "Graph配置不完整: 缺少节点定义, agentId=" + graphDef.getAgentId());
         }
-        if (def.getGraphStart() == null || def.getGraphStart().isBlank()) {
+        if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isBlank()) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
-                    "Graph配置不完整: 缺少起始节点, agentId=" + def.getAgentId());
+                    "Graph配置不完整: 缺少起始节点, agentId=" + graphDef.getAgentId());
         }
     }
 
@@ -381,9 +384,9 @@ public class GraphEngineAdapter implements EngineAdapter {
     /**
      * 构建并编译 StateGraph（供 GraphChannel 获取原生对象）
      */
-    public CompiledGraph buildAndCompile(AgentDefinition def, ContextStore ctx) {
+    public CompiledGraph buildAndCompile(GraphAgentDefinition graphDef, ContextStore ctx) {
         try {
-            StateGraph graph = buildGraph(def, ctx);
+            StateGraph graph = buildGraph(graphDef, ctx);
             return graph.compile();
         } catch (GraphStateException e) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,

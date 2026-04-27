@@ -133,7 +133,7 @@ public class RagDecorator implements ChatStrategy {
                 .sessionId(original.getSessionId())
                 .query(enhancedQuery)
                 .mode(original.getMode())
-                .agentMode(original.getAgentMode())
+                .engine(original.getEngine())
                 .ragEnabled(original.getRagEnabled())
                 .knowledgeBaseId(original.getKnowledgeBaseId())
                 .agentId(original.getAgentId())

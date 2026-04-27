@@ -1,0 +1,13 @@
+agent:
+  id: "route-searcher"
+  name: "路线搜索员"
+  engine: CHAT
+  instruction: "你是路线搜索员，根据收集到的旅行需求搜索合适的交通路线。"
+  tools:
+    - name: "searchRoute"
+      type: FUNCTION
+      description: "搜索两个城市之间的交通路线"
+      className: "com.ai.agent.domain.agent.tools.RouteSearchTool"
+  model:
+    name: "qwq-plus"
+    temperature: 0.5

@@ -70,7 +70,7 @@ public class TaskRuntime implements ChatStrategy {
         ContextStore ctx = contextStoreFactory.getOrCreate(
                 request.getSessionId(),
                 request.getUserId(),
-                false,
+                request.getEngine() != null ? request.getEngine() : EngineType.GRAPH,
                 Boolean.TRUE.equals(request.getRagEnabled()),
                 request.getKnowledgeBaseId()
         );
@@ -156,9 +156,9 @@ public class TaskRuntime implements ChatStrategy {
             log.warn("未找到指定agentId的Agent定义: agentId={}", request.getAgentId());
         }
 
-        // 按原 agentMode name 查找（兼容旧逻辑）
-        if (request.getAgentMode() != null) {
-            AgentDefinition def = agentRegistry.get(request.getAgentMode().name());
+        // 按 engine name 查找（兼容旧逻辑）
+        if (request.getEngine() != null) {
+            AgentDefinition def = agentRegistry.get(request.getEngine().name());
             if (def != null) {
                 return def;
             }

@@ -1,0 +1,13 @@
+agent:
+  id: "faq-bot"
+  name: "FAQ机器人"
+  engine: CHAT
+  instruction: "你是FAQ机器人，回答常见的客户问题。"
+  tools:
+    - name: "searchFaq"
+      type: FUNCTION
+      description: "搜索FAQ知识库"
+      className: "com.ai.agent.domain.agent.tools.FaqTool"
+  model:
+    name: "qwq-plus"
+    temperature: 0.3

@@ -7,7 +7,7 @@ import com.ai.agent.infrastructure.persistent.dao.IChatMessageDao;
 import com.ai.agent.infrastructure.persistent.dao.IChatSessionDao;
 import com.ai.agent.infrastructure.persistent.po.ChatMessagePO;
 import com.ai.agent.infrastructure.persistent.po.ChatSessionPO;
-import com.ai.agent.types.enums.AgentMode;
+import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.enums.MessageRole;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository {
         po.setSessionId(session.getSessionId());
         po.setUserId(session.getUserId());
         po.setMode(session.getMode().name());
-        po.setAgentMode(session.getAgentMode().name());
+        po.setAgentMode(session.getEngine().name());
         po.setRagEnabled(session.getRagEnabled());
         po.setKnowledgeBaseId(session.getKnowledgeBaseId());
         po.setCreatedAt(session.getCreatedAt());
@@ -83,7 +83,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository {
                 .sessionId(po.getSessionId())
                 .userId(po.getUserId())
                 .mode(ChatMode.valueOf(po.getMode()))
-                .agentMode(AgentMode.valueOf(po.getAgentMode()))
+                .engine(EngineType.valueOf(po.getAgentMode()))
                 .ragEnabled(po.getRagEnabled())
                 .knowledgeBaseId(po.getKnowledgeBaseId())
                 .createdAt(po.getCreatedAt())

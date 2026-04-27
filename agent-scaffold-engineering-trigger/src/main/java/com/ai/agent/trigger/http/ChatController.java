@@ -63,7 +63,7 @@ public class ChatController {
                 .sessionId(dto.getSessionId())
                 .query(dto.getQuery())
                 .mode(dto.getMode())
-                .agentMode(dto.getAgentMode())
+                .engine(dto.getEngine())
                 .ragEnabled(dto.getRagEnabled())
                 .knowledgeBaseId(dto.getKnowledgeBaseId())
                 .build();

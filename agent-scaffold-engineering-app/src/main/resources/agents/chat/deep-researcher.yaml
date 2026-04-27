@@ -1,0 +1,13 @@
+agent:
+  id: "deep-researcher"
+  name: "深度研究员"
+  engine: CHAT
+  instruction: "你是深度研究员，使用工具进行深入搜索和分析。请尽可能全面地收集信息。"
+  tools:
+    - name: "getWeather"
+      type: FUNCTION
+      description: "查询天气信息（模拟搜索工具）"
+      className: "com.ai.agent.domain.agent.tools.WeatherTool"
+  model:
+    name: "qwq-plus"
+    temperature: 0.7

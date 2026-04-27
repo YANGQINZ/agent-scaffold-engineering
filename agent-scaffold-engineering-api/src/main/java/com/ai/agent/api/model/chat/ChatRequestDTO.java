@@ -1,6 +1,6 @@
 package com.ai.agent.api.model.chat;
 
-import com.ai.agent.types.enums.AgentMode;
+import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.enums.ChatMode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +15,7 @@ public class ChatRequestDTO {
     private String query;
     @NotNull(message = "mode不能为空")
     private ChatMode mode;
-    private AgentMode agentMode;
+    private EngineType engine;
     private Boolean ragEnabled = false;
     private String knowledgeBaseId;
 }

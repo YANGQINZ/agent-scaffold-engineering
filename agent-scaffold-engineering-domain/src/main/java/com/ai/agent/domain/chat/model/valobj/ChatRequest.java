@@ -1,6 +1,6 @@
 package com.ai.agent.domain.chat.model.valobj;
 
-import com.ai.agent.types.enums.AgentMode;
+import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.enums.ChatMode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,9 +26,9 @@ public class ChatRequest {
     @Builder.Default
     private ChatMode mode = ChatMode.SIMPLE;
 
-    /** 智能体模式（当mode=AGENT时生效） */
+    /** 引擎类型（当mode=AGENT时生效） */
     @Builder.Default
-    private AgentMode agentMode = AgentMode.REACT;
+    private EngineType engine = EngineType.GRAPH;
 
     /** 是否启用RAG检索增强 */
     @Builder.Default

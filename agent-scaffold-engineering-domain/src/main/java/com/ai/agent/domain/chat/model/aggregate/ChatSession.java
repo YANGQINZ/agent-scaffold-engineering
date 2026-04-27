@@ -1,7 +1,7 @@
 package com.ai.agent.domain.chat.model.aggregate;
 
 import com.ai.agent.domain.chat.model.entity.ChatMessage;
-import com.ai.agent.types.enums.AgentMode;
+import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.enums.MessageRole;
 import lombok.AllArgsConstructor;
@@ -28,8 +28,8 @@ public class ChatSession {
     /** 对话模式 */
     private ChatMode mode;
 
-    /** 智能体模式 */
-    private AgentMode agentMode;
+    /** 引擎类型 */
+    private EngineType engine;
 
     /** 是否启用RAG */
     private Boolean ragEnabled;

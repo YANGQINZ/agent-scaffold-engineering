@@ -70,41 +70,44 @@ public class AgentScopeAdapter implements EngineAdapter {
 
     @Override
     public AgentMessage execute(AgentDefinition def, AgentMessage input, ContextStore ctx) {
-        log.info("AgentScopeAdapter执行: agentId={}", def.getAgentId());
+        AgentscopeAgentDefinition asDef = (AgentscopeAgentDefinition) def;
+        log.info("AgentScopeAdapter执行: agentId={}", asDef.getAgentId());
 
         try {
             // 1. 注入输入到 ContextStore
             ctx.appendHistory(input);
 
             // 2. 构建 ReActAgent 列表（不再注入 ContextSyncHook）
-            List<AgentBase> agents = buildAgents(def, ctx);
+            List<AgentBase> agents = buildAgents(asDef);
 
             // 3. 缓存 Agent 实例
-            lastAgentsCache.put(def.getAgentId(), agents);
+            lastAgentsCache.put(asDef.getAgentId(), agents);
 
             // 4. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
-            Msg inputMsg = toInputMsg(input, def, ctx);
+            Msg inputMsg = toInputMsg(input, asDef, ctx);
 
             // 5. 根据 Pipeline 类型执行
-            AgentscopeAgentDefinition asDef = (AgentscopeAgentDefinition) def;
             String pipelineType = asDef.getAgentscopePipelineType();
             String outputContent;
 
             if ("fanout".equalsIgnoreCase(pipelineType) && agents.size() > 1) {
-                outputContent = executeFanout(agents, inputMsg, def.getAgentId());
+                outputContent = executeFanout(agents, inputMsg, asDef.getAgentId());
             } else {
-                outputContent = executeSequential(agents, inputMsg, def.getAgentId());
+                outputContent = executeSequential(agents, inputMsg, asDef.getAgentId());
             }
 
             // 6. 构建最终响应
-            AgentMessage response = toAgentMessage(outputContent, def.getAgentId(), ctx.getSessionId());
+            AgentMessage response = toAgentMessage(outputContent, asDef.getAgentId(), ctx.getSessionId());
+
+            // 7. 最终响应追加历史
+            ctx.appendHistory(response);
             return response;
 
         } catch (AgentException e) {
             throw e;
         } catch (Exception e) {
             log.error("AgentScopeAdapter执行失败: agentId={}, error={}",
-                    def.getAgentId(), e.getMessage(), e);
+                    asDef.getAgentId(), e.getMessage(), e);
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                     "AgentScope编排执行失败: " + e.getMessage(), e);
         }
@@ -146,8 +149,7 @@ public class AgentScopeAdapter implements EngineAdapter {
      * 每个 AgentscopeAgentConfig 对应一个 ReActAgent 实例，
      * 通过 AgentRegistry 查找子 Agent 定义获取指令。
      */
-    private List<AgentBase> buildAgents(AgentDefinition def, ContextStore ctx) {
-        AgentscopeAgentDefinition asDef = (AgentscopeAgentDefinition) def;
+    private List<AgentBase> buildAgents(AgentscopeAgentDefinition asDef) {
         List<AgentBase> agents = new ArrayList<>();
 
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {

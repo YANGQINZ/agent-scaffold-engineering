@@ -1,6 +1,7 @@
 package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.HybridAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
@@ -60,9 +61,10 @@ public class HybridEngineAdapter implements EngineAdapter {
 
     @Override
     public AgentMessage execute(AgentDefinition def, AgentMessage input, ContextStore ctx) {
-        log.info("HybridEngineAdapter执行: agentId={}", def.getAgentId());
+        HybridAgentDefinition hyDef = (HybridAgentDefinition) def;
+        log.info("HybridEngineAdapter执行: agentId={}", hyDef.getAgentId());
 
-        validateHybridConfig(def);
+        validateHybridConfig(hyDef);
 
         try {
             // 入口处注入记忆上下文（1次）
@@ -73,7 +75,7 @@ public class HybridEngineAdapter implements EngineAdapter {
             }
             ctx.appendHistory(input);
 
-            StateGraph graph = buildHybridGraph(def, ctx);
+            StateGraph graph = buildHybridGraph(hyDef, ctx);
             CompiledGraph compiled = graph.compile();
 
             RunnableConfig config = graphAdapter.buildRunnableConfig(ctx.getSessionId());
@@ -81,8 +83,8 @@ public class HybridEngineAdapter implements EngineAdapter {
             graphInput.put("output", enrichedInput);
             Optional<OverAllState> result = compiled.invoke(graphInput, config);
 
-            String output = result.map(s -> s.value("output").orElse("")).orElse(enrichedInput);
-            AgentMessage response = toAgentMessage(output, def.getAgentId(), ctx.getSessionId());
+            String output = result.map(s -> (String) s.value("output").orElse("")).orElse(enrichedInput);
+            AgentMessage response = toAgentMessage(output, hyDef.getAgentId(), ctx.getSessionId());
 
             // 最终响应追加历史（1次）
             ctx.appendHistory(response);
@@ -92,7 +94,7 @@ public class HybridEngineAdapter implements EngineAdapter {
             throw e;
         } catch (Exception e) {
             log.error("HybridEngineAdapter执行失败: agentId={}, error={}",
-                    def.getAgentId(), e.getMessage(), e);
+                    hyDef.getAgentId(), e.getMessage(), e);
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                     "Hybrid编排执行失败: " + e.getMessage(), e);
         }
@@ -131,31 +133,31 @@ public class HybridEngineAdapter implements EngineAdapter {
     // Hybrid StateGraph 构建
     // ═══════════════════════════════════════════════════════
 
-    private StateGraph buildHybridGraph(AgentDefinition def, ContextStore ctx) throws GraphStateException {
+    private StateGraph buildHybridGraph(HybridAgentDefinition hyDef, ContextStore ctx) throws GraphStateException {
         StateGraph graph = new StateGraph(graphAdapter.defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
 
         // 1. 添加节点，根据 subEngines 决定委托给哪个引擎
-        for (WorkflowNode node : def.getGraphNodes()) {
-            EngineType subEngine = def.getSubEngine(node.getId());
+        for (WorkflowNode node : hyDef.getGraphNodes()) {
+            EngineType subEngine = hyDef.getSubEngine(node.getId());
 
             if (subEngine == EngineType.AGENTSCOPE) {
-                graph.addNode(node.getId(), node_async(wrapAsGraphAction(def, node, ctx)));
+                graph.addNode(node.getId(), node_async(wrapAsGraphAction(hyDef, node, ctx)));
             } else {
                 // 复用 GraphEngineAdapter 的节点构建方法
-                graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(def, node, ctx)));
+                graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(hyDef, node, ctx)));
             }
         }
 
         // 2. 添加起始边
-        graph.addEdge(START, def.getGraphStart());
+        graph.addEdge(START, hyDef.getGraphStart());
 
         // 3. 构建边映射
-        Map<String, List<GraphEdge>> edgeMap = def.getGraphEdges().stream()
+        Map<String, List<GraphEdge>> edgeMap = hyDef.getGraphEdges().stream()
                 .collect(Collectors.groupingBy(GraphEdge::getFrom));
 
-        Set<String> nodesWithOutEdges = def.getGraphEdges().stream()
+        Set<String> nodesWithOutEdges = hyDef.getGraphEdges().stream()
                 .map(GraphEdge::getFrom)
                 .collect(Collectors.toSet());
 
@@ -180,7 +182,7 @@ public class HybridEngineAdapter implements EngineAdapter {
 
                 graph.addConditionalEdges(fromNode,
                         edge_async(state -> {
-                            String decision = state.value("decision").orElse("");
+                            String decision = (String) state.value("decision").orElse("");
                             for (GraphEdge edge : conditionalEdges) {
                                 if (conditionEvaluator.evaluate(decision, edge.getCondition(), chatModel)) {
                                     return edge.getCondition();
@@ -197,7 +199,7 @@ public class HybridEngineAdapter implements EngineAdapter {
         }
 
         // 5. 叶子节点自动连到 END
-        for (WorkflowNode node : def.getGraphNodes()) {
+        for (WorkflowNode node : hyDef.getGraphNodes()) {
             if (!nodesWithOutEdges.contains(node.getId())) {
                 graph.addEdge(node.getId(), END);
             }
@@ -209,9 +211,9 @@ public class HybridEngineAdapter implements EngineAdapter {
     /**
      * 将 AgentScope 执行包装为 StateGraph 的 NodeAction
      */
-    private NodeAction wrapAsGraphAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
+    private NodeAction wrapAsGraphAction(HybridAgentDefinition hyDef, WorkflowNode node, ContextStore ctx) {
         return state -> {
-            String input = state.value("output").orElse("");
+            String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
 
             log.info("Hybrid子节点委托AgentScope: nodeId={}", nodeId);
@@ -225,7 +227,7 @@ public class HybridEngineAdapter implements EngineAdapter {
                     .build();
 
             // 委托 AgentScopeAdapter 执行
-            AgentDefinition subDef = findSubAgentDef(def, node);
+            AgentDefinition subDef = findSubAgentDef(hyDef, node);
             AgentMessage result = agentscopeAdapter.execute(subDef, subInput, ctx);
 
             // 写回 state
@@ -239,12 +241,12 @@ public class HybridEngineAdapter implements EngineAdapter {
     /**
      * 查找子 Agent 定义
      */
-    private AgentDefinition findSubAgentDef(AgentDefinition def, WorkflowNode node) {
+    private AgentDefinition findSubAgentDef(HybridAgentDefinition hyDef, WorkflowNode node) {
         if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
             AgentDefinition subDef = agentRegistry.get(node.getAgentId());
-            return subDef != null ? subDef : def;
+            return subDef != null ? subDef : hyDef;
         }
-        return def;
+        return hyDef;
     }
 
     // ═══════════════════════════════════════════════════════
@@ -264,14 +266,14 @@ public class HybridEngineAdapter implements EngineAdapter {
                 .build();
     }
 
-    private void validateHybridConfig(AgentDefinition def) {
-        if (def.getGraphNodes() == null || def.getGraphNodes().isEmpty()) {
+    private void validateHybridConfig(HybridAgentDefinition hyDef) {
+        if (hyDef.getGraphNodes() == null || hyDef.getGraphNodes().isEmpty()) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
-                    "Hybrid配置不完整: 缺少节点定义, agentId=" + def.getAgentId());
+                    "Hybrid配置不完整: 缺少节点定义, agentId=" + hyDef.getAgentId());
         }
-        if (def.getGraphStart() == null || def.getGraphStart().isBlank()) {
+        if (hyDef.getGraphStart() == null || hyDef.getGraphStart().isBlank()) {
             throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
-                    "Hybrid配置不完整: 缺少起始节点, agentId=" + def.getAgentId());
+                    "Hybrid配置不完整: 缺少起始节点, agentId=" + hyDef.getAgentId());
         }
     }
 

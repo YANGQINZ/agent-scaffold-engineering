@@ -1,6 +1,6 @@
 package com.ai.agent.config;
 
-import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.*;
 import com.ai.agent.domain.agent.model.entity.AgentscopeAgentConfig;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
 import com.ai.agent.domain.agent.model.entity.McpServerConfig;
@@ -8,7 +8,6 @@ import com.ai.agent.domain.agent.model.entity.ToolConfig;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.ModelConfig;
 import com.ai.agent.domain.agent.service.AgentRegistry;
-import com.ai.agent.types.enums.AgentMode;
 import com.ai.agent.types.enums.EngineType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +24,7 @@ import java.util.*;
 
 /**
  * Agent YAML配置加载器 — 启动时扫描classpath:agents/目录下所有YAML文件，
- * 解析为AgentDefinition并注册到AgentRegistry
+ * 解析为AgentDefinition子类并注册到AgentRegistry
  */
 @Slf4j
 @Configuration
@@ -40,24 +39,25 @@ public class AgentYamlLoader {
     }
 
     /**
-     * 扫描并加载所有Agent YAML配置文件
+     * 扫描并加载所有Agent YAML配置文件（递归子目录）
      */
     private void loadAgents(AgentRegistry agentRegistry, ApplicationContext applicationContext) {
         log.info("开始扫描Agent YAML配置文件...");
 
-        // 第一阶段：加载所有YAML文件为AgentDefinition列表
         List<AgentDefinition> allAgents = new ArrayList<>();
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources("classpath:agents/*.yaml");
+            Resource[] resources = resolver.getResources("classpath:agents/**/*.yaml");
 
             for (Resource resource : resources) {
                 try {
-                    List<AgentDefinition> agents = parseYaml(resource);
-                    allAgents.addAll(agents);
-                    log.info("加载YAML文件: {}, 包含{}个Agent定义", resource.getFilename(), agents.size());
+                    AgentDefinition agent = parseYaml(resource);
+                    if (agent != null) {
+                        allAgents.add(agent);
+                        log.info("加载YAML文件: {}, agentId={}, engine={}",
+                                resource.getFilename(), agent.getAgentId(), agent.getEngine());
+                    }
                 } catch (Exception e) {
-                    // YAML解析失败记录错误日志跳过该文件，不阻止应用启动
                     log.error("YAML文件解析失败: {}, 错误: {}", resource.getFilename(), e.getMessage());
                 }
             }
@@ -65,90 +65,89 @@ public class AgentYamlLoader {
             log.error("扫描Agent YAML文件失败: {}", e.getMessage());
         }
 
-        // 第二阶段：注册所有Agent定义到Registry
         for (AgentDefinition agent : allAgents) {
-            // 验证FUNCTION类型工具类名是否存在
             validateToolClasses(agent, applicationContext);
             agentRegistry.register(agent);
         }
 
-        // 第三阶段：验证agentId引用（workflowNodes和graphNodes中引用的子Agent）
         validateAgentReferences(agentRegistry);
 
-        // 打印加载结果
         log.info("Agent YAML加载完成: 共加载{}个Agent定义", agentRegistry.getAll().size());
         agentRegistry.getAll().forEach(agent ->
-                log.info("  已注册Agent: agentId={}, name={}, engine={}", agent.getAgentId(), agent.getName(), agent.getEngine()));
+                log.info("  已注册Agent: agentId={}, name={}, engine={}",
+                        agent.getAgentId(), agent.getName(), agent.getEngine()));
     }
 
     /**
-     * 解析单个YAML文件为AgentDefinition列表
+     * 解析单个YAML文件为AgentDefinition（根键为 agent）
      */
-    private List<AgentDefinition> parseYaml(Resource resource) throws Exception {
+    private AgentDefinition parseYaml(Resource resource) throws Exception {
         JsonNode root = yamlMapper.readTree(resource.getInputStream());
 
-        if (!root.has("agents") || !root.get("agents").isArray()) {
-            log.warn("YAML文件 {} 格式无效：缺少agents数组", resource.getFilename());
-            return Collections.emptyList();
+        if (!root.has("agent") || !root.get("agent").isObject()) {
+            log.warn("YAML文件 {} 格式无效：缺少agent对象", resource.getFilename());
+            return null;
         }
 
-        List<AgentDefinition> agents = new ArrayList<>();
-        for (JsonNode agentNode : root.get("agents")) {
-            try {
-                agents.add(parseAgentDefinition(agentNode));
-            } catch (Exception e) {
-                log.error("解析Agent定义失败: {}, 错误: {}", agentNode.path("id").asText("unknown"), e.getMessage());
-            }
-        }
-        return agents;
+        JsonNode agentNode = root.get("agent");
+        return parseAgentDefinition(agentNode);
     }
 
     /**
-     * 解析单个Agent定义
+     * 根据 engine 字段分发到对应的解析方法
      */
     private AgentDefinition parseAgentDefinition(JsonNode node) {
         String id = node.path("id").asText();
         String name = node.path("name").asText();
-        String modeStr = node.path("mode").asText("REACT");
-        AgentMode mode = AgentMode.valueOf(modeStr.toUpperCase());
+        String engineStr = node.path("engine").asText("CHAT");
+        EngineType engine = EngineType.valueOf(engineStr.toUpperCase());
         String instruction = node.path("instruction").asText("");
 
-        // 解析引擎类型（新增，缺省时根据 mode 推断，无 mode 时默认 GRAPH）
-        String engineStr = node.path("engine").asText(null);
-        EngineType engine;
-        if (engineStr != null && !engineStr.isBlank()) {
-            engine = EngineType.valueOf(engineStr.toUpperCase());
-        } else {
-            // 兼容旧 YAML：根据 mode 推断 engine
-            engine = switch (mode) {
-                case GRAPH, HYBRID -> EngineType.valueOf(modeStr.toUpperCase());
-                case REACT, WORKFLOW -> EngineType.GRAPH;
-            };
-        }
-
-        // 解析模型配置
         ModelConfig modelConfig = parseModelConfig(node.path("model"));
-
-        // 解析工具配置
         List<ToolConfig> tools = parseToolConfigs(node.path("tools"));
+        List<McpServerConfig> mcpServers = node.has("mcpServers")
+                ? parseMcpServerConfigs(node.get("mcpServers")) : List.of();
 
-        AgentDefinition.AgentDefinitionBuilder builder = AgentDefinition.builder()
+        return switch (engine) {
+            case CHAT -> parseChatDefinition(id, name, instruction, modelConfig, tools, mcpServers);
+            case GRAPH -> parseGraphDefinition(id, name, instruction, modelConfig, tools, mcpServers, node);
+            case AGENTSCOPE -> parseAgentscopeDefinition(id, name, instruction, modelConfig, tools, mcpServers, node);
+            case HYBRID -> parseHybridDefinition(id, name, instruction, modelConfig, tools, mcpServers, node);
+        };
+    }
+
+    /**
+     * 解析 CHAT 类型 Agent
+     */
+    private ChatAgentDefinition parseChatDefinition(String id, String name, String instruction,
+                                                     ModelConfig modelConfig, List<ToolConfig> tools,
+                                                     List<McpServerConfig> mcpServers) {
+        return ChatAgentDefinition.builder()
                 .agentId(id)
                 .name(name)
-                .mode(mode)
-                .engine(engine)
+                .engine(EngineType.CHAT)
                 .instruction(instruction)
                 .modelConfig(modelConfig)
-                .tools(tools);
+                .tools(tools)
+                .mcpServers(mcpServers)
+                .build();
+    }
 
-        // 解析Workflow配置
-        if (node.has("workflow")) {
-            JsonNode workflowNode = node.get("workflow");
-            builder.workflowEntry(workflowNode.path("entry").asText(null));
-            builder.workflowNodes(parseWorkflowNodes(workflowNode.path("nodes")));
-        }
+    /**
+     * 解析 GRAPH 类型 Agent
+     */
+    private GraphAgentDefinition parseGraphDefinition(String id, String name, String instruction,
+                                                       ModelConfig modelConfig, List<ToolConfig> tools,
+                                                       List<McpServerConfig> mcpServers, JsonNode node) {
+        GraphAgentDefinition.GraphAgentDefinitionBuilder builder = GraphAgentDefinition.builder()
+                .agentId(id)
+                .name(name)
+                .engine(EngineType.GRAPH)
+                .instruction(instruction)
+                .modelConfig(modelConfig)
+                .tools(tools)
+                .mcpServers(mcpServers);
 
-        // 解析Graph配置
         if (node.has("graph")) {
             JsonNode graphNode = node.get("graph");
             builder.graphStart(graphNode.path("start").asText(null));
@@ -156,46 +155,72 @@ public class AgentYamlLoader {
             builder.graphEdges(parseGraphEdges(graphNode.path("edges")));
         }
 
-        // 解析AgentScope配置（engine=agentscope 时生效）
+        return builder.build();
+    }
+
+    /**
+     * 解析 AGENTSCOPE 类型 Agent
+     */
+    private AgentscopeAgentDefinition parseAgentscopeDefinition(String id, String name, String instruction,
+                                                                 ModelConfig modelConfig, List<ToolConfig> tools,
+                                                                 List<McpServerConfig> mcpServers, JsonNode node) {
+        AgentscopeAgentDefinition.AgentscopeAgentDefinitionBuilder builder = AgentscopeAgentDefinition.builder()
+                .agentId(id)
+                .name(name)
+                .engine(EngineType.AGENTSCOPE)
+                .instruction(instruction)
+                .modelConfig(modelConfig)
+                .tools(tools)
+                .mcpServers(mcpServers);
+
         if (node.has("agentscope")) {
             JsonNode agentscopeNode = node.get("agentscope");
             builder.agentscopePipelineType(agentscopeNode.path("pipeline").asText("sequential"));
             builder.agentscopeAgents(parseAgentscopeAgentConfigs(agentscopeNode.path("agents")));
         }
 
-        // 解析Hybrid子引擎映射（engine=hybrid 时生效）
-        if (node.has("hybrid")) {
-            JsonNode hybridNode = node.get("hybrid");
-            // hybrid.graph 复用 graph 解析逻辑
-            if (hybridNode.has("graph")) {
-                JsonNode graphNode = hybridNode.get("graph");
-                builder.graphStart(graphNode.path("start").asText(null));
-                builder.graphNodes(parseWorkflowNodes(graphNode.path("nodes")));
-                builder.graphEdges(parseGraphEdges(graphNode.path("edges")));
-            }
-            // subEngines 映射：nodeId → EngineType
-            if (hybridNode.has("subEngines")) {
-                Map<String, EngineType> subEngines = new HashMap<>();
-                Iterator<Map.Entry<String, JsonNode>> fields = hybridNode.get("subEngines").fields();
-                while (fields.hasNext()) {
-                    Map.Entry<String, JsonNode> entry = fields.next();
-                    subEngines.put(entry.getKey(), EngineType.valueOf(entry.getValue().asText().toUpperCase()));
-                }
-                builder.subEngines(subEngines);
-            }
+        return builder.build();
+    }
+
+    /**
+     * 解析 HYBRID 类型 Agent
+     */
+    private HybridAgentDefinition parseHybridDefinition(String id, String name, String instruction,
+                                                         ModelConfig modelConfig, List<ToolConfig> tools,
+                                                         List<McpServerConfig> mcpServers, JsonNode node) {
+        HybridAgentDefinition.HybridAgentDefinitionBuilder builder = HybridAgentDefinition.builder()
+                .agentId(id)
+                .name(name)
+                .engine(EngineType.HYBRID)
+                .instruction(instruction)
+                .modelConfig(modelConfig)
+                .tools(tools)
+                .mcpServers(mcpServers);
+
+        if (node.has("graph")) {
+            JsonNode graphNode = node.get("graph");
+            builder.graphStart(graphNode.path("start").asText(null));
+            builder.graphNodes(parseWorkflowNodes(graphNode.path("nodes")));
+            builder.graphEdges(parseGraphEdges(graphNode.path("edges")));
         }
 
-        // 解析MCP Server配置（跨引擎通用）
-        if (node.has("mcpServers")) {
-            builder.mcpServers(parseMcpServerConfigs(node.get("mcpServers")));
+        if (node.has("subEngines")) {
+            Map<String, EngineType> subEngines = new HashMap<>();
+            Iterator<Map.Entry<String, JsonNode>> fields = node.get("subEngines").fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                subEngines.put(entry.getKey(), EngineType.valueOf(entry.getValue().asText().toUpperCase()));
+            }
+            builder.subEngines(subEngines);
         }
 
         return builder.build();
     }
 
-    /**
-     * 解析模型配置
-     */
+    // ═══════════════════════════════════════════════════════
+    // 通用解析方法
+    // ═══════════════════════════════════════════════════════
+
     private ModelConfig parseModelConfig(JsonNode node) {
         if (node.isMissingNode() || node.isNull()) {
             return new ModelConfig();
@@ -207,9 +232,6 @@ public class AgentYamlLoader {
                 .build();
     }
 
-    /**
-     * 解析工具配置列表
-     */
     private List<ToolConfig> parseToolConfigs(JsonNode node) {
         if (node.isMissingNode() || !node.isArray()) {
             return List.of();
@@ -226,9 +248,6 @@ public class AgentYamlLoader {
         return tools;
     }
 
-    /**
-     * 解析Workflow节点列表
-     */
     private List<WorkflowNode> parseWorkflowNodes(JsonNode node) {
         if (node.isMissingNode() || !node.isArray()) {
             return List.of();
@@ -245,9 +264,6 @@ public class AgentYamlLoader {
         return nodes;
     }
 
-    /**
-     * 解析Graph边列表
-     */
     private List<GraphEdge> parseGraphEdges(JsonNode node) {
         if (node.isMissingNode() || !node.isArray()) {
             return List.of();
@@ -263,9 +279,6 @@ public class AgentYamlLoader {
         return edges;
     }
 
-    /**
-     * 解析AgentScope Agent配置列表
-     */
     private List<AgentscopeAgentConfig> parseAgentscopeAgentConfigs(JsonNode node) {
         if (node.isMissingNode() || !node.isArray()) {
             return List.of();
@@ -276,7 +289,6 @@ public class AgentYamlLoader {
                     .agentId(agentNode.path("agentId").asText())
                     .mcpServers(parseMcpServerConfigs(agentNode.path("mcpServers")))
                     .build();
-            // 解析 enableTools 列表
             if (agentNode.has("enableTools") && agentNode.get("enableTools").isArray()) {
                 List<String> enableTools = new ArrayList<>();
                 for (JsonNode toolNode : agentNode.get("enableTools")) {
@@ -289,9 +301,6 @@ public class AgentYamlLoader {
         return agents;
     }
 
-    /**
-     * 解析MCP Server配置列表
-     */
     private List<McpServerConfig> parseMcpServerConfigs(JsonNode node) {
         if (node.isMissingNode() || !node.isArray()) {
             return List.of();
@@ -330,7 +339,7 @@ public class AgentYamlLoader {
     }
 
     /**
-     * 验证FUNCTION类型工具类名是否存在，不存在则记录错误并从tools列表移除该工具
+     * 验证FUNCTION类型工具类名是否存在
      */
     private void validateToolClasses(AgentDefinition agent, ApplicationContext applicationContext) {
         if (agent.getTools() == null || agent.getTools().isEmpty()) {
@@ -359,35 +368,28 @@ public class AgentYamlLoader {
     }
 
     /**
-     * 验证Agent定义中的agentId引用是否存在，未找到的引用记录错误日志并跳过该Agent定义
+     * 验证Agent定义中的agentId引用是否存在
      */
     private void validateAgentReferences(AgentRegistry agentRegistry) {
         List<String> invalidAgentIds = new ArrayList<>();
 
         for (AgentDefinition agent : agentRegistry.getAll()) {
-            // 收集该Agent引用的所有子Agent ID
             Set<String> referencedIds = new HashSet<>();
 
-            if (agent.getWorkflowNodes() != null) {
-                for (WorkflowNode node : agent.getWorkflowNodes()) {
-                    if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
-                        referencedIds.add(node.getAgentId());
-                    }
-                    if (node.getReactAgentId() != null && !node.getReactAgentId().isBlank()) {
-                        referencedIds.add(node.getReactAgentId());
-                    }
-                }
-            }
-
-            if (agent.getGraphNodes() != null) {
-                for (WorkflowNode node : agent.getGraphNodes()) {
-                    if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
-                        referencedIds.add(node.getAgentId());
+            if (agent instanceof GraphAgentDefinition graphDef) {
+                collectNodeReferences(graphDef.getGraphNodes(), referencedIds);
+            } else if (agent instanceof HybridAgentDefinition hybridDef) {
+                collectNodeReferences(hybridDef.getGraphNodes(), referencedIds);
+            } else if (agent instanceof AgentscopeAgentDefinition asDef) {
+                if (asDef.getAgentscopeAgents() != null) {
+                    for (AgentscopeAgentConfig asConfig : asDef.getAgentscopeAgents()) {
+                        if (asConfig.getAgentId() != null) {
+                            referencedIds.add(asConfig.getAgentId());
+                        }
                     }
                 }
             }
 
-            // 检查引用是否存在（跳过自身引用）
             for (String refId : referencedIds) {
                 if (refId.equals(agent.getAgentId())) {
                     continue;
@@ -401,10 +403,25 @@ public class AgentYamlLoader {
             }
         }
 
-        // 从Registry中移除无效Agent
         for (String invalidId : invalidAgentIds) {
-            // 注意：AgentRegistry没有remove方法，此处记录警告，后续可增加remove方法
             log.warn("Agent '{}' 存在无效的子Agent引用，建议检查配置", invalidId);
+        }
+    }
+
+    /**
+     * 收集节点中引用的子Agent ID
+     */
+    private void collectNodeReferences(List<WorkflowNode> nodes, Set<String> referencedIds) {
+        if (nodes == null) {
+            return;
+        }
+        for (WorkflowNode node : nodes) {
+            if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
+                referencedIds.add(node.getAgentId());
+            }
+            if (node.getReactAgentId() != null && !node.getReactAgentId().isBlank()) {
+                referencedIds.add(node.getReactAgentId());
+            }
         }
     }
 
