@@ -35,6 +35,9 @@ public class AgentMessage {
     /** 消息内容 */
     private String content;
 
+    /** 思考过程内容（enableThinking=true时有值） */
+    private String thinkingContent;
+
     /** 时间戳 */
     private long timestamp;
 

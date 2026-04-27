@@ -137,6 +137,7 @@ public class RagDecorator implements ChatStrategy {
                 .ragEnabled(original.getRagEnabled())
                 .knowledgeBaseId(original.getKnowledgeBaseId())
                 .agentId(original.getAgentId())
+                .enableThinking(original.getEnableThinking())
                 .build();
     }
 

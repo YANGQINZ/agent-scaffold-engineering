@@ -17,5 +17,7 @@ public class ChatRequestDTO {
     private ChatMode mode;
     private EngineType engine;
     private Boolean ragEnabled = false;
+    /** 是否启用思考过程输出 */
+    private Boolean enableThinking = false;
     private String knowledgeBaseId;
 }

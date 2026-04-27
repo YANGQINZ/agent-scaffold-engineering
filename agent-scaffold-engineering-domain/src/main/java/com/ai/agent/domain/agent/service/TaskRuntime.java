@@ -178,7 +178,8 @@ public class TaskRuntime implements ChatStrategy {
                 .timestamp(System.currentTimeMillis())
                 .metadata(Map.of(
                         "role", "user",
-                        "sessionId", request.getSessionId() != null ? request.getSessionId() : ""
+                        "sessionId", request.getSessionId() != null ? request.getSessionId() : "",
+                        "enableThinking", request.getEnableThinking() != null ? request.getEnableThinking() : false
                 ))
                 .build();
     }
@@ -190,6 +191,7 @@ public class TaskRuntime implements ChatStrategy {
         Object sessionId = msg.getMetadataValue("sessionId");
         return ChatResponse.builder()
                 .answer(msg.getContent())
+                .thinkingContent(msg.getThinkingContent())
                 .sessionId(sessionId != null ? sessionId.toString() : "")
                 .metadata(Map.of(
                         "engine", msg.getMetadataValue("engine") != null

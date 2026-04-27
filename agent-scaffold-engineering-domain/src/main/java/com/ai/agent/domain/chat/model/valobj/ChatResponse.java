@@ -17,6 +17,9 @@ public class ChatResponse {
     /** 回答内容 */
     private String answer;
 
+    /** 思考过程内容（enableThinking=true时有值） */
+    private String thinkingContent;
+
     /** RAG引用来源 */
     private List<Source> sources;
 

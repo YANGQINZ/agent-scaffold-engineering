@@ -34,6 +34,10 @@ public class ChatRequest {
     @Builder.Default
     private Boolean ragEnabled = false;
 
+    /** 是否启用思考过程输出 */
+    @Builder.Default
+    private Boolean enableThinking = false;
+
     /** 知识库ID（RAG启用时指定） */
     private String knowledgeBaseId;
 

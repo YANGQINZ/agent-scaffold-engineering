@@ -66,6 +66,7 @@ public class ChatController {
                 .engine(dto.getEngine())
                 .ragEnabled(dto.getRagEnabled())
                 .knowledgeBaseId(dto.getKnowledgeBaseId())
+                .enableThinking(dto.getEnableThinking())
                 .build();
     }
 
@@ -74,6 +75,7 @@ public class ChatController {
                 .answer(response.getAnswer())
                 .sessionId(response.getSessionId())
                 .ragDegraded(response.getRagDegraded())
+                .thinkingContent(response.getThinkingContent())
                 .metadata(response.getMetadata())
                 .sources(response.getSources() != null ? response.getSources().stream()
                         .map(s -> SourceDTO.builder().docName(s.getDocName()).chunkContent(s.getChunkContent()).score(s.getScore()).build())
