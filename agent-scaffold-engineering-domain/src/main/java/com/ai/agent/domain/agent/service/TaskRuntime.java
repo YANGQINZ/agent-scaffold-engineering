@@ -36,17 +36,21 @@ public class TaskRuntime implements ChatStrategy {
     private final ContextStoreFactory contextStoreFactory;
     private final List<EngineAdapter> adapterList;
 
-    /** 引擎适配器映射（EngineType → EngineAdapter） */
-    private Map<EngineType, EngineAdapter> adapters;
+    /** 引擎适配器映射（EngineType → EngineAdapter），使用 volatile 保证可见性 */
+    private volatile Map<EngineType, EngineAdapter> adapters;
 
     /**
-     * 获取引擎适配器映射（延迟初始化）
+     * 获取引擎适配器映射（延迟初始化，线程安全）
      */
     private Map<EngineType, EngineAdapter> getAdapters() {
-        if (adapters == null || adapters.isEmpty()) {
-            adapters = adapterList.stream()
-                    .collect(Collectors.toMap(EngineAdapter::getType, a -> a));
-            log.info("TaskRuntime引擎适配器注册完成: {}", adapters.keySet());
+        if (adapters == null) {
+            synchronized (this) {
+                if (adapters == null) {
+                    adapters = adapterList.stream()
+                            .collect(Collectors.toMap(EngineAdapter::getType, a -> a));
+                    log.info("TaskRuntime引擎适配器注册完成: {}", adapters.keySet());
+                }
+            }
         }
         return adapters;
     }

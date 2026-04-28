@@ -138,12 +138,12 @@ public class MmrService {
         double[] norms = new double[n];
         double[] querySims = new double[n];
 
-        // 2. 预计算：模长与 Query 相似度
+        // 2. 预计算：模长与 Query 相似度（零向量安全除法）
         double queryNorm = calcNorm(queryEmbedding);
         for (int i = 0; i < n; i++) {
             embeddings[i] = validList.get(i).getEmbedding();
             norms[i] = calcNorm(embeddings[i]);
-            querySims[i] = dotProduct(queryEmbedding, embeddings[i]) / (queryNorm * norms[i]);
+            querySims[i] = safeCosine(queryEmbedding, embeddings[i], queryNorm, norms[i]);
         }
 
         // 3. 状态维护数组
@@ -176,9 +176,8 @@ public class MmrService {
                 if (selectedMask[i])
                     continue;
 
-                // 关键优化：只与上一次新加入的片段比对，更新最大相似度
-                double simToLast =
-                    dotProduct(embeddings[i], embeddings[lastAddedIdx]) / (norms[i] * norms[lastAddedIdx]);
+                // 关键优化：只与上一次新加入的片段比对，更新最大相似度（零向量安全除法）
+                double simToLast = safeCosine(embeddings[i], embeddings[lastAddedIdx], norms[i], norms[lastAddedIdx]);
                 maxSimToSelected[i] = Math.max(maxSimToSelected[i], simToLast);
 
                 // MMR = lambda * 相关性 - (1 - lambda) * 冗余性
@@ -209,6 +208,17 @@ public class MmrService {
         for (float v : a)
             sum += v * v;
         return Math.sqrt(sum);
+    }
+
+    /**
+     * 安全余弦相似度计算 — 防止零向量导致除以零产生 NaN
+     */
+    private double safeCosine(float[] a, float[] b, double normA, double normB) {
+        double denominator = normA * normB;
+        if (denominator == 0.0) {
+            return 0.0;
+        }
+        return dotProduct(a, b) / denominator;
     }
 
 }

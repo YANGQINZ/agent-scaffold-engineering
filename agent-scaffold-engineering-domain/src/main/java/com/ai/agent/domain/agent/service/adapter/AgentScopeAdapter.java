@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +63,49 @@ public class AgentScopeAdapter implements EngineAdapter {
     /** Pipeline执行后保留的Agent实例，用于AgentScopeChannel暴露 */
     private final Map<String, List<AgentBase>> lastAgentsCache = new ConcurrentHashMap<>();
 
+    /** 缓存最大条目数，防止内存泄漏 */
+    private static final int MAX_CACHE_SIZE = 100;
+
+    /**
+     * 获取Agent缓存（包级可见，供测试和AgentScopeChannel使用）
+     */
+    Map<String, List<AgentBase>> getAgentsCache() {
+        return lastAgentsCache;
+    }
+
+    /**
+     * 清理指定Agent的缓存实例，防止内存泄漏
+     *
+     * @param agentId Agent唯一标识
+     */
+    public void clearAgentCache(String agentId) {
+        lastAgentsCache.remove(agentId);
+    }
+
+    /**
+     * 清理所有Agent缓存实例
+     */
+    public void clearAllAgentCache() {
+        lastAgentsCache.clear();
+    }
+
+    /**
+     * 缓存Agent实例，并在超过阈值时淘汰最早的一半条目
+     */
+    void cacheAgents(String agentId, List<AgentBase> agents) {
+        lastAgentsCache.put(agentId, agents);
+        // 防止缓存无限增长：超过阈值时淘汰一半
+        if (lastAgentsCache.size() > MAX_CACHE_SIZE) {
+            int toRemove = lastAgentsCache.size() / 2;
+            var iterator = lastAgentsCache.keySet().iterator();
+            for (int i = 0; i < toRemove && iterator.hasNext(); i++) {
+                iterator.next();
+                iterator.remove();
+            }
+            log.info("Agent缓存淘汰: 保留{}个条目", lastAgentsCache.size());
+        }
+    }
+
     @Override
     public EngineType getType() {
         return EngineType.AGENTSCOPE;
@@ -81,8 +125,8 @@ public class AgentScopeAdapter implements EngineAdapter {
             // 2. 构建 ReActAgent 列表（不再注入 ContextSyncHook）
             List<AgentBase> agents = buildAgents(asDef, enableThinking);
 
-            // 3. 缓存 Agent 实例
-            lastAgentsCache.put(asDef.getAgentId(), agents);
+            // 3. 缓存 Agent 实例（带淘汰策略，防止内存泄漏）
+            cacheAgents(asDef.getAgentId(), agents);
 
             // 4. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
             Msg inputMsg = toInputMsg(input, asDef, ctx);
@@ -147,7 +191,7 @@ public class AgentScopeAdapter implements EngineAdapter {
                 return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                         "AgentScope流式执行失败: " + e.getMessage(), e));
             }
-        });
+        }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
     }
 
     @Override

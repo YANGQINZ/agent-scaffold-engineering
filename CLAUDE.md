@@ -88,9 +88,11 @@ types (枚举, 常量, 异常, Response<T>)
 
 | POST | `/api/v1/chat/stream` | 流式聊天（通过 Flux 实现 SSE） |
 
-| POST | `/api/v1/knowledge/upload` |上传知识库文档 |
+| DELETE | `/api/v1/chat/session/{sessionId}` | 删除会话 |
 
-| GET | `/api/v1/knowledge/{baseId}` | 获取知识库信息 |
+| POST | `/api/v1/knowledge/bases` | 创建知识库 |
+
+| POST | `/api/v1/knowledge/upload` | 上传知识库文档 |
 
 ## 已注释的基础设施
 

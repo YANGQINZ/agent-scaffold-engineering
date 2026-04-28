@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -131,7 +132,7 @@ public class HybridEngineAdapter implements EngineAdapter {
                 return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
                         "Hybrid流式执行失败: " + e.getMessage(), e));
             }
-        });
+        }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
     }
 
     @Override

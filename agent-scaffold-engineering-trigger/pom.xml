@@ -27,18 +27,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!-- Apache Tika 文档解析框架（支持PDF/Word/TXT等格式） -->
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers-standard-package</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-
         <!-- 系统模块 -->
         <dependency>
             <groupId>com.ai.agent</groupId>

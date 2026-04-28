@@ -368,7 +368,7 @@ public class AgentYamlLoader {
     }
 
     /**
-     * 验证Agent定义中的agentId引用是否存在
+     * 验证Agent定义中的agentId引用是否存在，注销引用无效的Agent
      */
     private void validateAgentReferences(AgentRegistry agentRegistry) {
         List<String> invalidAgentIds = new ArrayList<>();
@@ -395,7 +395,7 @@ public class AgentYamlLoader {
                     continue;
                 }
                 if (agentRegistry.get(refId) == null) {
-                    log.error("Agent '{}' 引用了不存在的子Agent: {}，跳过该Agent定义",
+                    log.error("Agent '{}' 引用了不存在的子Agent: {}，注销该Agent定义",
                             agent.getAgentId(), refId);
                     invalidAgentIds.add(agent.getAgentId());
                     break;
@@ -403,8 +403,10 @@ public class AgentYamlLoader {
             }
         }
 
+        // 注销引用无效的Agent定义
         for (String invalidId : invalidAgentIds) {
-            log.warn("Agent '{}' 存在无效的子Agent引用，建议检查配置", invalidId);
+            agentRegistry.unregister(invalidId);
+            log.warn("已注销Agent '{}' — 存在无效的子Agent引用", invalidId);
         }
     }
 

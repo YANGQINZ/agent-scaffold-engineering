@@ -39,6 +39,18 @@ public class AgentRegistry {
     }
 
     /**
+     * 注销Agent定义
+     *
+     * @param agentId Agent唯一标识
+     */
+    public void unregister(String agentId) {
+        AgentDefinition removed = registry.remove(agentId);
+        if (removed != null) {
+            log.info("注销Agent定义: agentId={}", agentId);
+        }
+    }
+
+    /**
      * 根据agentId获取Agent定义
      *
      * @param agentId Agent唯一标识
