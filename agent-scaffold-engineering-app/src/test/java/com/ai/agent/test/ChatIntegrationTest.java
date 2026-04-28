@@ -1,7 +1,7 @@
 package com.ai.agent.test;
 
-import com.ai.agent.domain.chat.model.valobj.ChatRequest;
-import com.ai.agent.domain.chat.model.valobj.ChatResponse;
+import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.chat.service.ChatFacade;
 import com.ai.agent.types.enums.ChatMode;
 import jakarta.annotation.Resource;

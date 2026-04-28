@@ -1,9 +1,10 @@
 package com.ai.agent.domain.chat.service.strategy;
 
-import com.ai.agent.domain.chat.model.valobj.ChatRequest;
-import com.ai.agent.domain.chat.model.valobj.ChatResponse;
-import com.ai.agent.domain.chat.model.valobj.SourceRef;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.common.interface_.ChatStrategy;
+import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.domain.common.valobj.ChatResponse;
+import com.ai.agent.domain.common.valobj.SourceRef;
+import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import com.ai.agent.domain.knowledge.model.valobj.RagResult;
 import com.ai.agent.domain.knowledge.service.rag.RagService;

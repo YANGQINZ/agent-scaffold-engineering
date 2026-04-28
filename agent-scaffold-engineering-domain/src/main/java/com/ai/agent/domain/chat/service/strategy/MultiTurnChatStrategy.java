@@ -1,12 +1,12 @@
 package com.ai.agent.domain.chat.service.strategy;
 
-import com.ai.agent.domain.agent.model.valobj.AgentMessage;
-import com.ai.agent.domain.agent.repository.ContextStore;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.ContextStoreFactory;
-import com.ai.agent.domain.chat.model.valobj.ChatRequest;
-import com.ai.agent.domain.chat.model.valobj.ChatResponse;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
-import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
+import com.ai.agent.domain.common.interface_.ChatStrategy;
+import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.domain.common.valobj.ChatResponse;
+import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
@@ -65,21 +65,9 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             String answer = thinkingResult.textContent();
 
             // 通过 ContextStore 追加历史
-            AgentMessage userInput = AgentMessage.builder()
-                    .senderId(request.getUserId())
-                    .content(request.getQuery())
-                    .timestamp(System.currentTimeMillis())
-                    .metadata(Map.of("role", "user"))
-                    .build();
-            ctx.appendHistory(userInput);
+            ctx.appendHistory(request.getUserId(), request.getQuery(), Map.of("role", "user"));
 
-            AgentMessage assistantOutput = AgentMessage.builder()
-                    .senderId("assistant")
-                    .content(answer)
-                    .timestamp(System.currentTimeMillis())
-                    .metadata(Map.of("role", "assistant"))
-                    .build();
-            ctx.appendHistory(assistantOutput);
+            ctx.appendHistory("assistant", answer, Map.of("role", "assistant"));
 
             return ChatResponse.builder()
                     .answer(answer)
@@ -115,13 +103,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             messages.add(new UserMessage(request.getQuery()));
 
             // 保存用户消息
-            AgentMessage userInput = AgentMessage.builder()
-                    .senderId(request.getUserId())
-                    .content(request.getQuery())
-                    .timestamp(System.currentTimeMillis())
-                    .metadata(Map.of("role", "user"))
-                    .build();
-            ctx.appendHistory(userInput);
+            ctx.appendHistory(request.getUserId(), request.getQuery(), Map.of("role", "user"));
 
             StringBuilder answerBuilder = new StringBuilder();
 
@@ -142,13 +124,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
                     })
                     .concatWith(Flux.defer(() -> {
                         String fullAnswer = answerBuilder.toString();
-                        AgentMessage assistantOutput = AgentMessage.builder()
-                                .senderId("assistant")
-                                .content(fullAnswer)
-                                .timestamp(System.currentTimeMillis())
-                                .metadata(Map.of("role", "assistant"))
-                                .build();
-                        ctx.appendHistory(assistantOutput);
+                        ctx.appendHistory("assistant", fullAnswer, Map.of("role", "assistant"));
                         return Flux.just(StreamEvent.done(false, null, finalSessionId));
                     }));
         });

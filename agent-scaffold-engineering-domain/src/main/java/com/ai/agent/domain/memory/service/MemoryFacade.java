@@ -2,6 +2,7 @@ package com.ai.agent.domain.memory.service;
 
 import com.ai.agent.domain.chat.model.entity.ChatMessage;
 import com.ai.agent.domain.chat.repository.IChatSessionRepository;
+import com.ai.agent.domain.common.interface_.MemoryPort;
 import com.ai.agent.domain.memory.model.aggregate.MemoryContext;
 import com.ai.agent.domain.memory.model.valobj.HotContext;
 import com.ai.agent.domain.memory.repository.IHotContextRepository;
@@ -16,12 +17,12 @@ import java.util.List;
 
 /**
  * 记忆系统门面 — 统一入口（写入/组装/压缩）
- * 替代 ChatMemoryManager
+ * 实现 MemoryPort 接口
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MemoryFacade {
+public class MemoryFacade implements MemoryPort {
 
     private final IHotContextRepository hotContextRepo;
     private final IChatSessionRepository chatSessionRepo;
@@ -29,47 +30,35 @@ public class MemoryFacade {
     private final ContextCompressor contextCompressor;
     private final ContextAssembler contextAssembler;
 
-    /**
-     * 写入消息（替代 ChatMemoryManager.save）
-     *
-     * @param sessionId 会话ID
-     * @param role      消息角色（user/assistant/system）
-     * @param content   消息内容
-     * @param tokenCount 消息token数
-     */
-    public void appendMessage(String sessionId, String role,
-                              String content, int tokenCount) {
-        // 1. 冷层写入 chat_message（同步，现有接口）
+    @Override
+    public void onMessageCreated(String sessionId, String content, String role) {
+        int estimatedTokens = content != null ? content.length() / 4 : 0;
+
+        // 1. 冷层写入 chat_message
         ChatMessage msg = ChatMessage.builder()
                 .sessionId(sessionId)
                 .role(MessageRole.valueOf(role.toUpperCase()))
                 .content(content)
-                .tokenCount(tokenCount)
+                .tokenCount(estimatedTokens)
                 .createdAt(LocalDateTime.now())
                 .build();
         chatSessionRepo.saveMessage(msg);
 
-        // 2. 通过聚合根操作热层
+        // 2. 热层操作
         HotContext hotCtx = hotContextRepo.load(sessionId);
         MemoryContext memoryContext = hotCtx != null
                 ? MemoryContext.from(sessionId, hotCtx)
                 : MemoryContext.create(sessionId);
-        memoryContext.appendMessage(role, content, tokenCount);
+        memoryContext.appendMessage(role, content, estimatedTokens);
         hotContextRepo.save(memoryContext.getHotContext());
 
-        // 3. 后台异步：记忆提炼 + 压缩检查
+        // 3. 异步处理
         Long msgId = msg.getMessageId() != null ? Long.valueOf(msg.getMessageId()) : null;
         memoryExtractor.extractAsync(sessionId, msgId, role, content);
         contextCompressor.checkAndCompress(sessionId, memoryContext);
     }
 
-    /**
-     * 组装上下文（替代 ChatMemoryManager.load）
-     *
-     * @param sessionId 会话ID
-     * @param userQuery 用户当前提问（用于语义检索）
-     * @return Spring AI Message 列表
-     */
+    @Override
     public List<Message> assembleContext(String sessionId, String userQuery) {
         return contextAssembler.assemble(sessionId, userQuery);
     }

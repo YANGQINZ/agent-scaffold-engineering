@@ -1,9 +1,10 @@
 package com.ai.agent.domain.chat.service.strategy;
 
-import com.ai.agent.domain.chat.model.valobj.ChatRequest;
-import com.ai.agent.domain.chat.model.valobj.ChatResponse;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
-import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
+import com.ai.agent.domain.common.interface_.ChatStrategy;
+import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.domain.common.valobj.ChatResponse;
+import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.exception.ChatException;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;

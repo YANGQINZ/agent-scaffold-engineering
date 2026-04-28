@@ -2,8 +2,8 @@ package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
-import com.ai.agent.domain.agent.repository.ContextStore;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
+import com.ai.agent.domain.common.interface_.ContextStore;
+import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.types.enums.EngineType;
 import reactor.core.publisher.Flux;
 

@@ -2,11 +2,7 @@ package com.ai.agent.types.model;
 
 import com.ai.agent.types.common.CommonConstants;
 import com.ai.agent.types.common.Constants;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 

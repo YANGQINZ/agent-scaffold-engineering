@@ -4,7 +4,6 @@ import com.ai.agent.domain.agent.model.aggregate.*;
 import com.ai.agent.domain.agent.model.entity.AgentscopeAgentConfig;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
 import com.ai.agent.domain.agent.model.entity.McpServerConfig;
-import com.ai.agent.domain.agent.model.entity.ToolConfig;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.ModelConfig;
 import com.ai.agent.domain.agent.service.AgentRegistry;
@@ -66,7 +65,6 @@ public class AgentYamlLoader {
         }
 
         for (AgentDefinition agent : allAgents) {
-            validateToolClasses(agent, applicationContext);
             agentRegistry.register(agent);
         }
 
@@ -104,15 +102,14 @@ public class AgentYamlLoader {
         String instruction = node.path("instruction").asText("");
 
         ModelConfig modelConfig = parseModelConfig(node.path("model"));
-        List<ToolConfig> tools = parseToolConfigs(node.path("tools"));
         List<McpServerConfig> mcpServers = node.has("mcpServers")
                 ? parseMcpServerConfigs(node.get("mcpServers")) : List.of();
 
         return switch (engine) {
-            case CHAT -> parseChatDefinition(id, name, instruction, modelConfig, tools, mcpServers);
-            case GRAPH -> parseGraphDefinition(id, name, instruction, modelConfig, tools, mcpServers, node);
-            case AGENTSCOPE -> parseAgentscopeDefinition(id, name, instruction, modelConfig, tools, mcpServers, node);
-            case HYBRID -> parseHybridDefinition(id, name, instruction, modelConfig, tools, mcpServers, node);
+            case CHAT -> parseChatDefinition(id, name, instruction, modelConfig, mcpServers);
+            case GRAPH -> parseGraphDefinition(id, name, instruction, modelConfig, mcpServers, node);
+            case AGENTSCOPE -> parseAgentscopeDefinition(id, name, instruction, modelConfig, mcpServers, node);
+            case HYBRID -> parseHybridDefinition(id, name, instruction, modelConfig, mcpServers, node);
         };
     }
 
@@ -120,7 +117,7 @@ public class AgentYamlLoader {
      * 解析 CHAT 类型 Agent
      */
     private ChatAgentDefinition parseChatDefinition(String id, String name, String instruction,
-                                                     ModelConfig modelConfig, List<ToolConfig> tools,
+                                                     ModelConfig modelConfig,
                                                      List<McpServerConfig> mcpServers) {
         return ChatAgentDefinition.builder()
                 .agentId(id)
@@ -128,7 +125,6 @@ public class AgentYamlLoader {
                 .engine(EngineType.CHAT)
                 .instruction(instruction)
                 .modelConfig(modelConfig)
-                .tools(tools)
                 .mcpServers(mcpServers)
                 .build();
     }
@@ -137,7 +133,7 @@ public class AgentYamlLoader {
      * 解析 GRAPH 类型 Agent
      */
     private GraphAgentDefinition parseGraphDefinition(String id, String name, String instruction,
-                                                       ModelConfig modelConfig, List<ToolConfig> tools,
+                                                       ModelConfig modelConfig,
                                                        List<McpServerConfig> mcpServers, JsonNode node) {
         GraphAgentDefinition.GraphAgentDefinitionBuilder builder = GraphAgentDefinition.builder()
                 .agentId(id)
@@ -145,7 +141,6 @@ public class AgentYamlLoader {
                 .engine(EngineType.GRAPH)
                 .instruction(instruction)
                 .modelConfig(modelConfig)
-                .tools(tools)
                 .mcpServers(mcpServers);
 
         if (node.has("graph")) {
@@ -162,7 +157,7 @@ public class AgentYamlLoader {
      * 解析 AGENTSCOPE 类型 Agent
      */
     private AgentscopeAgentDefinition parseAgentscopeDefinition(String id, String name, String instruction,
-                                                                 ModelConfig modelConfig, List<ToolConfig> tools,
+                                                                 ModelConfig modelConfig,
                                                                  List<McpServerConfig> mcpServers, JsonNode node) {
         AgentscopeAgentDefinition.AgentscopeAgentDefinitionBuilder builder = AgentscopeAgentDefinition.builder()
                 .agentId(id)
@@ -170,7 +165,6 @@ public class AgentYamlLoader {
                 .engine(EngineType.AGENTSCOPE)
                 .instruction(instruction)
                 .modelConfig(modelConfig)
-                .tools(tools)
                 .mcpServers(mcpServers);
 
         if (node.has("agentscope")) {
@@ -186,7 +180,7 @@ public class AgentYamlLoader {
      * 解析 HYBRID 类型 Agent
      */
     private HybridAgentDefinition parseHybridDefinition(String id, String name, String instruction,
-                                                         ModelConfig modelConfig, List<ToolConfig> tools,
+                                                         ModelConfig modelConfig,
                                                          List<McpServerConfig> mcpServers, JsonNode node) {
         HybridAgentDefinition.HybridAgentDefinitionBuilder builder = HybridAgentDefinition.builder()
                 .agentId(id)
@@ -194,7 +188,6 @@ public class AgentYamlLoader {
                 .engine(EngineType.HYBRID)
                 .instruction(instruction)
                 .modelConfig(modelConfig)
-                .tools(tools)
                 .mcpServers(mcpServers);
 
         if (node.has("graph")) {
@@ -230,22 +223,6 @@ public class AgentYamlLoader {
                 .temperature(node.path("temperature").asDouble(0.7))
                 .maxTokens(node.path("maxTokens").asInt(2000))
                 .build();
-    }
-
-    private List<ToolConfig> parseToolConfigs(JsonNode node) {
-        if (node.isMissingNode() || !node.isArray()) {
-            return List.of();
-        }
-        List<ToolConfig> tools = new ArrayList<>();
-        for (JsonNode toolNode : node) {
-            tools.add(ToolConfig.builder()
-                    .name(toolNode.path("name").asText())
-                    .type(toolNode.path("type").asText("FUNCTION"))
-                    .description(toolNode.path("description").asText(""))
-                    .className(toolNode.path("className").asText(null))
-                    .build());
-        }
-        return tools;
     }
 
     private List<WorkflowNode> parseWorkflowNodes(JsonNode node) {
@@ -336,35 +313,6 @@ public class AgentYamlLoader {
             servers.add(builder.build());
         }
         return servers;
-    }
-
-    /**
-     * 验证FUNCTION类型工具类名是否存在
-     */
-    private void validateToolClasses(AgentDefinition agent, ApplicationContext applicationContext) {
-        if (agent.getTools() == null || agent.getTools().isEmpty()) {
-            return;
-        }
-
-        List<ToolConfig> validTools = new ArrayList<>();
-        for (ToolConfig tool : agent.getTools()) {
-            if (!"FUNCTION".equals(tool.getType())) {
-                validTools.add(tool);
-                continue;
-            }
-            if (tool.getClassName() == null || tool.getClassName().isBlank()) {
-                log.warn("Agent '{}' 工具 '{}' 缺少className，跳过该工具", agent.getAgentId(), tool.getName());
-                continue;
-            }
-            try {
-                Class.forName(tool.getClassName());
-                validTools.add(tool);
-            } catch (ClassNotFoundException e) {
-                log.error("Agent '{}' 工具 '{}' 的className '{}' 不存在，跳过该工具",
-                        agent.getAgentId(), tool.getName(), tool.getClassName());
-            }
-        }
-        agent.setTools(validTools);
     }
 
     /**

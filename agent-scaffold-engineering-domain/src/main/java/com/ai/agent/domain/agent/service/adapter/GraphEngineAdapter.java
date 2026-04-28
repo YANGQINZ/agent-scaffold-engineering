@@ -5,13 +5,13 @@ import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.GraphEdge;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
-import com.ai.agent.domain.agent.repository.ContextStore;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
 import com.ai.agent.domain.agent.service.engine.GraphChannel;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
-import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
+import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
@@ -89,7 +89,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             if (!memoryContext.isBlank()) {
                 enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
             }
-            ctx.appendHistory(input);
+            ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
@@ -111,7 +111,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             AgentMessage response = toAgentMessage(output, thinkingContent, graphDef.getAgentId(), ctx.getSessionId());
 
             // 最终响应追加历史（1次）
-            ctx.appendHistory(response);
+            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
             return response;
 
         } catch (AgentException e) {
@@ -139,7 +139,7 @@ public class GraphEngineAdapter implements EngineAdapter {
                 if (!memoryContext.isBlank()) {
                     enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
                 }
-                ctx.appendHistory(input);
+                ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
                 boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
@@ -171,7 +171,7 @@ public class GraphEngineAdapter implements EngineAdapter {
                             AgentMessage response = toAgentMessage(finalAnswer[0], finalThinking[0],
                                 graphDef.getAgentId(), ctx.getSessionId());
                             // 最终响应追加历史（1次）
-                            ctx.appendHistory(response);
+                            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
 
                             Flux<StreamEvent> thinkingFlux = Flux.empty();
                             if (finalThinking[0] != null && !finalThinking[0].isBlank()) {

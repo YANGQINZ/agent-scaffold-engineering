@@ -5,7 +5,7 @@ import com.ai.agent.domain.agent.model.aggregate.ChatAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.agent.model.valobj.ModelConfig;
-import com.ai.agent.domain.agent.repository.ContextStore;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;

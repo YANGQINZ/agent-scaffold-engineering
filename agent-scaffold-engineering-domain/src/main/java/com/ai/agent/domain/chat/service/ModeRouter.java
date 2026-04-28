@@ -1,7 +1,7 @@
 package com.ai.agent.domain.chat.service;
 
 import com.ai.agent.domain.agent.service.TaskRuntime;
-import com.ai.agent.domain.chat.service.strategy.ChatStrategy;
+import com.ai.agent.domain.common.interface_.ChatStrategy;
 import com.ai.agent.domain.chat.service.strategy.MultiTurnChatStrategy;
 import com.ai.agent.domain.chat.service.strategy.SimpleChatStrategy;
 import com.ai.agent.types.common.Constants;

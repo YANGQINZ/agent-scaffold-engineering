@@ -3,12 +3,12 @@ package com.ai.agent.domain.agent.service.adapter;
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
-import com.ai.agent.domain.agent.repository.ContextStore;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.AgentScopeChannel;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
-import com.ai.agent.domain.chat.model.valobj.ThinkingExtractor;
+import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
@@ -118,7 +118,7 @@ public class AgentScopeAdapter implements EngineAdapter {
 
         try {
             // 1. 注入输入到 ContextStore
-            ctx.appendHistory(input);
+            ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
@@ -154,7 +154,7 @@ public class AgentScopeAdapter implements EngineAdapter {
             AgentMessage response = toAgentMessage(outputContent, thinkingContent, asDef.getAgentId(), ctx.getSessionId());
 
             // 7. 最终响应追加历史
-            ctx.appendHistory(response);
+            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
             return response;
 
         } catch (AgentException e) {

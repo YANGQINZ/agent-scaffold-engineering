@@ -107,15 +107,15 @@ class TaskRuntimeTest {
         public com.ai.agent.domain.agent.model.valobj.AgentMessage execute(
                 com.ai.agent.domain.agent.model.aggregate.AgentDefinition def,
                 com.ai.agent.domain.agent.model.valobj.AgentMessage input,
-                com.ai.agent.domain.agent.repository.ContextStore ctx) {
+                com.ai.agent.domain.common.interface_.ContextStore ctx) {
             return null;
         }
 
         @Override
-        public reactor.core.publisher.Flux<com.ai.agent.domain.chat.model.valobj.StreamEvent> executeStream(
+        public reactor.core.publisher.Flux<com.ai.agent.domain.common.valobj.StreamEvent> executeStream(
                 com.ai.agent.domain.agent.model.aggregate.AgentDefinition def,
                 com.ai.agent.domain.agent.model.valobj.AgentMessage input,
-                com.ai.agent.domain.agent.repository.ContextStore ctx) {
+                com.ai.agent.domain.common.interface_.ContextStore ctx) {
             return reactor.core.publisher.Flux.empty();
         }
 

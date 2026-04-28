@@ -1,7 +1,6 @@
 package com.ai.agent.domain.agent.model.aggregate;
 
 import com.ai.agent.domain.agent.model.entity.McpServerConfig;
-import com.ai.agent.domain.agent.model.entity.ToolConfig;
 import com.ai.agent.domain.agent.model.valobj.ModelConfig;
 import com.ai.agent.types.enums.EngineType;
 import lombok.AllArgsConstructor;
@@ -37,9 +36,6 @@ public abstract class AgentDefinition {
 
     /** 模型配置 */
     private ModelConfig modelConfig = new ModelConfig();
-
-    /** 工具配置列表 */
-    private List<ToolConfig> tools = List.of();
 
     /** MCP Server 配置列表（跨引擎通用） */
     private List<McpServerConfig> mcpServers = List.of();

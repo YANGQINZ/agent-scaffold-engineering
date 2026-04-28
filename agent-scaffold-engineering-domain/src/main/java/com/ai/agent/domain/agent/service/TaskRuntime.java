@@ -2,12 +2,12 @@ package com.ai.agent.domain.agent.service;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
-import com.ai.agent.domain.agent.repository.ContextStore;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.adapter.EngineAdapter;
-import com.ai.agent.domain.chat.model.valobj.ChatRequest;
-import com.ai.agent.domain.chat.model.valobj.ChatResponse;
-import com.ai.agent.domain.chat.model.valobj.StreamEvent;
-import com.ai.agent.domain.chat.service.strategy.ChatStrategy;
+import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.domain.common.valobj.ChatResponse;
+import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.common.interface_.ChatStrategy;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;

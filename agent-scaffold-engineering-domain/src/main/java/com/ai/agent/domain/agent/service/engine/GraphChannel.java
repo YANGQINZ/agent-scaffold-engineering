@@ -2,7 +2,7 @@ package com.ai.agent.domain.agent.service.engine;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
-import com.ai.agent.domain.agent.repository.ContextStore;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.adapter.GraphEngineAdapter;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import lombok.RequiredArgsConstructor;
