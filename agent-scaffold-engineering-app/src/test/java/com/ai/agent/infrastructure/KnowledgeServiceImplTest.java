@@ -4,11 +4,12 @@ import com.ai.agent.api.model.knowledge.KnowledgeBaseResponseDTO;
 import com.ai.agent.domain.knowledge.model.aggregate.KnowledgeBase;
 import com.ai.agent.domain.knowledge.model.entity.Document;
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
+import com.ai.agent.domain.knowledge.model.entity.KnowledgeBaseResponse;
 import com.ai.agent.domain.knowledge.repository.IDocumentChunkRepository;
 import com.ai.agent.domain.knowledge.repository.IDocumentRepository;
 import com.ai.agent.domain.knowledge.repository.IKnowledgeBaseRepository;
-import com.ai.agent.domain.knowledge.service.DocumentProcessor;
-import com.ai.agent.infrastructure.persistent.repository.KnowledgeServiceImpl;
+import com.ai.agent.domain.knowledge.DocumentProcessor;
+import com.ai.agent.domain.knowledge.service.business.KnowledgeServiceImpl;
 import com.ai.agent.types.enums.DocumentStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class KnowledgeServiceImplTest {
 
     @Test
     void createKnowledgeBase_validInput_returnsDTO() {
-        KnowledgeBaseResponseDTO result = service.createKnowledgeBase("测试库", "描述", "USER", "user1");
+        KnowledgeBaseResponse result = service.createKnowledgeBase("测试库", "描述", "USER", "user1");
         assertNotNull(result);
         assertEquals("测试库", result.getName());
         assertEquals("描述", result.getDescription());

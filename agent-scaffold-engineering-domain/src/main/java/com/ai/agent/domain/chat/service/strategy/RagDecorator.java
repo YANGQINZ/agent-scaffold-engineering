@@ -6,7 +6,7 @@ import com.ai.agent.domain.chat.model.valobj.SourceRef;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import com.ai.agent.domain.knowledge.model.valobj.RagResult;
-import com.ai.agent.domain.knowledge.service.RagService;
+import com.ai.agent.domain.knowledge.service.rag.RagService;
 import com.ai.agent.types.enums.StreamEventType;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

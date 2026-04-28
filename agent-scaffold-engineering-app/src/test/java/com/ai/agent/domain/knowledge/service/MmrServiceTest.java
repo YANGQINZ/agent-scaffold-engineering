@@ -1,6 +1,7 @@
 package com.ai.agent.domain.knowledge.service;
 
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
+import com.ai.agent.domain.knowledge.service.mmr.MmrService;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

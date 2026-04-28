@@ -1,4 +1,4 @@
-package com.ai.agent.domain.knowledge.service;
+package com.ai.agent.domain.knowledge.service.rag;
 
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import com.ai.agent.domain.knowledge.model.entity.RerankItem;
@@ -6,6 +6,9 @@ import com.ai.agent.domain.knowledge.model.valobj.MmrConfig;
 import com.ai.agent.domain.knowledge.model.valobj.RagResult;
 import com.ai.agent.domain.knowledge.model.valobj.RerankConfig;
 import com.ai.agent.domain.knowledge.repository.IDocumentChunkRepository;
+import com.ai.agent.domain.knowledge.service.EmbeddingService;
+import com.ai.agent.domain.knowledge.service.RerankingService;
+import com.ai.agent.domain.knowledge.service.mmr.MmrService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;

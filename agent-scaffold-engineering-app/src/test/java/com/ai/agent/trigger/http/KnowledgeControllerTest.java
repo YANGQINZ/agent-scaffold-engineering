@@ -1,7 +1,7 @@
 package com.ai.agent.trigger.http;
 
-import com.ai.agent.api.IKnowledgeService;
-import com.ai.agent.api.model.knowledge.KnowledgeBaseResponseDTO;
+import com.ai.agent.domain.knowledge.model.entity.KnowledgeBaseResponse;
+import com.ai.agent.domain.knowledge.service.IKnowledgeService;
 import com.ai.agent.types.model.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ class KnowledgeControllerTest {
     @Test
     void createKnowledgeBase_validParams_delegatesToService() {
         when(knowledgeService.createKnowledgeBase("测试", "描述", "USER", "u1"))
-                .thenReturn(KnowledgeBaseResponseDTO.builder()
+                .thenReturn(KnowledgeBaseResponse.builder()
                         .baseId("id-123").name("测试").description("描述").docCount(0).build());
 
         Response<?> response = controller.createKnowledgeBase("测试", "描述", "USER", "u1");

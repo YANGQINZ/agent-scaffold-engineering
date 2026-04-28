@@ -1,4 +1,4 @@
-package com.ai.agent.domain.knowledge.service;
+package com.ai.agent.domain.knowledge.service.mmr;
 
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import lombok.extern.slf4j.Slf4j;

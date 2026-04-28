@@ -1,6 +1,7 @@
-package com.ai.agent.domain.knowledge.service;
+package com.ai.agent.domain.knowledge;
 
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
+import com.ai.agent.domain.knowledge.service.EmbeddingService;
 import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.exception.KnowledgeException;
 import lombok.extern.slf4j.Slf4j;

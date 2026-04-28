@@ -22,6 +22,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <skipTests>true</skipTests>
+        <hutool.version>5.8.28</hutool.version>
     </properties>
 
     <licenses>
@@ -126,13 +127,30 @@
                 <version>0.4.2</version>
             </dependency>
 
+            <!-- hutool工具包 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+
             <!-- 设计模式框架 -->
             <dependency>
                 <groupId>cn.bugstack.wrench</groupId>
                 <artifactId>xfg-wrench-starter-design-framework</artifactId>
                 <version>3.0.0</version>
             </dependency>
-
+            <!-- Apache Tika 文档解析 -->
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-parsers-standard-package</artifactId>
+                <version>3.1.0</version>
+            </dependency>
             <!-- 工程模块 -->
             <dependency>
                 <groupId>com.ai.agent</groupId>

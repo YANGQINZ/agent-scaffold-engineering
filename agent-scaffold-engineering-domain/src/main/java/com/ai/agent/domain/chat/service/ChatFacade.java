@@ -6,7 +6,7 @@ import com.ai.agent.domain.chat.model.valobj.ChatResponse;
 import com.ai.agent.domain.chat.model.valobj.StreamEvent;
 import com.ai.agent.domain.chat.service.strategy.ChatStrategy;
 import com.ai.agent.domain.chat.service.strategy.RagDecorator;
-import com.ai.agent.domain.knowledge.service.RagService;
+import com.ai.agent.domain.knowledge.service.rag.RagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

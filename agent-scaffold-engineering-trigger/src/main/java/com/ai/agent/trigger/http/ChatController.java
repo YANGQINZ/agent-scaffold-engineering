@@ -1,5 +1,6 @@
 package com.ai.agent.trigger.http;
 
+import com.ai.agent.api.IChatService;
 import com.ai.agent.api.model.chat.ChatRequestDTO;
 import com.ai.agent.api.model.chat.ChatResponseDTO;
 import com.ai.agent.api.model.chat.SourceDTO;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/chat")
-public class ChatController {
+public class ChatController implements IChatService {
 
     private final ChatFacade chatFacade;
 
@@ -32,11 +33,7 @@ public class ChatController {
     public Response<ChatResponseDTO> chat(@Valid @RequestBody ChatRequestDTO requestDTO) {
         ChatRequest request = convertRequest(requestDTO);
         ChatResponse response = chatFacade.chat(request);
-        return Response.<ChatResponseDTO>builder()
-                .code(Constants.ResponseCode.SUCCESS.getCode())
-                .info(Constants.ResponseCode.SUCCESS.getInfo())
-                .data(convertResponse(response))
-                .build();
+        return Response.success(convertResponse(response));
     }
 
     @PostMapping("/stream")
@@ -51,10 +48,7 @@ public class ChatController {
     @DeleteMapping("/session/{sessionId}")
     public Response<Void> removeSession(@PathVariable String sessionId) {
         chatFacade.removeSession(sessionId);
-        return Response.<Void>builder()
-                .code(Constants.ResponseCode.SUCCESS.getCode())
-                .info(Constants.ResponseCode.SUCCESS.getInfo())
-                .build();
+        return Response.success();
     }
 
     private ChatRequest convertRequest(ChatRequestDTO dto) {

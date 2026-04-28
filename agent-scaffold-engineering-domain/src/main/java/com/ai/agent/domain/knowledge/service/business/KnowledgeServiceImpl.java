@@ -1,14 +1,14 @@
-package com.ai.agent.infrastructure.persistent.repository;
+package com.ai.agent.domain.knowledge.service.business;
 
-import com.ai.agent.api.IKnowledgeService;
-import com.ai.agent.api.model.knowledge.KnowledgeBaseResponseDTO;
 import com.ai.agent.domain.knowledge.model.aggregate.KnowledgeBase;
 import com.ai.agent.domain.knowledge.model.entity.Document;
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
+import com.ai.agent.domain.knowledge.model.entity.KnowledgeBaseResponse;
 import com.ai.agent.domain.knowledge.repository.IDocumentChunkRepository;
 import com.ai.agent.domain.knowledge.repository.IDocumentRepository;
 import com.ai.agent.domain.knowledge.repository.IKnowledgeBaseRepository;
-import com.ai.agent.domain.knowledge.service.DocumentProcessor;
+import com.ai.agent.domain.knowledge.DocumentProcessor;
+import com.ai.agent.domain.knowledge.service.IKnowledgeService;
 import com.ai.agent.types.enums.DocumentStatus;
 import com.ai.agent.types.enums.OwnerType;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -37,8 +38,8 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
     private final Tika tika = new Tika();
 
     @Override
-    public KnowledgeBaseResponseDTO createKnowledgeBase(String name, String description,
-                                                         String ownerType, String ownerId) {
+    public KnowledgeBaseResponse createKnowledgeBase(String name, String description,
+                                                     String ownerType, String ownerId) {
         OwnerType parsedOwnerType = OwnerType.valueOf(ownerType);
 
         KnowledgeBase kb = KnowledgeBase.builder()
@@ -51,7 +52,7 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
                 .build();
         knowledgeBaseRepository.save(kb);
 
-        return KnowledgeBaseResponseDTO.builder()
+        return KnowledgeBaseResponse.builder()
                 .baseId(kb.getBaseId())
                 .name(kb.getName())
                 .description(kb.getDescription())
@@ -91,5 +92,11 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
             }
             throw new RuntimeException("文档处理失败: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Map<String, Object> uploadKnowledgeBase(MultipartFile file, String name, String category) {
+
+        return Map.of();
     }
 }
