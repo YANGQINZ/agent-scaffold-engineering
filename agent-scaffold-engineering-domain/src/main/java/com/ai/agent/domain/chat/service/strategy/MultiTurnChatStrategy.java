@@ -44,6 +44,9 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             ContextStore ctx = contextStoreFactory.getOrCreate(
                     sessionId, request.getUserId(), EngineType.GRAPH, false, null);
 
+            // 通过 ContextStore 追加用户消息历史（assistant消息由ChatFacade统一发布事件写入）
+            ctx.appendHistory(request.getUserId(), request.getQuery(), Map.of("role", "user"));
+
             // 通过 ContextStore 组装记忆上下文
             String memoryContext = ctx.assembleMemoryContext(request.getQuery());
             List<Message> messages = new ArrayList<>();
@@ -64,10 +67,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             ThinkingExtractor.ThinkingResult thinkingResult = ThinkingExtractor.extractFromSpringAi(aiResponse);
             String answer = thinkingResult.textContent();
 
-            // 通过 ContextStore 追加历史
-            ctx.appendHistory(request.getUserId(), request.getQuery(), Map.of("role", "user"));
-
-            ctx.appendHistory("assistant", answer, Map.of("role", "assistant"));
+            ctx.appendHistory("assistant", aiResponse.getResult().getOutput().getText(), Map.of("role", "assistant"));
 
             return ChatResponse.builder()
                     .answer(answer)

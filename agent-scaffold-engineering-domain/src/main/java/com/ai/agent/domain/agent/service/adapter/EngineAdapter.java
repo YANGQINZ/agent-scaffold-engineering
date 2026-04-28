@@ -42,12 +42,4 @@ public interface EngineAdapter {
      */
     Flux<StreamEvent> executeStream(AgentDefinition def, AgentMessage input, ContextStore ctx);
 
-    /**
-     * 获取引擎特化通道
-     *
-     * @param channelType 通道类型（GraphChannel/AgentScopeChannel/HybridChannel）
-     * @return 通道实例
-     */
-    <T> T getTypedChannel(Class<T> channelType);
-
 }

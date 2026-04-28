@@ -23,7 +23,6 @@ import java.util.UUID;
 public class AgentMessage {
 
     /** 消息唯一标识，自动生成 UUID */
-    @Builder.Default
     private String messageId = UUID.randomUUID().toString();
 
     /** 发送者 Agent ID */
@@ -42,7 +41,6 @@ public class AgentMessage {
     private long timestamp;
 
     /** 扩展字段（来源引擎、token 用量、角色等） */
-    @Builder.Default
     private Map<String, Object> metadata = new HashMap<>();
 
     /**

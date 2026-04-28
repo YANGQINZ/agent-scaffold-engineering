@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Graph引擎特化通道 — 开发者通过此通道访问StateGraph原生能力
+ * Graph引擎特化通道 — 开发者通过此通道访问StateGraph原生能力（扩展类）
  *
  * 提供 StateGraph 原生对象获取和动态节点添加等高级操作。
  */

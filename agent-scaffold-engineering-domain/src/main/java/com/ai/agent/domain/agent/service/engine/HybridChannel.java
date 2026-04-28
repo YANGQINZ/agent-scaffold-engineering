@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Hybrid 双通道 — 同时暴露 GraphChannel 和 AgentScopeChannel
+ * Hybrid 双通道 — 同时暴露 GraphChannel 和 AgentScopeChannel（扩展类）
  *
  * 开发者可通过此通道精确控制任一引擎的原生能力。
  */

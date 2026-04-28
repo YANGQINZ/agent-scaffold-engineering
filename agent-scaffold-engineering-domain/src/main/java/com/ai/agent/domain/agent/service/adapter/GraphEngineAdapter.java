@@ -51,7 +51,6 @@ public class GraphEngineAdapter implements EngineAdapter {
 
     private final ChatModel chatModel;
     private final AgentRegistry agentRegistry;
-    private final McpToolProvider mcpToolProvider;
     private final ConditionEvaluator conditionEvaluator;
 
     /** 最大重试次数 */
@@ -191,16 +190,6 @@ public class GraphEngineAdapter implements EngineAdapter {
                         "Graph编排流式执行失败: " + e.getMessage(), e));
             }
         }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getTypedChannel(Class<T> channelType) {
-        if (channelType == GraphChannel.class) {
-            return (T) new GraphChannel(this);
-        }
-        throw new AgentException(Constants.ErrorCode.AGENT_MODE_UNSUPPORTED,
-                "不支持的通道类型: " + channelType.getSimpleName());
     }
 
     // ═══════════════════════════════════════════════════════

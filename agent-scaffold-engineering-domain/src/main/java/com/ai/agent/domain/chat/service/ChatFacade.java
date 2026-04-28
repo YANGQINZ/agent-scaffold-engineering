@@ -47,12 +47,7 @@ public class ChatFacade {
             strategy = new RagDecorator(strategy, ragService);
         }
 
-        ChatResponse response = strategy.execute(request);
-
-        // 发布消息创建事件 — 通知 memory 系统
-        publishMessageEvent(request.getSessionId(), response.getAnswer(), "assistant");
-
-        return response;
+        return strategy.execute(request);
     }
 
     /**
@@ -65,20 +60,7 @@ public class ChatFacade {
             strategy = new RagDecorator(strategy, ragService);
         }
 
-        // 收集流式响应的完整内容
-        AtomicReference<String> fullContent = new AtomicReference<>("");
-
-        return strategy.executeStream(request)
-                .doOnNext(event -> {
-                    // 收集文本片段
-                    if (event.getData() != null && event.getData().containsKey("text")) {
-                        fullContent.updateAndGet(current -> current + event.getData().get("text"));
-                    }
-                })
-                .doOnComplete(() -> {
-                    // 流完成后发布事件
-                    publishMessageEvent(request.getSessionId(), fullContent.get(), "assistant");
-                });
+        return strategy.executeStream(request);
     }
 
     /**
@@ -86,15 +68,5 @@ public class ChatFacade {
      */
     public void removeSession(String sessionId) {
         contextStoreFactory.remove(sessionId);
-    }
-
-    private void publishMessageEvent(String sessionId, String content, String role) {
-        try {
-            eventPublisher.publishEvent(
-                    new MessageCreatedEvent(sessionId, content, role, Instant.now())
-            );
-        } catch (Exception e) {
-            log.warn("消息事件发布降级: sessionId={}, error={}", sessionId, e.getMessage());
-        }
     }
 }

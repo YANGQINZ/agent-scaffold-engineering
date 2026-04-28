@@ -61,50 +61,11 @@ public class AgentScopeAdapter implements EngineAdapter {
     private volatile io.agentscope.core.model.Model agentscopeModel;
 
     /** Pipeline执行后保留的Agent实例，用于AgentScopeChannel暴露 */
-    private final Map<String, List<AgentBase>> lastAgentsCache = new ConcurrentHashMap<>();
+    /*private final Map<String, List<AgentBase>> lastAgentsCache = new ConcurrentHashMap<>();*/
 
     /** 缓存最大条目数，防止内存泄漏 */
     private static final int MAX_CACHE_SIZE = 100;
 
-    /**
-     * 获取Agent缓存（包级可见，供测试和AgentScopeChannel使用）
-     */
-    Map<String, List<AgentBase>> getAgentsCache() {
-        return lastAgentsCache;
-    }
-
-    /**
-     * 清理指定Agent的缓存实例，防止内存泄漏
-     *
-     * @param agentId Agent唯一标识
-     */
-    public void clearAgentCache(String agentId) {
-        lastAgentsCache.remove(agentId);
-    }
-
-    /**
-     * 清理所有Agent缓存实例
-     */
-    public void clearAllAgentCache() {
-        lastAgentsCache.clear();
-    }
-
-    /**
-     * 缓存Agent实例，并在超过阈值时淘汰最早的一半条目
-     */
-    void cacheAgents(String agentId, List<AgentBase> agents) {
-        lastAgentsCache.put(agentId, agents);
-        // 防止缓存无限增长：超过阈值时淘汰一半
-        if (lastAgentsCache.size() > MAX_CACHE_SIZE) {
-            int toRemove = lastAgentsCache.size() / 2;
-            var iterator = lastAgentsCache.keySet().iterator();
-            for (int i = 0; i < toRemove && iterator.hasNext(); i++) {
-                iterator.next();
-                iterator.remove();
-            }
-            log.info("Agent缓存淘汰: 保留{}个条目", lastAgentsCache.size());
-        }
-    }
 
     @Override
     public EngineType getType() {
@@ -117,21 +78,18 @@ public class AgentScopeAdapter implements EngineAdapter {
         log.info("AgentScopeAdapter执行: agentId={}", asDef.getAgentId());
 
         try {
-            // 1. 注入输入到 ContextStore
-            ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
+            // 1. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
+            Msg inputMsg = toInputMsg(input, asDef, ctx);
 
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
             // 2. 构建 ReActAgent 列表（不再注入 ContextSyncHook）
             List<AgentBase> agents = buildAgents(asDef, enableThinking);
 
-            // 3. 缓存 Agent 实例（带淘汰策略，防止内存泄漏）
-            cacheAgents(asDef.getAgentId(), agents);
+            // 3. 注入输入到 ContextStore
+            ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
-            // 4. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
-            Msg inputMsg = toInputMsg(input, asDef, ctx);
-
-            // 5. 根据 Pipeline 类型执行
+            // 4. 根据 Pipeline 类型执行
             String pipelineType = asDef.getAgentscopePipelineType();
             Msg lastMsg;
 
@@ -150,10 +108,10 @@ public class AgentScopeAdapter implements EngineAdapter {
                 thinkingContent = thinkResult.hasThinking() ? thinkResult.thinkingContent() : null;
             }
 
-            // 6. 构建最终响应
+            // 5. 构建最终响应
             AgentMessage response = toAgentMessage(outputContent, thinkingContent, asDef.getAgentId(), ctx.getSessionId());
 
-            // 7. 最终响应追加历史
+            // 6. 最终响应追加历史
             ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
             return response;
 
@@ -174,6 +132,7 @@ public class AgentScopeAdapter implements EngineAdapter {
                 AgentMessage result = execute(def, input, ctx);
                 String sessionId = ctx.getSessionId();
 
+                ctx.appendHistory(result.getSenderId(), result.getContent(), result.getMetadata());
                 Flux<StreamEvent> events = Flux.empty();
 
                 // 先发射思考过程
@@ -192,16 +151,6 @@ public class AgentScopeAdapter implements EngineAdapter {
                         "AgentScope流式执行失败: " + e.getMessage(), e));
             }
         }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getTypedChannel(Class<T> channelType) {
-        if (channelType == AgentScopeChannel.class) {
-            return (T) new AgentScopeChannel(lastAgentsCache);
-        }
-        throw new AgentException(Constants.ErrorCode.AGENT_MODE_UNSUPPORTED,
-                "不支持的通道类型: " + channelType.getSimpleName());
     }
 
     // ═══════════════════════════════════════════════════════

@@ -32,7 +32,14 @@ public class MemoryFacade implements MemoryPort {
 
     @Override
     public void onMessageCreated(String sessionId, String content, String role) {
-        int estimatedTokens = content != null ? content.length() / 4 : 0;
+        if (sessionId == null || sessionId.isBlank() || content == null || content.isBlank()) {
+            log.debug("onMessageCreated 跳过: sessionId={}, content为空", sessionId);
+            return;
+        }
+        if (role == null || role.isBlank()) {
+            role = "assistant";
+        }
+        int estimatedTokens = content.length() / 4;
 
         // 1. 冷层写入 chat_message
         ChatMessage msg = ChatMessage.builder()

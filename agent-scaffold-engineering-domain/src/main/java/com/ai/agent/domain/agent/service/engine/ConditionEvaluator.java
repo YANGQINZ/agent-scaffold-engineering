@@ -26,8 +26,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ConditionEvaluator {
 
-    private final ChatModel chatModel;
-
     /** LLM 条件前缀 */
     private static final String LLM_PREFIX = "llm:";
 

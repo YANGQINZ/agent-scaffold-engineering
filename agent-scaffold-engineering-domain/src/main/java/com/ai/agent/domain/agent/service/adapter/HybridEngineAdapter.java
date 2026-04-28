@@ -115,6 +115,7 @@ public class HybridEngineAdapter implements EngineAdapter {
                 AgentMessage result = execute(def, input, ctx);
                 String sessionId = ctx.getSessionId();
 
+                ctx.appendHistory(result.getSenderId(), result.getContent(), result.getMetadata());
                 Flux<StreamEvent> events = Flux.empty();
 
                 // 先发射思考过程
@@ -133,19 +134,6 @@ public class HybridEngineAdapter implements EngineAdapter {
                         "Hybrid流式执行失败: " + e.getMessage(), e));
             }
         }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getTypedChannel(Class<T> channelType) {
-        if (channelType == HybridChannel.class) {
-            return (T) new HybridChannel(
-                    graphAdapter.getTypedChannel(GraphChannel.class),
-                    agentscopeAdapter.getTypedChannel(AgentScopeChannel.class)
-            );
-        }
-        throw new AgentException(Constants.ErrorCode.AGENT_MODE_UNSUPPORTED,
-                "不支持的通道类型: " + channelType.getSimpleName());
     }
 
     // ═══════════════════════════════════════════════════════

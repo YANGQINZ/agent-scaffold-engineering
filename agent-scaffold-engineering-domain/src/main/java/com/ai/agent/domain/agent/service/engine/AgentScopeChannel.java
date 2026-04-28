@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AgentScope 引擎特化通道 — 暴露 agentscope-java 原生能力
+ * AgentScope 引擎特化通道 — 暴露 agentscope-java 原生能力（扩展类）
  *
  * 开发者通过此通道访问 Pipeline 原生对象、Agent 实例、
  * 自定义 Hook 注入、MsgHub 广播模式等操作。
