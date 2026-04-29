@@ -24,17 +24,17 @@ public class SessionController {
     private final IChatSessionRepository chatSessionRepository;
 
     /**
-     * 根据用户ID查询会话列表
+     * 根据Agent ID查询会话列表
      */
     @GetMapping
     public Response<List<ChatSessionDTO>> listSessions(
-            @RequestParam(value = "userId", required = false) String userId) {
-        log.info("查询会话列表: userId={}", userId);
+            @RequestParam(value = "agentId", required = false) String agentId) {
+        log.info("查询会话列表: agentId={}", agentId);
         List<ChatSession> sessions;
-        if (userId != null && !userId.isBlank()) {
-            sessions = chatSessionRepository.findByUserId(userId);
+        if (agentId != null && !agentId.isBlank()) {
+            sessions = chatSessionRepository.findByAgentId(agentId);
         } else {
-            // 未指定userId时返回空列表，避免全表扫描
+            // 未指定agentId时返回空列表，避免全表扫描
             sessions = List.of();
         }
         List<ChatSessionDTO> dtoList = sessions.stream()
@@ -63,6 +63,7 @@ public class SessionController {
         return ChatSessionDTO.builder()
                 .sessionId(session.getSessionId())
                 .userId(session.getUserId())
+                .agentId(session.getAgentId())
                 .mode(session.getMode() != null ? session.getMode().name() : null)
                 .engine(session.getEngine() != null ? session.getEngine().name() : null)
                 .ragEnabled(session.getRagEnabled())

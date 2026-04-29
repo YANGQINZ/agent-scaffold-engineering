@@ -31,4 +31,9 @@ public interface IChatSessionDao {
      */
     List<ChatSessionPO> selectByUserId(String userId);
 
+    /**
+     * 根据Agent ID查询会话列表
+     */
+    List<ChatSessionPO> selectByAgentId(String agentId);
+
 }

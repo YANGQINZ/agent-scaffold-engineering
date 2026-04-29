@@ -34,8 +34,14 @@ public class ContextStoreFactory {
     public ContextStore getOrCreate(String sessionId, String userId,
                                      EngineType engineType, boolean ragEnabled,
                                      String knowledgeBaseId) {
+        return getOrCreate(sessionId, userId, null, engineType, ragEnabled, knowledgeBaseId);
+    }
+
+    public ContextStore getOrCreate(String sessionId, String userId, String agentId,
+                                     EngineType engineType, boolean ragEnabled,
+                                     String knowledgeBaseId) {
         return store.computeIfAbsent(sessionId,
-                id -> SessionContext.create(id, userId, engineType, ragEnabled,
+                id -> SessionContext.create(id, userId, agentId, engineType, ragEnabled,
                         knowledgeBaseId, memoryPort));
     }
 

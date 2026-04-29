@@ -32,6 +32,9 @@ public class SessionContext implements ContextStore {
     /** 用户ID */
     private String userId;
 
+    /** 关联的Agent定义ID */
+    private String agentId;
+
     /** 引擎类型 */
     private EngineType engineType = EngineType.GRAPH;
 
@@ -67,9 +70,20 @@ public class SessionContext implements ContextStore {
                                         EngineType engineType, boolean ragEnabled,
                                         String knowledgeBaseId,
                                         MemoryPort memoryPort) {
+        return create(sessionId, userId, null, engineType, ragEnabled, knowledgeBaseId, memoryPort);
+    }
+
+    /**
+     * 工厂方法：为新会话创建 SessionContext（含 agentId）
+     */
+    public static SessionContext create(String sessionId, String userId, String agentId,
+                                        EngineType engineType, boolean ragEnabled,
+                                        String knowledgeBaseId,
+                                        MemoryPort memoryPort) {
         SessionContext ctx = new SessionContext();
         ctx.sessionId = sessionId;
         ctx.userId = userId;
+        ctx.agentId = agentId;
         ctx.engineType = engineType != null ? engineType : EngineType.GRAPH;
         ctx.ragEnabled = ragEnabled;
         ctx.knowledgeBaseId = knowledgeBaseId;

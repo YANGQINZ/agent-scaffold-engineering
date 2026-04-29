@@ -34,6 +34,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         ChatSessionPO po = new ChatSessionPO();
         po.setSessionId(session.getSessionId());
         po.setUserId(session.getUserId());
+        po.setAgentId(session.getAgentId());
         po.setMode(session.getMode().name());
         po.setAgentMode(session.getEngine().name());
         po.setRagEnabled(session.getRagEnabled());
@@ -83,6 +84,12 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         return poList.stream().map(this::toSession).toList();
     }
 
+    @Override
+    public List<ChatSession> findByAgentId(String agentId) {
+        List<ChatSessionPO> poList = chatSessionDao.selectByAgentId(agentId);
+        return poList.stream().map(this::toSession).toList();
+    }
+
     /**
      * ChatSessionPO -> ChatSession 领域对象
      */
@@ -90,6 +97,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         return ChatSession.builder()
                 .sessionId(po.getSessionId())
                 .userId(po.getUserId())
+                .agentId(po.getAgentId())
                 .mode(ChatMode.valueOf(po.getMode()))
                 .engine(EngineType.valueOf(po.getAgentMode()))
                 .ragEnabled(po.getRagEnabled())
@@ -122,6 +130,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         ChatSessionPO po = new ChatSessionPO();
         po.setSessionId(session.getSessionId());
         po.setUserId(session.getUserId());
+        po.setAgentId(session.getAgentId());
         po.setMode(ChatMode.AGENT.name());
         po.setAgentMode(session.getEngineType().name());
         po.setRagEnabled(session.isRagEnabled());
@@ -155,6 +164,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         return SessionContext.builder()
                 .sessionId(po.getSessionId())
                 .userId(po.getUserId())
+                .agentId(po.getAgentId())
                 .engineType(EngineType.valueOf(po.getAgentMode()))
                 .ragEnabled(po.getRagEnabled() != null ? po.getRagEnabled() : false)
                 .knowledgeBaseId(po.getKnowledgeBaseId())

@@ -25,6 +25,9 @@ public class ChatSession {
     /** 用户ID */
     private String userId;
 
+    /** 关联的Agent定义ID */
+    private String agentId;
+
     /** 对话模式 */
     private ChatMode mode;
 

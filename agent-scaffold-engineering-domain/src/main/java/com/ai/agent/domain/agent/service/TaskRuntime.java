@@ -74,6 +74,7 @@ public class TaskRuntime implements ChatStrategy {
         ContextStore ctx = contextStoreFactory.getOrCreate(
                 request.getSessionId(),
                 request.getUserId(),
+                request.getAgentId(),
                 request.getEngine() != null ? request.getEngine() : EngineType.GRAPH,
                 Boolean.TRUE.equals(request.getRagEnabled()),
                 request.getKnowledgeBaseId()

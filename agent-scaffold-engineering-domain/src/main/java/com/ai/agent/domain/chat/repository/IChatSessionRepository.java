@@ -41,4 +41,9 @@ public interface IChatSessionRepository {
      */
     List<ChatSession> findByUserId(String userId);
 
+    /**
+     * 根据Agent ID查询会话列表
+     */
+    List<ChatSession> findByAgentId(String agentId);
+
 }
