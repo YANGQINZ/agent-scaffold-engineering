@@ -25,4 +25,9 @@ public interface IKnowledgeService {
      * 查询知识库下的文档分块列表
      */
     List<DocumentChunk> listDocuments(String baseId);
+
+    /**
+     * 向已有知识库追加文档
+     */
+    void uploadDocument(String baseId, MultipartFile file);
 }

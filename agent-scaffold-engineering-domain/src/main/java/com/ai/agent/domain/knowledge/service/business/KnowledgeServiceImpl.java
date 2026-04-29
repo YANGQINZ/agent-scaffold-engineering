@@ -108,4 +108,19 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
     public List<DocumentChunk> listDocuments(String baseId) {
         return documentChunkRepository.findByBaseId(baseId);
     }
+
+    @Override
+    public void uploadDocument(String baseId, MultipartFile file) {
+        // 复用上传逻辑，追加到已有知识库
+        validateFile(file, MAX_FILE_SIZE, "文档");
+
+        TikaDocumentReader documentReader = new TikaDocumentReader(file.getResource());
+        List<org.springframework.ai.document.Document> documentList = tokenTextSplitter.apply(documentReader.get());
+
+        // 使用已有知识库ID作为标签
+        documentList.forEach(chunk -> chunk.getMetadata().put("kb_id", baseId));
+        vectorStore.accept(documentList);
+
+        log.info("向知识库追加文档完成: baseId={}, 文件={}, 分块数={}", baseId, file.getOriginalFilename(), documentList.size());
+    }
 }

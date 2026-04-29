@@ -63,7 +63,7 @@ export async function createKnowledgeBase(
 
 /**
  * 向已有知识库上传文档
- * POST /knowledge/upload — multipart/form-data
+ * POST /knowledge/bases/{id}/documents — multipart/form-data
  */
 export async function uploadDocument(
   baseId: string,
@@ -71,8 +71,7 @@ export async function uploadDocument(
 ): Promise<void> {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('baseId', baseId);
-  await apiClient.post('/knowledge/upload', formData, {
+  await apiClient.post(`/knowledge/bases/${baseId}/documents`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }

@@ -28,13 +28,25 @@ public class KnowledgeController implements IKnowledgeBaseService {
     private final IKnowledgeService knowledgeService;
 
     /**
-     * 上传知识库文件
+     * 上传知识库文件（创建新知识库）
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Void> uploadKnowledgeBase(
         @RequestParam("file") MultipartFile file,
         @RequestParam(value = "name", required = false) String name) {
         knowledgeService.uploadKnowledgeBase(file, name);
+        return Response.buildSuccess();
+    }
+
+    /**
+     * 向已有知识库追加文档
+     */
+    @PostMapping(value = "/bases/{id}/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<Void> uploadDocument(
+        @PathVariable("id") String baseId,
+        @RequestParam("file") MultipartFile file) {
+        log.info("向知识库追加文档: baseId={}, file={}", baseId, file.getOriginalFilename());
+        knowledgeService.uploadDocument(baseId, file);
         return Response.buildSuccess();
     }
 

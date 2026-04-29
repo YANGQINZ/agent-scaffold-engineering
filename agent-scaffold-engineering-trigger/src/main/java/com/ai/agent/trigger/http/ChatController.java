@@ -12,6 +12,7 @@ import com.ai.agent.domain.chat.service.ChatFacade;
 import com.ai.agent.types.model.Response;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -35,7 +36,7 @@ public class ChatController implements IChatService {
         return Response.buildSuccess(convertResponse(response));
     }
 
-    @PostMapping("/stream")
+    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<StreamEventDTO> chatStream(@Valid @RequestBody ChatRequestDTO requestDTO) {
         ChatRequest request = convertRequest(requestDTO);
         return chatFacade.chatStream(request).map(this::convertStreamEvent);

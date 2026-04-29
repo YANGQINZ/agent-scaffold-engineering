@@ -6,6 +6,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAppStore } from '@/stores/app';
 
 /** 导航标签页配置 */
 const NAV_TABS = [
@@ -17,6 +18,8 @@ const NAV_TABS = [
 function Layout() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const mode = useAppStore((s) => s.mode);
+  const setMode = useAppStore((s) => s.setMode);
 
   /** 当前语言是否为中文 */
   const isZh = i18n.language === 'zh';
@@ -65,9 +68,10 @@ function Layout() {
           <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/50 p-0.5">
             <button
               type="button"
+              onClick={() => setMode('simple')}
               className={cn(
                 'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                true
+                mode === 'simple'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}
@@ -77,9 +81,10 @@ function Layout() {
             </button>
             <button
               type="button"
+              onClick={() => setMode('expert')}
               className={cn(
                 'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                false
+                mode === 'expert'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}

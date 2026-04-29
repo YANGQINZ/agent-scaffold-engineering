@@ -66,7 +66,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
             const text =
               typeof event.data === 'string'
                 ? event.data
-                : (event.data?.text as string) ?? (event.data?.content as string) ?? '';
+                : (event.data?.thought as string) ?? (event.data?.text as string) ?? '';
             setThinkingContent(text);
             break;
           }
@@ -74,7 +74,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
             const nodeId =
               typeof event.data === 'string'
                 ? event.data
-                : (event.data?.nodeId as string) ?? '';
+                : (event.data?.nodeName as string) ?? (event.data?.nodeId as string) ?? '';
             if (nodeId) {
               addNodeStatus({ nodeId, status: 'running' });
             }
@@ -84,7 +84,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
             const nodeId =
               typeof event.data === 'string'
                 ? event.data
-                : (event.data?.nodeId as string) ?? '';
+                : (event.data?.nodeName as string) ?? (event.data?.nodeId as string) ?? '';
             if (nodeId) {
               updateNodeStatus(nodeId, 'done');
             }

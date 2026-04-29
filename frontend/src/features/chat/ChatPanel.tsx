@@ -67,7 +67,7 @@ function ChatPanel() {
         query: text,
         sessionId: activeSessionId ?? undefined,
         agentId: selectedAgentId ?? undefined,
-        mode: 'MULTI_TURN',
+        mode: selectedAgentId ? 'AGENT' : 'MULTI_TURN',
       });
     },
     [addMessage, startStream, activeSessionId, selectedAgentId],
