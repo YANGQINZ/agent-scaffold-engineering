@@ -20,4 +20,6 @@ public class ChatRequestDTO {
     /** 是否启用思考过程输出 */
     private Boolean enableThinking = false;
     private String knowledgeBaseId;
+    /** 指定目标Agent（AGENT模式下使用） */
+    private String agentId;
 }
