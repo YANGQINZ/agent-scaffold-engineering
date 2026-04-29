@@ -46,10 +46,32 @@ export async function listKnowledgeBases(): Promise<KnowledgeBase[]> {
 }
 
 /**
- * 创建知识库（通过上传文件）
+ * 创建知识库（通过上传首个文件）
  * POST /knowledge/upload — multipart/form-data
  */
-export async function uploadDocument(formData: FormData): Promise<void> {
+export async function createKnowledgeBase(
+  name: string,
+  file: File,
+): Promise<void> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('name', name);
+  await apiClient.post('/knowledge/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+/**
+ * 向已有知识库上传文档
+ * POST /knowledge/upload — multipart/form-data
+ */
+export async function uploadDocument(
+  baseId: string,
+  file: File,
+): Promise<void> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('baseId', baseId);
   await apiClient.post('/knowledge/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
