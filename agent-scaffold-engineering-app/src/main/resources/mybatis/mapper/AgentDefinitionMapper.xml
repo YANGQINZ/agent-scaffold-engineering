@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IAgentDefinitionDao">
+
+    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO">
+        INSERT INTO agent_definition (agent_id, name, engine, instruction, model_config, mcp_servers, graph_start, agentscope_pipeline_type, sub_engines, created_at, updated_at)
+        VALUES (#{agentId}, #{name}, #{engine}, #{instruction}, #{modelConfig}, #{mcpServers}, #{graphStart}, #{agentscopePipelineType}, #{subEngines}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <select id="selectByAgentId" resultType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO">
+        SELECT id, agent_id, name, engine, instruction, model_config, mcp_servers, graph_start, agentscope_pipeline_type, sub_engines, created_at, updated_at
+        FROM agent_definition WHERE agent_id = #{agentId}
+    </select>
+
+    <select id="selectAll" resultType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO">
+        SELECT id, agent_id, name, engine, instruction, model_config, mcp_servers, graph_start, agentscope_pipeline_type, sub_engines, created_at, updated_at
+        FROM agent_definition
+    </select>
+
+    <update id="updateByAgentId" parameterType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO">
+        UPDATE agent_definition
+        SET name = #{name},
+            engine = #{engine},
+            instruction = #{instruction},
+            model_config = #{modelConfig},
+            mcp_servers = #{mcpServers},
+            graph_start = #{graphStart},
+            agentscope_pipeline_type = #{agentscopePipelineType},
+            sub_engines = #{subEngines},
+            updated_at = #{updatedAt}
+        WHERE agent_id = #{agentId}
+    </update>
+
+    <delete id="deleteByAgentId">
+        DELETE FROM agent_definition WHERE agent_id = #{agentId}
+    </delete>
+
+</mapper>

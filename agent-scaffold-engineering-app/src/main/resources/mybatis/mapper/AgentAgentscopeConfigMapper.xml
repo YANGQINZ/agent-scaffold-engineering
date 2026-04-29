@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IAgentAgentscopeConfigDao">
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO agent_agentscope_config (agent_definition_id, config_agent_id, mcp_servers, enable_tools, sort_order)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.agentDefinitionId}, #{item.configAgentId}, #{item.mcpServers}, #{item.enableTools}, #{item.sortOrder})
+        </foreach>
+    </insert>
+
+    <select id="selectByAgentDefinitionId" resultType="com.ai.agent.infrastructure.persistent.po.AgentAgentscopeConfigPO">
+        SELECT id, agent_definition_id, config_agent_id, mcp_servers, enable_tools, sort_order
+        FROM agent_agentscope_config WHERE agent_definition_id = #{agentDefinitionId} ORDER BY sort_order ASC
+    </select>
+
+    <delete id="deleteByAgentDefinitionId">
+        DELETE FROM agent_agentscope_config WHERE agent_definition_id = #{agentDefinitionId}
+    </delete>
+
+</mapper>

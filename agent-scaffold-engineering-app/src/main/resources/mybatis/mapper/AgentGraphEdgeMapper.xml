@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ai.agent.infrastructure.persistent.dao.IAgentGraphEdgeDao">
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO agent_graph_edge (agent_definition_id, from_node, to_node, condition_expr, sort_order)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.agentDefinitionId}, #{item.fromNode}, #{item.toNode}, #{item.conditionExpr}, #{item.sortOrder})
+        </foreach>
+    </insert>
+
+    <select id="selectByAgentDefinitionId" resultType="com.ai.agent.infrastructure.persistent.po.AgentGraphEdgePO">
+        SELECT id, agent_definition_id, from_node, to_node, condition_expr, sort_order
+        FROM agent_graph_edge WHERE agent_definition_id = #{agentDefinitionId} ORDER BY sort_order ASC
+    </select>
+
+    <delete id="deleteByAgentDefinitionId">
+        DELETE FROM agent_graph_edge WHERE agent_definition_id = #{agentDefinitionId}
+    </delete>
+
+</mapper>
