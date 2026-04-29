@@ -43,5 +43,6 @@ build/
 /.idea
 .env.example
 /docs/dev-ops
+/docs/superpowers
 /.specify
 /specs
