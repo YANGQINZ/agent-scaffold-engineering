@@ -42,6 +42,6 @@ build/
 /.claude
 /.idea
 .env.example
-/docs
+/docs/dev-ops
 /.specify
 /specs
