@@ -65,6 +65,7 @@ function ChatPanel() {
       // 3. 发起流式请求
       startStream({
         query: text,
+        userId: 'web-user',
         sessionId: activeSessionId ?? undefined,
         agentId: selectedAgentId ?? undefined,
         mode: selectedAgentId ? 'AGENT' : 'MULTI_TURN',
