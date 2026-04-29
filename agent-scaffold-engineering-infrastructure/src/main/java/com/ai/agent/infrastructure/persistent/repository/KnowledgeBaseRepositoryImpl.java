@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 知识库仓储实现
  */
@@ -41,6 +43,17 @@ public class KnowledgeBaseRepositoryImpl implements IKnowledgeBaseRepository {
         return toKnowledgeBase(po);
     }
 
+    @Override
+    public List<KnowledgeBase> findAll() {
+        List<KnowledgeBasePO> poList = knowledgeBaseDao.selectAll();
+        return poList.stream().map(this::toKnowledgeBase).toList();
+    }
+
+    @Override
+    public void deleteById(String baseId) {
+        knowledgeBaseDao.deleteById(baseId);
+    }
+
     /**
      * KnowledgeBasePO -> KnowledgeBase 领域对象
      */
@@ -51,7 +64,7 @@ public class KnowledgeBaseRepositoryImpl implements IKnowledgeBaseRepository {
                 .description(po.getDescription())
                 .fileName(po.getFileName())
                 .fileType(po.getFileType())
-                .ownerType(OwnerType.valueOf(po.getOwnerType()))
+                .ownerType(po.getOwnerType() != null ? OwnerType.valueOf(po.getOwnerType()) : null)
                 .ownerId(po.getOwnerId())
                 .docCount(po.getDocCount())
                 .createdAt(po.getCreatedAt())

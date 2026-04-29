@@ -12,4 +12,13 @@
         FROM knowledge_base WHERE base_id = #{baseId}
     </select>
 
+    <select id="selectAll" resultType="com.ai.agent.infrastructure.persistent.po.KnowledgeBasePO">
+        SELECT base_id, name, description, file_name, file_type, owner_type, owner_id, doc_count, created_at
+        FROM knowledge_base ORDER BY created_at DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM knowledge_base WHERE base_id = #{baseId}
+    </delete>
+
 </mapper>

@@ -1,6 +1,8 @@
 package com.ai.agent.domain.knowledge.service.business;
 
 import com.ai.agent.domain.knowledge.model.aggregate.KnowledgeBase;
+import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
+import com.ai.agent.domain.knowledge.repository.IDocumentChunkRepository;
 import com.ai.agent.domain.knowledge.repository.IKnowledgeBaseRepository;
 import com.ai.agent.domain.knowledge.service.IKnowledgeService;
 import com.ai.agent.types.exception.KnowledgeException;
@@ -28,6 +30,7 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
     private final TokenTextSplitter tokenTextSplitter;
     private final VectorStore vectorStore;
     private final IKnowledgeBaseRepository knowledgeBaseRepository;
+    private final IDocumentChunkRepository documentChunkRepository;
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     @Override
@@ -85,5 +88,24 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
             return filename.substring(0, lastDot);
         }
         return filename;
+    }
+
+    @Override
+    public List<KnowledgeBase> listKnowledgeBases() {
+        return knowledgeBaseRepository.findAll();
+    }
+
+    @Override
+    public void deleteKnowledgeBase(String baseId) {
+        log.info("删除知识库: baseId={}", baseId);
+        // 先删除关联的文档分块
+        documentChunkRepository.deleteByBaseId(baseId);
+        // 再删除知识库记录
+        knowledgeBaseRepository.deleteById(baseId);
+    }
+
+    @Override
+    public List<DocumentChunk> listDocuments(String baseId) {
+        return documentChunkRepository.findByBaseId(baseId);
     }
 }

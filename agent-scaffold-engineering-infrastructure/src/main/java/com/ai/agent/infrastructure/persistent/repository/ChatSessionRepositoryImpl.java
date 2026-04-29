@@ -77,6 +77,12 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         chatSessionDao.updateTtl(sessionId);
     }
 
+    @Override
+    public List<ChatSession> findByUserId(String userId) {
+        List<ChatSessionPO> poList = chatSessionDao.selectByUserId(userId);
+        return poList.stream().map(this::toSession).toList();
+    }
+
     /**
      * ChatSessionPO -> ChatSession 领域对象
      */

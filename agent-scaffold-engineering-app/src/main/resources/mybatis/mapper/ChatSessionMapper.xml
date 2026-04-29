@@ -16,4 +16,10 @@
         UPDATE chat_session SET updated_at = NOW() WHERE session_id = #{sessionId}
     </update>
 
+    <select id="selectByUserId" resultType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
+        SELECT session_id, user_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
+        FROM chat_session WHERE user_id = #{userId}
+        ORDER BY updated_at DESC
+    </select>
+
 </mapper>

@@ -37,6 +37,17 @@ public class DocumentChunkRepositoryImpl implements IDocumentChunkRepository {
         return poList.stream().map(this::toChunk).toList();
     }
 
+    @Override
+    public List<DocumentChunk> findByBaseId(String baseId) {
+        List<DocumentChunkPO> poList = documentChunkDao.selectByBaseId(baseId);
+        return poList.stream().map(this::toChunk).toList();
+    }
+
+    @Override
+    public void deleteByBaseId(String baseId) {
+        documentChunkDao.deleteByBaseId(baseId);
+    }
+
     /**
      * DocumentChunk 领域对象 -> DocumentChunkPO
      */

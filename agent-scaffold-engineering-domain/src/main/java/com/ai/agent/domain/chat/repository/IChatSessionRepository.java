@@ -36,4 +36,9 @@ public interface IChatSessionRepository {
      */
     void updateSessionTtl(String sessionId, int ttlSeconds);
 
+    /**
+     * 根据用户ID查询会话列表
+     */
+    List<ChatSession> findByUserId(String userId);
+
 }

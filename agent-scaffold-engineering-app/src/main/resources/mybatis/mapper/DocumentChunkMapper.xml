@@ -27,4 +27,14 @@
         LIMIT #{topK}
     </select>
 
+    <select id="selectByBaseId" resultType="com.ai.agent.infrastructure.persistent.po.DocumentChunkPO">
+        SELECT id, content, metadata FROM document_chunk
+        WHERE metadata->>'baseId' = #{baseId}
+        ORDER BY id ASC
+    </select>
+
+    <delete id="deleteByBaseId">
+        DELETE FROM document_chunk WHERE metadata->>'baseId' = #{baseId}
+    </delete>
+
 </mapper>

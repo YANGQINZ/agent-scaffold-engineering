@@ -3,6 +3,8 @@ package com.ai.agent.infrastructure.persistent.dao;
 import com.ai.agent.infrastructure.persistent.po.ChatSessionPO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 聊天会话DAO
  */
@@ -23,5 +25,10 @@ public interface IChatSessionDao {
      * 更新会话TTL
      */
     void updateTtl(String sessionId);
+
+    /**
+     * 根据用户ID查询会话列表
+     */
+    List<ChatSessionPO> selectByUserId(String userId);
 
 }

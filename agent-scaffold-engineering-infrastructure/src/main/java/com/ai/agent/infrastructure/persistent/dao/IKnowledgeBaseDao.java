@@ -3,6 +3,8 @@ package com.ai.agent.infrastructure.persistent.dao;
 import com.ai.agent.infrastructure.persistent.po.KnowledgeBasePO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 知识库DAO
  */
@@ -20,5 +22,15 @@ public interface IKnowledgeBaseDao {
      * 根据知识库ID查询
      */
     KnowledgeBasePO selectById(String baseId);
+
+    /**
+     * 查询所有知识库
+     */
+    List<KnowledgeBasePO> selectAll();
+
+    /**
+     * 根据知识库ID删除
+     */
+    int deleteById(String baseId);
 
 }

@@ -24,4 +24,14 @@ public interface IDocumentChunkRepository {
      */
     List<DocumentChunk> bm25Search(String baseId, String query, int topK);
 
+    /**
+     * 根据知识库ID查询文档分块列表
+     */
+    List<DocumentChunk> findByBaseId(String baseId);
+
+    /**
+     * 根据知识库ID删除所有文档分块
+     */
+    void deleteByBaseId(String baseId);
+
 }

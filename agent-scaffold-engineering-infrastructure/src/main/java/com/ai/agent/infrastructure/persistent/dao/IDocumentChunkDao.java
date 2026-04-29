@@ -26,4 +26,14 @@ public interface IDocumentChunkDao {
      */
     List<DocumentChunkPO> bm25Search(String baseId, String query, int topK);
 
+    /**
+     * 根据知识库ID查询文档分块列表
+     */
+    List<DocumentChunkPO> selectByBaseId(String baseId);
+
+    /**
+     * 根据知识库ID删除文档分块
+     */
+    int deleteByBaseId(String baseId);
+
 }
