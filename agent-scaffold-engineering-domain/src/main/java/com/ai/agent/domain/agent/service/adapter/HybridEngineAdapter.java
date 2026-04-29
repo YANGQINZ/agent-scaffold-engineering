@@ -10,6 +10,7 @@ import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.knowledge.service.rag.NodeRagService;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
 import com.ai.agent.types.exception.enums.ErrorCodeEnum;
@@ -50,6 +51,7 @@ public class HybridEngineAdapter implements EngineAdapter {
     private final AgentRegistry agentRegistry;
     private final McpToolProvider mcpToolProvider;
     private final ConditionEvaluator conditionEvaluator;
+    private final NodeRagService nodeRagService;
 
     @Override
     public EngineType getType() {
@@ -221,6 +223,9 @@ public class HybridEngineAdapter implements EngineAdapter {
             String nodeId = node.getId();
 
             log.info("Hybrid子节点委托AgentScope: nodeId={}", nodeId);
+
+            // 节点级 RAG 增强：根据节点的 ragEnabled/knowledgeBaseId 配置决定是否增强
+            input = nodeRagService.enhancePrompt(input, node);
 
             // 构建子 Agent 输入
             AgentMessage subInput = AgentMessage.builder()

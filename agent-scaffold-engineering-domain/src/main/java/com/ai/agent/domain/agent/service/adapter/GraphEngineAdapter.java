@@ -10,6 +10,7 @@ import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
+import com.ai.agent.domain.knowledge.service.rag.NodeRagService;
 import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.ai.agent.types.enums.EngineType;
@@ -50,6 +51,7 @@ public class GraphEngineAdapter implements EngineAdapter {
     private final ChatModel chatModel;
     private final AgentRegistry agentRegistry;
     private final ConditionEvaluator conditionEvaluator;
+    private final NodeRagService nodeRagService;
 
     /** 最大重试次数 */
     private static final int MAX_RETRY = 3;
@@ -277,6 +279,9 @@ public class GraphEngineAdapter implements EngineAdapter {
             String nodeId = node.getId();
 
             log.info("Graph节点执行: nodeId={}, agentId={}", nodeId, node.getAgentId());
+
+            // 节点级 RAG 增强：根据节点的 ragEnabled/knowledgeBaseId 配置决定是否增强
+            input = nodeRagService.enhancePrompt(input, node);
 
             NodeExecuteResult execResult = executeWithRetry(def, node, input, ctx, nodeId, enableThinking);
 

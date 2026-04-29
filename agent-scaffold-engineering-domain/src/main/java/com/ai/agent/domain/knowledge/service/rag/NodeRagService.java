@@ -38,6 +38,7 @@ public class NodeRagService {
         try {
             RagResult result = ragService.retrieveAndBuild(
                     node.getKnowledgeBaseId(), prompt, DEFAULT_TOP_K);
+            log.info("节点 {} RAG增强完成，知识库: {}", node.getId(), node.getKnowledgeBaseId());
             return result.getEnhancedPrompt();
         } catch (Exception e) {
             log.error("节点 {} RAG增强失败，降级为原始prompt", node.getId(), e);

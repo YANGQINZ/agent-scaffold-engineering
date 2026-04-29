@@ -2,11 +2,13 @@ package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
+import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
+import com.ai.agent.domain.knowledge.service.rag.NodeRagService;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
@@ -48,6 +50,7 @@ public class AgentScopeAdapter implements EngineAdapter {
 
     private final AgentRegistry agentRegistry;
     private final McpToolProvider mcpToolProvider;
+    private final NodeRagService nodeRagService;
 
     @Value("${spring.ai.dashscope.api-key:}")
     private String dashscopeApiKey;
@@ -80,6 +83,21 @@ public class AgentScopeAdapter implements EngineAdapter {
             Msg inputMsg = toInputMsg(input, asDef, ctx);
 
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
+
+            // 节点级 RAG 增强：为 AgentScope 构建临时 WorkflowNode 以支持节点粒度 RAG
+            WorkflowNode ragNode = WorkflowNode.builder()
+                    .id(asDef.getAgentId())
+                    .ragEnabled((Boolean) input.getMetadataValue("ragEnabled"))
+                    .knowledgeBaseId((String) input.getMetadataValue("knowledgeBaseId"))
+                    .build();
+            String enhancedContent = nodeRagService.enhancePrompt(inputMsg.getTextContent(), ragNode);
+            if (!enhancedContent.equals(inputMsg.getTextContent())) {
+                inputMsg = Msg.builder()
+                        .role(inputMsg.getRole())
+                        .name(inputMsg.getName())
+                        .textContent(enhancedContent)
+                        .build();
+            }
 
             // 2. 构建 ReActAgent 列表（不再注入 ContextSyncHook）
             List<AgentBase> agents = buildAgents(asDef, enableThinking);

@@ -8,6 +8,7 @@ import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import com.ai.agent.domain.knowledge.model.valobj.RagResult;
 import com.ai.agent.domain.knowledge.service.rag.RagService;
+import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.enums.StreamEventType;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -36,6 +37,11 @@ public class RagDecorator implements ChatStrategy {
 
     @Override
     public ChatResponse execute(ChatRequest request) {
+        // AGENT 模式由各节点自行处理 RAG
+        if (request.getMode() == ChatMode.AGENT) {
+            return delegate.execute(request);
+        }
+
         String knowledgeBaseId = request.getKnowledgeBaseId();
         String query = request.getQuery();
 
@@ -74,6 +80,11 @@ public class RagDecorator implements ChatStrategy {
 
     @Override
     public Flux<StreamEvent> executeStream(ChatRequest request) {
+        // AGENT 模式由各节点自行处理 RAG
+        if (request.getMode() == ChatMode.AGENT) {
+            return delegate.executeStream(request);
+        }
+
         String knowledgeBaseId = request.getKnowledgeBaseId();
         String query = request.getQuery();
         String sessionId = request.getSessionId() != null ? request.getSessionId() : UUID.randomUUID().toString();
