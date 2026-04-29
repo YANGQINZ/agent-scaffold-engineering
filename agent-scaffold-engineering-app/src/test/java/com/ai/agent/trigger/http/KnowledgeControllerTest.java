@@ -24,7 +24,7 @@ class KnowledgeControllerTest {
     void createKnowledgeBase_invalidOwnerType_returnsErrorResponse() {
         Response<?> response = controller.createKnowledgeBase("测试", "", "INVALID_TYPE", "");
         assertNotNull(response);
-        assertNotEquals("0000", response.getCode());
+        assertNotEquals("0000", response.getErrorCode());
         // 不应调用 knowledgeService
         verifyNoInteractions(knowledgeService);
     }
@@ -33,7 +33,7 @@ class KnowledgeControllerTest {
     void createKnowledgeBase_nullName_returnsErrorResponse() {
         Response<?> response = controller.createKnowledgeBase(null, "", "USER", "");
         assertNotNull(response);
-        assertNotEquals("0000", response.getCode());
+        assertNotEquals("0000", response.getErrorCode());
         verifyNoInteractions(knowledgeService);
     }
 
@@ -41,7 +41,7 @@ class KnowledgeControllerTest {
     void createKnowledgeBase_blankName_returnsErrorResponse() {
         Response<?> response = controller.createKnowledgeBase("  ", "", "USER", "");
         assertNotNull(response);
-        assertNotEquals("0000", response.getCode());
+        assertNotEquals("0000", response.getErrorCode());
         verifyNoInteractions(knowledgeService);
     }
 
@@ -52,7 +52,7 @@ class KnowledgeControllerTest {
                         .baseId("id-123").name("测试").description("描述").docCount(0).build());
 
         Response<?> response = controller.createKnowledgeBase("测试", "描述", "USER", "u1");
-        assertEquals("0000", response.getCode());
+        assertEquals("0000", response.getErrorCode());
         verify(knowledgeService).createKnowledgeBase("测试", "描述", "USER", "u1");
     }
 }

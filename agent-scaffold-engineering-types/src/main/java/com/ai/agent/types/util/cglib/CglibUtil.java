@@ -1,4 +1,4 @@
-package com.ai.agent.types.cglib;
+package com.ai.agent.types.util.cglib;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ReflectUtil;

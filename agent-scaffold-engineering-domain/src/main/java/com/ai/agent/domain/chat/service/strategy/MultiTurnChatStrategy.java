@@ -7,8 +7,8 @@ import com.ai.agent.domain.common.valobj.ChatRequest;
 import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.ChatException;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +79,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
             throw e;
         } catch (Exception e) {
             log.error("MultiTurnChat LLM call failed: {}", e.getMessage(), e);
-            throw new ChatException(Constants.ErrorCode.CHAT_LLM_ERROR, "服务繁忙请稍后重试", e);
+            throw new ChatException(ErrorCodeEnum.CHAT_LLM_ERROR, "服务繁忙请稍后重试", e);
         }
     }
 

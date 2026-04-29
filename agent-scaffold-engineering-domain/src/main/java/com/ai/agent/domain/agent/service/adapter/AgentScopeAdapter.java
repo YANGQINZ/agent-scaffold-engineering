@@ -5,13 +5,12 @@ import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
-import com.ai.agent.domain.agent.service.engine.AgentScopeChannel;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.agent.AgentBase;
 import io.agentscope.core.message.Msg;
@@ -30,7 +29,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AgentScope引擎适配器 — 集成 agentscope-java 实现 Pipeline 编排
@@ -120,7 +118,7 @@ public class AgentScopeAdapter implements EngineAdapter {
         } catch (Exception e) {
             log.error("AgentScopeAdapter执行失败: agentId={}, error={}",
                     asDef.getAgentId(), e.getMessage(), e);
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "AgentScope编排执行失败: " + e.getMessage(), e);
         }
     }
@@ -147,7 +145,7 @@ public class AgentScopeAdapter implements EngineAdapter {
                         StreamEvent.done(false, null, sessionId)
                 ));
             } catch (Exception e) {
-                return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+                return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
                         "AgentScope流式执行失败: " + e.getMessage(), e));
             }
         }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环

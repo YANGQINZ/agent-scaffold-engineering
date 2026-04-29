@@ -17,23 +17,31 @@ spring:
     name: agent-scaffold-engineering-app
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/agent_db
-    username: postgres
-    password: "123456"
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:15432}/${POSTGRES_DB:agent_db}
+    username: ${POSTGRES_USER:postgres}
+    # 与根目录 docker-compose.yml 中 postgres 服务默认一致（本地只起依赖容器 + bootRun 时无需改）
+    password: ${POSTGRES_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-
   ai:
-    dashscope:
-      api-key: ${AI_DASHSCOPE_API_KEY}
-      chat:
-        options:
-        model: qwq-plus
     openai:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       api-key: ${AI_DASHSCOPE_API_KEY}
+      chat:
+        options:
+          model: ${AI_MODEL:qwen-plus}
+          temperature: 0.2
+      # Embedding模型配置 - 使用text-embedding-v3
       embedding:
         options:
           model: text-embedding-v3
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536  # text-embedding-v3实际生成的向量维度
+        initialize-schema: false # 开发环境设置为 true，方便快速启动。生产环境设置为 false，手动管理数据库 schema，避免意外变更。
+        remove-existing-vector-store-table: false  # 保留现有表和数据
+        table-name: document_chunk
 
 mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
@@ -53,51 +61,6 @@ redis:
       retry-interval: 1000
       ping-interval: 60000
       keep-alive: true
-
-## RocketMQ 配置，在docs/dev-ops下，有创建 xfg-group 脚本，也有场景mq消息的脚本
-#rocketmq:
-#  name-server: 127.0.0.1:9876
-#  consumer:
-#    group: xfg-group
-#    # 一次拉取消息最大值，注意是拉取消息的最大值而非消费最大值
-#    pull-batch-size: 10
-#  producer:
-#    # 发送同一类消息的设置为同一个group，保证唯一
-#    group: xfg-group
-#    # 发送消息超时时间，默认3000
-#    sendMessageTimeout: 10000
-#    # 发送消息失败重试次数，默认2
-#    retryTimesWhenSendFailed: 2
-#    # 异步消息重试此处，默认2
-#    retryTimesWhenSendAsyncFailed: 2
-#    # 消息最大长度，默认1024 * 1024 * 4(默认4M)
-#    maxMessageSize: 4096
-#    # 压缩消息阈值，默认4k(1024 * 4)
-#    compressMessageBodyThreshold: 4096
-#    # 是否在内部发送失败时重试另一个broker，默认false
-#    retryNextServer: false
-#
-## xxl-job https://www.xuxueli.com/xxl-job/#%E6%AD%A5%E9%AA%A4%E4%B8%80%EF%BC%9A%E8%B0%83%E5%BA%A6%E4%B8%AD%E5%BF%83%E9%85%8D%E7%BD%AE%EF%BC%9A
-#xxl:
-#  job:
-#    # 验证信息 官网Bug https://github.com/xuxueli/xxl-job/issues/1951
-#    accessToken: default_token
-#    # 注册地址
-#    admin:
-#      addresses: http://localhost:9090/xxl-job-admin
-#    # 注册执行器
-#    executor:
-#      #  执行器注册 [选填]：优先使用该配置作为注册地址，为空时使用内嵌服务 ”IP:PORT“ 作为注册地址。从而更灵活的支持容器类型执行器动态IP和动态映射端口问题。
-#      address:
-#      appname: xxl-job-executor-sample
-#      # 执行器IP 配置为本机IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP，该IP不会绑定Host仅作为通讯实用；地址信息用于 "执行器注册" 和 "调度中心请求并触发任务"；
-#      ip:
-#      # 执行器端口号 [选填]：小于等于0则自动获取；默认端口为9999，单机部署多个执行器时，注意要配置不同执行器端口；
-#      port: 9999
-#      # 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径；
-#      logpath: ./data/applogs/xxl-job/jobhandler
-#      # 执行器日志文件保存天数 [选填] ： 过期日志自动清理, 限制值大于等于3时生效; 否则, 如-1, 关闭自动清理功能；
-#      logretentiondays: 30
 
 # 日志
 logging:

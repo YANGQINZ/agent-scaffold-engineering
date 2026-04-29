@@ -23,19 +23,15 @@ public class ChatRequest {
     private String query;
 
     /** 对话模式 */
-    @Builder.Default
     private ChatMode mode = ChatMode.SIMPLE;
 
     /** 引擎类型（当mode=AGENT时生效） */
-    @Builder.Default
     private EngineType engine = EngineType.GRAPH;
 
     /** 是否启用RAG检索增强 */
-    @Builder.Default
     private Boolean ragEnabled = false;
 
     /** 是否启用思考过程输出 */
-    @Builder.Default
     private Boolean enableThinking = false;
 
     /** 知识库ID（RAG启用时指定） */

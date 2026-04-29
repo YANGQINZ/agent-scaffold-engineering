@@ -8,9 +8,9 @@ import com.ai.agent.domain.common.valobj.ChatRequest;
 import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.interface_.ChatStrategy;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -96,7 +96,7 @@ public class TaskRuntime implements ChatStrategy {
         // 1. 从 Registry 加载 AgentDefinition
         AgentDefinition def = agentRegistry.get(agentId);
         if (def == null) {
-            throw new AgentException(Constants.ErrorCode.AGENT_NOT_FOUND,
+            throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
                     "未找到Agent定义: agentId=" + agentId);
         }
 
@@ -142,7 +142,7 @@ public class TaskRuntime implements ChatStrategy {
         }
         EngineAdapter adapter = getAdapters().get(engineType);
         if (adapter == null) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ENGINE_INVALID,
+            throw new AgentException(ErrorCodeEnum.AGENT_ENGINE_INVALID,
                     "不支持的引擎类型: " + engineType);
         }
         return adapter;
@@ -168,7 +168,7 @@ public class TaskRuntime implements ChatStrategy {
             }
         }
 
-        throw new AgentException(Constants.ErrorCode.AGENT_NOT_FOUND,
+        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
                 "未找到Agent定义: agentId=" + request.getAgentId());
     }
 

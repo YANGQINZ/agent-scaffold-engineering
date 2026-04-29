@@ -5,8 +5,8 @@ import com.ai.agent.domain.common.valobj.ChatRequest;
 import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.exception.ChatException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -43,7 +43,7 @@ public class SimpleChatStrategy implements ChatStrategy {
                     .build();
         } catch (Exception e) {
             log.error("SimpleChat LLM call failed: {}", e.getMessage(), e);
-            throw new ChatException(Constants.ErrorCode.CHAT_LLM_ERROR, "服务繁忙请稍后重试", e);
+            throw new ChatException(ErrorCodeEnum.CHAT_LLM_ERROR, "服务繁忙请稍后重试", e);
         }
     }
 

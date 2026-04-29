@@ -13,6 +13,8 @@ import com.ai.agent.domain.knowledge.service.business.KnowledgeServiceImpl;
 import com.ai.agent.types.enums.DocumentStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.VectorStore;
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ class KnowledgeServiceImplTest {
     private IDocumentChunkRepository chunkRepo;
     private DocumentProcessor processor;
     private KnowledgeServiceImpl service;
+    private TokenTextSplitter token;
+    private VectorStore vectorStore;
 
     @BeforeEach
     void setUp() {
@@ -34,7 +38,10 @@ class KnowledgeServiceImplTest {
         docRepo = mock(IDocumentRepository.class);
         chunkRepo = mock(IDocumentChunkRepository.class);
         processor = mock(DocumentProcessor.class);
-        service = new KnowledgeServiceImpl(kbRepo, docRepo, chunkRepo, processor);
+        token = mock(TokenTextSplitter.class);
+        processor = mock(DocumentProcessor.class);
+        vectorStore = mock(VectorStore.class);
+        service = new KnowledgeServiceImpl(token, vectorStore, kbRepo, docRepo, chunkRepo, processor);
     }
 
     @Test

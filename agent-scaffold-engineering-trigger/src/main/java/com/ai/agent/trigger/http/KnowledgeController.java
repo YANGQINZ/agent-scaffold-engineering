@@ -4,7 +4,6 @@ import com.ai.agent.api.IKnowledgeBaseService;
 import com.ai.agent.api.model.knowledge.KnowledgeBaseResponseDTO;
 import com.ai.agent.domain.knowledge.model.entity.KnowledgeBaseResponse;
 import com.ai.agent.domain.knowledge.service.IKnowledgeService;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.OwnerType;
 import com.ai.agent.types.model.Response;
 import com.ai.agent.types.util.CopyUtil;
@@ -36,23 +35,23 @@ public class KnowledgeController implements IKnowledgeBaseService {
             @RequestParam(defaultValue = "") String ownerId) {
         // 参数校验：name 不能为空或空白
         if (name == null || name.isBlank()) {
-            return Response.error("知识库名称不能为空");
+            return Response.buildError("知识库名称不能为空");
         }
 
         // 参数校验：ownerType 必须是合法的枚举值
         try {
             OwnerType.valueOf(ownerType);
         } catch (IllegalArgumentException e) {
-            return Response.error("无效的ownerType: " + ownerType + "，合法值: ADMIN, USER");
+            return Response.buildError("无效的ownerType: " + ownerType + "，合法值: ADMIN, USER");
         }
 
         try {
             KnowledgeBaseResponse data = knowledgeService.createKnowledgeBase(name, description, ownerType, ownerId);
             KnowledgeBaseResponseDTO knowledgeBaseResponseDTO = CopyUtil.copyBean(data, KnowledgeBaseResponseDTO::new);
-            return Response.success(knowledgeBaseResponseDTO);
+            return Response.buildSuccess(knowledgeBaseResponseDTO);
         } catch (Exception e) {
             log.error("创建知识库失败: name={}, error={}", name, e.getMessage(), e);
-            return Response.error("创建知识库失败: " + e.getMessage());
+            return Response.buildError("创建知识库失败: " + e.getMessage());
         }
     }
 
@@ -63,10 +62,10 @@ public class KnowledgeController implements IKnowledgeBaseService {
             @RequestParam(required = false) String userId) {
         try {
             String docId = knowledgeService.uploadDocument(knowledgeBaseId, file, userId);
-            return Response.success(docId);
+            return Response.buildSuccess(docId);
         } catch (Exception e) {
             log.error("文档上传处理失败: baseId={}, error={}", knowledgeBaseId, e.getMessage(), e);
-            return Response.error("文档处理失败: " + e.getMessage());
+            return Response.buildError("文档处理失败: " + e.getMessage());
         }
     }
 
@@ -78,6 +77,6 @@ public class KnowledgeController implements IKnowledgeBaseService {
         @RequestParam("file") MultipartFile file,
         @RequestParam(value = "name", required = false) String name,
         @RequestParam(value = "category", required = false) String category) {
-        return Response.success(knowledgeService.uploadKnowledgeBase(file, name, category));
+        return Response.buildSuccess(knowledgeService.uploadKnowledgeBase(file, name, category));
     }
 }

@@ -11,16 +11,27 @@ import com.ai.agent.domain.knowledge.DocumentProcessor;
 import com.ai.agent.domain.knowledge.service.IKnowledgeService;
 import com.ai.agent.types.enums.DocumentStatus;
 import com.ai.agent.types.enums.OwnerType;
+import com.ai.agent.types.exception.KnowledgeException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
+import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * 知识库服务实现 — 封装知识库创建与文档上传的业务逻辑
@@ -31,11 +42,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KnowledgeServiceImpl implements IKnowledgeService {
 
+    private final TokenTextSplitter tokenTextSplitter;
+    private final VectorStore vectorStore;
     private final IKnowledgeBaseRepository knowledgeBaseRepository;
     private final IDocumentRepository documentRepository;
     private final IDocumentChunkRepository chunkRepository;
     private final DocumentProcessor documentProcessor;
     private final Tika tika = new Tika();
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     @Override
     public KnowledgeBaseResponse createKnowledgeBase(String name, String description,
@@ -96,7 +110,36 @@ public class KnowledgeServiceImpl implements IKnowledgeService {
 
     @Override
     public Map<String, Object> uploadKnowledgeBase(MultipartFile file, String name, String category) {
+        // 1. 验证文件
+        validateFile(file, MAX_FILE_SIZE, "知识库");
 
+        TikaDocumentReader documentReader = new TikaDocumentReader(file.getResource());
+        List<org.springframework.ai.document.Document> documentList = tokenTextSplitter.apply(documentReader.get());
+
+        // TODO
+
+        // 添加知识库标签
+        documentList.forEach(chunk -> chunk.getMetadata().put("kb_id", "knowledgeBaseId.toString()"));
+        // 存储知识库文件
+        vectorStore.accept(documentList);
         return Map.of();
+    }
+
+    /**
+     * 验证文件基本属性（是否为空、文件大小）
+     *
+     * @param file 上传的文件
+     * @param maxSizeBytes 最大文件大小（字节）
+     * @param fileTypeName 文件类型名称（用于错误消息，如"简历"、"知识库"）
+     */
+    public void validateFile(MultipartFile file, long maxSizeBytes, String fileTypeName) {
+        if (file.isEmpty()) {
+            throw new KnowledgeException(ErrorCodeEnum.BAD_REQUEST,
+                String.format("请选择要上传的%s文件", fileTypeName));
+        }
+
+        if (file.getSize() > maxSizeBytes) {
+            throw new KnowledgeException(ErrorCodeEnum.BAD_REQUEST, "文件大小超过限制");
+        }
     }
 }

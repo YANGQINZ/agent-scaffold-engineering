@@ -47,7 +47,6 @@ public class ChatSession {
     private Integer ttlSeconds;
 
     /** 消息列表 */
-    @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>();
 
     /**

@@ -7,15 +7,12 @@ import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
-import com.ai.agent.domain.agent.service.engine.AgentScopeChannel;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
-import com.ai.agent.domain.agent.service.engine.GraphChannel;
-import com.ai.agent.domain.agent.service.engine.HybridChannel;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import com.alibaba.cloud.ai.graph.*;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
 import com.alibaba.cloud.ai.graph.exception.GraphStateException;
@@ -103,7 +100,7 @@ public class HybridEngineAdapter implements EngineAdapter {
         } catch (Exception e) {
             log.error("HybridEngineAdapter执行失败: agentId={}, error={}",
                     hyDef.getAgentId(), e.getMessage(), e);
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Hybrid编排执行失败: " + e.getMessage(), e);
         }
     }
@@ -130,7 +127,7 @@ public class HybridEngineAdapter implements EngineAdapter {
                         StreamEvent.done(false, null, sessionId)
                 ));
             } catch (Exception e) {
-                return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+                return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
                         "Hybrid流式执行失败: " + e.getMessage(), e));
             }
         }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
@@ -276,11 +273,11 @@ public class HybridEngineAdapter implements EngineAdapter {
 
     private void validateHybridConfig(HybridAgentDefinition hyDef) {
         if (hyDef.getGraphNodes() == null || hyDef.getGraphNodes().isEmpty()) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Hybrid配置不完整: 缺少节点定义, agentId=" + hyDef.getAgentId());
         }
         if (hyDef.getGraphStart() == null || hyDef.getGraphStart().isBlank()) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Hybrid配置不完整: 缺少起始节点, agentId=" + hyDef.getAgentId());
         }
     }

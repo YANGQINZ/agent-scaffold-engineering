@@ -20,7 +20,6 @@ public class WorkflowDefinition {
     private String entry;
 
     /** 节点列表 */
-    @Builder.Default
     private List<WorkflowNode> nodes = List.of();
 
 }

@@ -1,7 +1,7 @@
 package com.ai.agent.types.util;
 
 import cn.hutool.core.collection.CollUtil;
-import com.ai.agent.types.cglib.CglibUtil;
+import com.ai.agent.types.util.cglib.CglibUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;

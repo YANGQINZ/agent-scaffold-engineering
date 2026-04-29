@@ -27,7 +27,6 @@ public class ChatResponse {
     private String sessionId;
 
     /** RAG是否降级（检索失败时降级为普通对话） */
-    @Builder.Default
     private Boolean ragDegraded = false;
 
     /** 元数据 */

@@ -4,9 +4,9 @@ import com.ai.agent.domain.agent.service.TaskRuntime;
 import com.ai.agent.domain.common.interface_.ChatStrategy;
 import com.ai.agent.domain.chat.service.strategy.MultiTurnChatStrategy;
 import com.ai.agent.domain.chat.service.strategy.SimpleChatStrategy;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.exception.ChatException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ public class ModeRouter {
         ChatStrategy strategy = strategyMap.get(mode);
         if (strategy == null) {
             log.error("Unsupported chat mode: {}", mode);
-            throw new ChatException(Constants.ErrorCode.CHAT_MODE_UNSUPPORTED,
+            throw new ChatException(ErrorCodeEnum.CHAT_MODE_UNSUPPORTED,
                     "不支持的对话模式: " + mode.getDescription());
         }
         return strategy;

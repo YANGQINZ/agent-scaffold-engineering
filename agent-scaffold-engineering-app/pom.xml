@@ -61,24 +61,10 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-gson</artifactId>
-            <version>2.9.0</version>
-        </dependency>-->
-
         <!-- spring ai & google adk begin -->
 
         <dependency>
@@ -99,6 +85,10 @@
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
         </dependency>
 
         <!-- Apache Tika 文档解析框架（支持PDF/Word/TXT等格式） -->

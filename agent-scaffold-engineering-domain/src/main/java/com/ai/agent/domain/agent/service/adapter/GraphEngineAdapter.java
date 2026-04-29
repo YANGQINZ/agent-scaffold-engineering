@@ -8,12 +8,10 @@ import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
-import com.ai.agent.domain.agent.service.engine.GraphChannel;
-import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
 import com.alibaba.cloud.ai.graph.*;
@@ -118,7 +116,7 @@ public class GraphEngineAdapter implements EngineAdapter {
         } catch (Exception e) {
             log.error("GraphEngineAdapter执行失败: agentId={}, error={}",
                     graphDef.getAgentId(), e.getMessage(), e);
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Graph编排执行失败: " + e.getMessage(), e);
         }
     }
@@ -186,7 +184,7 @@ public class GraphEngineAdapter implements EngineAdapter {
 
             } catch (Exception e) {
                 log.error("GraphEngineAdapter流式执行失败: {}", e.getMessage(), e);
-                return Flux.error(new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+                return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
                         "Graph编排流式执行失败: " + e.getMessage(), e));
             }
         }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
@@ -406,11 +404,11 @@ public class GraphEngineAdapter implements EngineAdapter {
 
     private void validateGraphConfig(GraphAgentDefinition graphDef) {
         if (graphDef.getGraphNodes() == null || graphDef.getGraphNodes().isEmpty()) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Graph配置不完整: 缺少节点定义, agentId=" + graphDef.getAgentId());
         }
         if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isBlank()) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Graph配置不完整: 缺少起始节点, agentId=" + graphDef.getAgentId());
         }
     }
@@ -427,7 +425,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             StateGraph graph = buildGraph(graphDef, ctx, false);
             return graph.compile();
         } catch (GraphStateException e) {
-            throw new AgentException(Constants.ErrorCode.AGENT_ORCHESTRATION_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "StateGraph编译失败: " + e.getMessage(), e);
         }
     }

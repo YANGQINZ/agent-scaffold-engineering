@@ -23,11 +23,9 @@ public class AgentscopeAgentConfig {
     private String agentId;
 
     /** Agent 级别的 MCP Server 配置 */
-    @Builder.Default
     private List<McpServerConfig> mcpServers = List.of();
 
     /** 启用的工具名称列表（为空时启用全部工具） */
-    @Builder.Default
     private List<String> enableTools = List.of();
 
 }

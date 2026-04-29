@@ -33,7 +33,6 @@ public class KnowledgeBase {
     private String ownerId;
 
     /** 文档数量 */
-    @Builder.Default
     private Integer docCount = 0;
 
     /** 创建时间 */

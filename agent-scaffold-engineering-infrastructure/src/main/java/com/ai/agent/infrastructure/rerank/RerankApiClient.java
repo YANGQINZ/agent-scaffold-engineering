@@ -49,9 +49,6 @@ public class RerankApiClient {
         requestBody.put("documents", new JSONArray(documents));
         requestBody.put("top_n", topN);
         requestBody.put("return_documents", true);
-        if (rerankConfig.getInstruct() != null && !rerankConfig.getInstruct().isBlank()) {
-            requestBody.put("instruct", rerankConfig.getInstruct());
-        }
 
         // 设置请求头
         HttpHeaders headers = new HttpHeaders();

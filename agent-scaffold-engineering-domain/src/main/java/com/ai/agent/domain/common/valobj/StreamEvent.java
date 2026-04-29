@@ -20,7 +20,6 @@ public class StreamEvent {
     private StreamEventType type;
 
     /** 事件数据 */
-    @Builder.Default
     private Map<String, Object> data = new HashMap<>();
 
     /** 会话ID */

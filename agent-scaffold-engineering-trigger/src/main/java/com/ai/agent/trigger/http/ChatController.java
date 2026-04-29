@@ -9,7 +9,6 @@ import com.ai.agent.domain.common.valobj.ChatRequest;
 import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.chat.service.ChatFacade;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.model.Response;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,7 @@ public class ChatController implements IChatService {
     public Response<ChatResponseDTO> chat(@Valid @RequestBody ChatRequestDTO requestDTO) {
         ChatRequest request = convertRequest(requestDTO);
         ChatResponse response = chatFacade.chat(request);
-        return Response.success(convertResponse(response));
+        return Response.buildSuccess(convertResponse(response));
     }
 
     @PostMapping("/stream")
@@ -48,7 +47,7 @@ public class ChatController implements IChatService {
     @DeleteMapping("/session/{sessionId}")
     public Response<Void> removeSession(@PathVariable String sessionId) {
         chatFacade.removeSession(sessionId);
-        return Response.success();
+        return Response.buildSuccess();
     }
 
     private ChatRequest convertRequest(ChatRequestDTO dto) {

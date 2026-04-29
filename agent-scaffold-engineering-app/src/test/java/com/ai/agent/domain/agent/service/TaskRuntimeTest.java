@@ -119,9 +119,5 @@ class TaskRuntimeTest {
             return reactor.core.publisher.Flux.empty();
         }
 
-        @Override
-        public <T> T getTypedChannel(Class<T> channelType) {
-            return null;
-        }
     }
 }

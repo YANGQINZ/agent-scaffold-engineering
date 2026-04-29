@@ -2,8 +2,8 @@ package com.ai.agent.domain.knowledge;
 
 import com.ai.agent.domain.knowledge.model.entity.DocumentChunk;
 import com.ai.agent.domain.knowledge.service.EmbeddingService;
-import com.ai.agent.types.common.Constants;
 import com.ai.agent.types.exception.KnowledgeException;
+import com.ai.agent.types.exception.enums.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
@@ -68,7 +68,7 @@ public class DocumentProcessor {
             return result;
         } catch (Exception e) {
             log.error("文档处理失败 docId={}, baseId={}", docId, baseId, e);
-            throw new KnowledgeException(Constants.ErrorCode.KNOW_PROCESSING_FAILED, "文档处理失败: " + e.getMessage(), e);
+            throw new KnowledgeException(ErrorCodeEnum.KNOW_PROCESSING_FAILED, "文档处理失败: " + e.getMessage(), e);
         }
     }
 

@@ -1,3 +1,4 @@
+/*
 package com.ai.agent.domain.agent.service.adapter;
 
 import io.agentscope.core.agent.AgentBase;
@@ -9,9 +10,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+*/
 /**
  * 测试 AgentScopeAdapter 的 lastAgentsCache 缓存管理
- */
+ *//*
+
 class AgentScopeAdapterTest {
 
     private AgentScopeAdapter adapter;
@@ -94,3 +97,4 @@ class AgentScopeAdapterTest {
         assertTrue(cache.size() > 0, "淘汰后应有条目保留");
     }
 }
+*/

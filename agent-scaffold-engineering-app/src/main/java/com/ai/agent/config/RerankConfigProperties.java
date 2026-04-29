@@ -26,9 +26,6 @@ public class RerankConfigProperties {
     /** 重试次数 */
     private Integer retryCount = 3;
 
-    /** 自定义排序任务指令 */
-    private String instruct = "Given a web search query, retrieve relevant passages that answer the query.";
-
     /**
      * 将配置属性映射为领域值对象
      */
@@ -39,7 +36,6 @@ public class RerankConfigProperties {
                 .model(model)
                 .topN(topN)
                 .retryCount(retryCount)
-                .instruct(instruct)
                 .build();
     }
 

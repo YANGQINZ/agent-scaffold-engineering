@@ -33,11 +33,9 @@ public class SessionContext implements ContextStore {
     private String userId;
 
     /** 引擎类型 */
-    @Builder.Default
     private EngineType engineType = EngineType.GRAPH;
 
     /** 是否启用RAG */
-    @Builder.Default
     private boolean ragEnabled = false;
 
     /** 知识库ID */
@@ -50,11 +48,9 @@ public class SessionContext implements ContextStore {
     private LocalDateTime lastActiveAt;
 
     /** 过期时间（秒） */
-    @Builder.Default
     private int ttlSeconds = 3600;
 
     /** 最后访问时间（epoch毫秒），用于TTL淘汰 */
-    @Builder.Default
     private long lastAccessTime = System.currentTimeMillis();
 
     /** MemoryPort 引用（由 ContextStoreFactory 注入，不参与序列化） */

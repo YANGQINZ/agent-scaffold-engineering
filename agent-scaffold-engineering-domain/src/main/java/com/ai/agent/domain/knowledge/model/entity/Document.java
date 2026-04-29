@@ -33,7 +33,6 @@ public class Document {
     private DocumentStatus status;
 
     /** 分块数量 */
-    @Builder.Default
     private Integer chunkCount = 0;
 
     /** 创建时间 */

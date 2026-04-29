@@ -42,7 +42,7 @@ class GraphEngineAdapterTest {
         McpToolProvider toolProvider = mock(McpToolProvider.class);
         ConditionEvaluator evaluator = mock(ConditionEvaluator.class);
 
-        GraphEngineAdapter adapter = new GraphEngineAdapter(chatModel, registry, toolProvider, evaluator);
+        GraphEngineAdapter adapter = new GraphEngineAdapter(chatModel, registry, evaluator);
 
         // 验证 Flux.defer() 内部不会阻塞当前线程
         // 由于 StateGraph 需要 YAML 配置，我们测试 Flux 结构的正确性
