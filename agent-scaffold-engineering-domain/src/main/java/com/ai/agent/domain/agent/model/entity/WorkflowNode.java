@@ -26,4 +26,11 @@ public class WorkflowNode {
     /** 下一个节点ID */
     private String next;
 
+    /** 是否启用 RAG 增强检索 */
+    @Builder.Default
+    private Boolean ragEnabled = false;
+
+    /** 关联知识库 ID（ragEnabled=true 时使用） */
+    private String knowledgeBaseId;
+
 }

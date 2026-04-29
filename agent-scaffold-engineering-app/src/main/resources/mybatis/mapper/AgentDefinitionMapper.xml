@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ai.agent.infrastructure.persistent.dao.IAgentDefinitionDao">
 
-    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO">
+    <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO agent_definition (agent_id, name, engine, instruction, model_config, mcp_servers, graph_start, agentscope_pipeline_type, sub_engines, created_at, updated_at)
         VALUES (#{agentId}, #{name}, #{engine}, #{instruction}, #{modelConfig}, #{mcpServers}, #{graphStart}, #{agentscopePipelineType}, #{subEngines}, #{createdAt}, #{updatedAt})
     </insert>

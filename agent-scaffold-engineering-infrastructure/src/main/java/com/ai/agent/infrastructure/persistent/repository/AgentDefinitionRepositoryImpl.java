@@ -51,10 +51,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         po.setCreatedAt(now);
         po.setUpdatedAt(now);
         agentDefinitionDao.insert(po);
-
-        // 获取插入后的主键ID
-        AgentDefinitionPO inserted = agentDefinitionDao.selectByAgentId(definition.getAgentId());
-        Long definitionId = inserted.getId();
+        Long definitionId = po.getId();
 
         insertChildren(definition, definitionId);
         log.info("保存Agent定义: agentId={}, engine={}", definition.getAgentId(), definition.getEngine());
@@ -116,6 +113,10 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
     @Override
     @Transactional
     public void deleteByAgentId(String agentId) {
+        AgentDefinitionPO existing = agentDefinitionDao.selectByAgentId(agentId);
+        if (existing != null) {
+            deleteChildren(existing.getId(), EngineType.valueOf(existing.getEngine()));
+        }
         agentDefinitionDao.deleteByAgentId(agentId);
         log.info("删除Agent定义: agentId={}", agentId);
     }
@@ -281,6 +282,8 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                     po.setAgentId(node.getAgentId());
                     po.setReactAgentId(node.getReactAgentId());
                     po.setNextNodeId(node.getNext());
+                    po.setRagEnabled(node.getRagEnabled());
+                    po.setKnowledgeBaseId(node.getKnowledgeBaseId());
                     po.setSortOrder(i);
                     return po;
                 })
@@ -345,6 +348,8 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                         .agentId(po.getAgentId())
                         .reactAgentId(po.getReactAgentId())
                         .next(po.getNextNodeId())
+                        .ragEnabled(po.getRagEnabled())
+                        .knowledgeBaseId(po.getKnowledgeBaseId())
                         .build())
                 .toList();
     }
@@ -375,7 +380,6 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
     // 工具方法
     // ═══════════════════════════════════════════════════════
 
-    @SuppressWarnings("unchecked")
     private List<WorkflowNode> getWorkflowNodes(AgentDefinition definition) {
         if (definition instanceof GraphAgentDefinition graphDef) {
             return graphDef.getGraphNodes();
@@ -385,7 +389,6 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         return List.of();
     }
 
-    @SuppressWarnings("unchecked")
     private List<GraphEdge> getGraphEdges(AgentDefinition definition) {
         if (definition instanceof GraphAgentDefinition graphDef) {
             return graphDef.getGraphEdges();
