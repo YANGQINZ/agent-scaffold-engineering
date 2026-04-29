@@ -60,6 +60,7 @@ public class ChatController implements IChatService {
                 .ragEnabled(dto.getRagEnabled())
                 .knowledgeBaseId(dto.getKnowledgeBaseId())
                 .enableThinking(dto.getEnableThinking())
+                .agentId(dto.getAgentId())
                 .build();
     }
 
