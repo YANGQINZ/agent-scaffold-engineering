@@ -17,6 +17,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@Deprecated
 public class DocumentProcessor {
 
     private final EmbeddingService embeddingService;
@@ -27,6 +28,7 @@ public class DocumentProcessor {
 
     /**
      * 处理文档内容：分块并生成向量嵌入
+     * baseId、docId、chunkIndex等信息存储在metadata JSON中
      *
      * @param docId   文档ID
      * @param baseId  知识库ID
@@ -50,16 +52,17 @@ public class DocumentProcessor {
             List<String> texts = chunks.stream().map(Document::getText).toList();
             List<float[]> embeddings = embeddingService.embedBatch(texts);
 
-            // 构建DocumentChunk列表
+            // 构建DocumentChunk列表，将baseId/docId/chunkIndex存入metadata
             List<DocumentChunk> result = new ArrayList<>();
             for (int i = 0; i < chunks.size(); i++) {
                 Document aiChunk = chunks.get(i);
+                String metadata = String.format(
+                        "{\"baseId\":\"%s\",\"docId\":\"%s\",\"chunkIndex\":%d}",
+                        baseId, docId, i);
                 DocumentChunk chunk = DocumentChunk.builder()
-                        .docId(docId)
-                        .baseId(baseId)
                         .content(aiChunk.getText())
                         .embedding(embeddings.get(i))
-                        .chunkIndex(i)
+                        .metadata(metadata)
                         .build();
                 result.add(chunk);
             }

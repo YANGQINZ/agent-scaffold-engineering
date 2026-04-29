@@ -32,7 +32,7 @@ class MmrServiceTest {
         // 零向量 embedding 不应导致 NaN 传播使算法提前中断
         float[] queryEmb = new float[]{1.0f, 0.0f};
         DocumentChunk chunk = DocumentChunk.builder()
-                .chunkId(1L)
+                .id("uuid-1")
                 .content("测试")
                 .embedding(new float[]{0.0f, 0.0f})
                 .build();
@@ -47,8 +47,8 @@ class MmrServiceTest {
     void rerankByMmr_allZeroVectors_returnsExpectedCount() {
         // 所有向量（包括 query）都是零向量时，不应因 NaN 导致结果被截断
         float[] queryEmb = new float[]{0.0f, 0.0f};
-        DocumentChunk c1 = DocumentChunk.builder().chunkId(1L).content("a").embedding(new float[]{0.0f, 0.0f}).build();
-        DocumentChunk c2 = DocumentChunk.builder().chunkId(2L).content("b").embedding(new float[]{0.0f, 0.0f}).build();
+        DocumentChunk c1 = DocumentChunk.builder().id("uuid-1").content("a").embedding(new float[]{0.0f, 0.0f}).build();
+        DocumentChunk c2 = DocumentChunk.builder().id("uuid-2").content("b").embedding(new float[]{0.0f, 0.0f}).build();
 
         List<DocumentChunk> result = mmrService.rerankByMmr(queryEmb, List.of(c1, c2), 0.7, 2);
         assertNotNull(result);
@@ -61,12 +61,12 @@ class MmrServiceTest {
         // 混合零向量与正常向量不应导致结果截断
         float[] queryEmb = new float[]{1.0f, 0.0f};
         DocumentChunk normalChunk = DocumentChunk.builder()
-                .chunkId(1L)
+                .id("uuid-1")
                 .content("正常")
                 .embedding(new float[]{1.0f, 0.0f})
                 .build();
         DocumentChunk zeroChunk = DocumentChunk.builder()
-                .chunkId(2L)
+                .id("uuid-2")
                 .content("零向量")
                 .embedding(new float[]{0.0f, 0.0f})
                 .build();
@@ -80,12 +80,12 @@ class MmrServiceTest {
     void rerankByMmr_normalVectors_returnsRanked() {
         float[] queryEmb = new float[]{1.0f, 0.0f};
         DocumentChunk chunk1 = DocumentChunk.builder()
-                .chunkId(1L)
+                .id("uuid-1")
                 .content("最相似")
                 .embedding(new float[]{0.9f, 0.1f})
                 .build();
         DocumentChunk chunk2 = DocumentChunk.builder()
-                .chunkId(2L)
+                .id("uuid-2")
                 .content("次相似")
                 .embedding(new float[]{0.5f, 0.5f})
                 .build();
@@ -94,6 +94,6 @@ class MmrServiceTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         // 最相似的应排在第一位
-        assertEquals(1L, result.get(0).getChunkId());
+        assertEquals("uuid-1", result.get(0).getId());
     }
 }

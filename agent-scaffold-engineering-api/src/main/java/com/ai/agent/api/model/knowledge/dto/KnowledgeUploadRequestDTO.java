@@ -1,4 +1,4 @@
-package com.ai.agent.api.model.knowledge;
+package com.ai.agent.api.model.knowledge.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

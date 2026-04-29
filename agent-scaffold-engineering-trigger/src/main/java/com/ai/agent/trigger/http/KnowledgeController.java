@@ -1,7 +1,7 @@
 package com.ai.agent.trigger.http;
 
 import com.ai.agent.api.IKnowledgeBaseService;
-import com.ai.agent.api.model.knowledge.KnowledgeBaseResponseDTO;
+import com.ai.agent.api.model.knowledge.dto.KnowledgeBaseResponseDTO;
 import com.ai.agent.domain.knowledge.model.entity.KnowledgeBaseResponse;
 import com.ai.agent.domain.knowledge.service.IKnowledgeService;
 import com.ai.agent.types.enums.OwnerType;
@@ -27,56 +27,14 @@ public class KnowledgeController implements IKnowledgeBaseService {
 
     private final IKnowledgeService knowledgeService;
 
-    @PostMapping("/bases")
-    public Response<KnowledgeBaseResponseDTO> createKnowledgeBase(
-            @RequestParam String name,
-            @RequestParam(defaultValue = "") String description,
-            @RequestParam(defaultValue = "USER") String ownerType,
-            @RequestParam(defaultValue = "") String ownerId) {
-        // 参数校验：name 不能为空或空白
-        if (name == null || name.isBlank()) {
-            return Response.buildError("知识库名称不能为空");
-        }
-
-        // 参数校验：ownerType 必须是合法的枚举值
-        try {
-            OwnerType.valueOf(ownerType);
-        } catch (IllegalArgumentException e) {
-            return Response.buildError("无效的ownerType: " + ownerType + "，合法值: ADMIN, USER");
-        }
-
-        try {
-            KnowledgeBaseResponse data = knowledgeService.createKnowledgeBase(name, description, ownerType, ownerId);
-            KnowledgeBaseResponseDTO knowledgeBaseResponseDTO = CopyUtil.copyBean(data, KnowledgeBaseResponseDTO::new);
-            return Response.buildSuccess(knowledgeBaseResponseDTO);
-        } catch (Exception e) {
-            log.error("创建知识库失败: name={}, error={}", name, e.getMessage(), e);
-            return Response.buildError("创建知识库失败: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/upload")
-    public Response<String> uploadDocument(
-            @RequestParam String knowledgeBaseId,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false) String userId) {
-        try {
-            String docId = knowledgeService.uploadDocument(knowledgeBaseId, file, userId);
-            return Response.buildSuccess(docId);
-        } catch (Exception e) {
-            log.error("文档上传处理失败: baseId={}, error={}", knowledgeBaseId, e.getMessage(), e);
-            return Response.buildError("文档处理失败: " + e.getMessage());
-        }
-    }
-
     /**
      * 上传知识库文件
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Response<Map<String, Object>> uploadKnowledgeBase(
+    public Response<Void> uploadKnowledgeBase(
         @RequestParam("file") MultipartFile file,
-        @RequestParam(value = "name", required = false) String name,
-        @RequestParam(value = "category", required = false) String category) {
-        return Response.buildSuccess(knowledgeService.uploadKnowledgeBase(file, name, category));
+        @RequestParam(value = "name", required = false) String name) {
+        knowledgeService.uploadKnowledgeBase(file, name);
+        return Response.buildSuccess();
     }
 }

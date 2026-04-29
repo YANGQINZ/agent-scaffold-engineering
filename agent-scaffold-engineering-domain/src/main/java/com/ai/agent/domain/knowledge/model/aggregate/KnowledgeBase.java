@@ -18,13 +18,19 @@ import java.time.LocalDateTime;
 public class KnowledgeBase {
 
     /** 知识库ID */
-    private String baseId;
+    private Long baseId;
 
     /** 知识库名称 */
     private String name;
 
     /** 描述 */
     private String description;
+
+    /** 文件名 */
+    private String fileName;
+
+    /** 文件类型 */
+    private String fileType;
 
     /** 拥有者类型 */
     private OwnerType ownerType;

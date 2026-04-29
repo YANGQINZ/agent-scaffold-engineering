@@ -99,7 +99,7 @@ public class RagDecorator implements ChatStrategy {
             // 构建引用来源并发射RAG_RETRIEVE事件
             List<SourceRef> sourceRefs = ragResult.getChunks().stream()
                     .map(chunk -> SourceRef.builder()
-                            .docName(chunk.getDocId())
+                            .docName(chunk.getId())
                             .chunkContent(chunk.getContent())
                             .score(chunk.getScore())
                             .build())
@@ -148,7 +148,7 @@ public class RagDecorator implements ChatStrategy {
     private List<ChatResponse.Source> buildSources(List<DocumentChunk> chunks) {
         return chunks.stream()
                 .map(chunk -> ChatResponse.Source.builder()
-                        .docName(chunk.getDocId())
+                        .docName(chunk.getId())
                         .chunkContent(chunk.getContent())
                         .score(chunk.getScore())
                         .build())

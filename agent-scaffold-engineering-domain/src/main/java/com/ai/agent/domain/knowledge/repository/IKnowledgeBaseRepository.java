@@ -10,7 +10,7 @@ public interface IKnowledgeBaseRepository {
     /**
      * 保存知识库
      */
-    void save(KnowledgeBase knowledgeBase);
+    long save(KnowledgeBase knowledgeBase);
 
     /**
      * 根据知识库ID查找

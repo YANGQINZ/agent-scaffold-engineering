@@ -3,12 +3,12 @@
 <mapper namespace="com.ai.agent.infrastructure.persistent.dao.IKnowledgeBaseDao">
 
     <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.KnowledgeBasePO">
-        INSERT INTO knowledge_base (base_id, name, description, owner_type, owner_id, doc_count, created_at)
-        VALUES (#{baseId}, #{name}, #{description}, #{ownerType}, #{ownerId}, #{docCount}, #{createdAt})
+        INSERT INTO knowledge_base (base_id, name, description, file_name, file_type, owner_type, owner_id, doc_count, created_at)
+        VALUES (#{baseId}, #{name}, #{description}, #{fileName}, #{fileType}, #{ownerType}, #{ownerId}, #{docCount}, #{createdAt})
     </insert>
 
     <select id="selectById" resultType="com.ai.agent.infrastructure.persistent.po.KnowledgeBasePO">
-        SELECT base_id, name, description, owner_type, owner_id, doc_count, created_at
+        SELECT base_id, name, description, file_name, file_type, owner_type, owner_id, doc_count, created_at
         FROM knowledge_base WHERE base_id = #{baseId}
     </select>
 

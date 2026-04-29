@@ -11,8 +11,10 @@ public interface IKnowledgeBaseDao {
 
     /**
      * 插入知识库
+     *
+     * @return
      */
-    void insert(KnowledgeBasePO knowledgeBasePO);
+    int insert(KnowledgeBasePO knowledgeBasePO);
 
     /**
      * 根据知识库ID查询

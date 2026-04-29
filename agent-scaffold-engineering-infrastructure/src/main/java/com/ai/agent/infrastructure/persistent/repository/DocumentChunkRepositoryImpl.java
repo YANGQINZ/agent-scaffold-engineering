@@ -42,15 +42,12 @@ public class DocumentChunkRepositoryImpl implements IDocumentChunkRepository {
      */
     private DocumentChunkPO toPO(DocumentChunk chunk) {
         DocumentChunkPO po = new DocumentChunkPO();
-        po.setChunkId(chunk.getChunkId());
-        po.setDocId(chunk.getDocId());
-        po.setBaseId(chunk.getBaseId());
+        po.setId(chunk.getId());
         po.setContent(chunk.getContent());
         if (chunk.getEmbedding() != null) {
             po.setEmbedding(embeddingToString(chunk.getEmbedding()));
         }
         po.setMetadata(chunk.getMetadata());
-        po.setChunkIndex(chunk.getChunkIndex());
         return po;
     }
 
@@ -59,12 +56,9 @@ public class DocumentChunkRepositoryImpl implements IDocumentChunkRepository {
      */
     private DocumentChunk toChunk(DocumentChunkPO po) {
         return DocumentChunk.builder()
-                .chunkId(po.getChunkId())
-                .docId(po.getDocId())
-                .baseId(po.getBaseId())
+                .id(po.getId())
                 .content(po.getContent())
                 .metadata(po.getMetadata())
-                .chunkIndex(po.getChunkIndex())
                 .score(po.getScore())
                 .build();
     }

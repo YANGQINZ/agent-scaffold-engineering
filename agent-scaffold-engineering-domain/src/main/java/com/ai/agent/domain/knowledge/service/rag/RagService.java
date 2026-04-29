@@ -140,19 +140,18 @@ public class RagService {
         double K = 60.0;
 
         int initialCapacity = (int) ((vectorResults.size() + bm25Results.size()) / 0.75) + 1;
-        Map<Long, Double> scoreMap = new HashMap<>(initialCapacity);
-        Map<Long, DocumentChunk> chunkMap = new HashMap<>(initialCapacity);
+        Map<String, Double> scoreMap = new HashMap<>(initialCapacity);
+        Map<String, DocumentChunk> chunkMap = new HashMap<>(initialCapacity);
 
         // 处理检索结果的统一逻辑
         processResults(vectorResults, scoreMap, chunkMap, ALPHA, K);
         processResults(bm25Results, scoreMap, chunkMap, BETA, K);
 
         return scoreMap.entrySet().stream()
-            .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+            .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
             .limit(topK)
             .map(entry -> {
                 DocumentChunk chunk = chunkMap.get(entry.getKey());
-                // 建议使用 shallow copy 或专门的 Score 包装类
                 chunk.setScore(entry.getValue());
                 return chunk;
             })
@@ -160,13 +159,13 @@ public class RagService {
     }
 
     private void processResults(List<DocumentChunk> results,
-                                Map<Long, Double> scoreMap,
-                                Map<Long, DocumentChunk> chunkMap,
+                                Map<String, Double> scoreMap,
+                                Map<String, DocumentChunk> chunkMap,
                                 double weight, double k) {
         if (results == null) return;
         for (int i = 0; i < results.size(); i++) {
             DocumentChunk chunk = results.get(i);
-            long id = chunk.getChunkId();
+            String id = chunk.getId();
             // RRF 核心公式：Weight / (K + rank)
             double score = weight / (k + i);
             scoreMap.merge(id, score, Double::sum);
@@ -206,13 +205,10 @@ public class RagService {
                         if (chunk != null) {
                             // 用Rerank得分替换RRF得分
                             DocumentChunk scoredChunk = DocumentChunk.builder()
-                                    .chunkId(chunk.getChunkId())
-                                    .docId(chunk.getDocId())
-                                    .baseId(chunk.getBaseId())
+                                    .id(chunk.getId())
                                     .content(chunk.getContent())
                                     .embedding(chunk.getEmbedding())
                                     .metadata(chunk.getMetadata())
-                                    .chunkIndex(chunk.getChunkIndex())
                                     .score(item.getRelevanceScore())
                                     .build();
                             rerankedChunks.add(scoredChunk);

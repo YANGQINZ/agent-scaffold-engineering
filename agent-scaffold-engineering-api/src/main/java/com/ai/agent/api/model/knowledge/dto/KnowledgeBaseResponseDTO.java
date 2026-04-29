@@ -1,4 +1,4 @@
-package com.ai.agent.api.model.knowledge;
+package com.ai.agent.api.model.knowledge.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

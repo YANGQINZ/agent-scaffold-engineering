@@ -30,35 +30,24 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     base_id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(128) NOT NULL,
     description TEXT,
+    file_name VARCHAR(256),
+    file_type VARCHAR(10),
     owner_type VARCHAR(20) NOT NULL DEFAULT 'USER',
     owner_id VARCHAR(64),
     doc_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS document (
-    doc_id VARCHAR(64) PRIMARY KEY,
-    base_id VARCHAR(64) NOT NULL REFERENCES knowledge_base(base_id),
-    file_name VARCHAR(256),
-    file_type VARCHAR(10),
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-    chunk_count INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS document_chunk (
-    chunk_id BIGSERIAL PRIMARY KEY,
-    doc_id VARCHAR(64) NOT NULL REFERENCES document(doc_id),
-    base_id VARCHAR(64) NOT NULL REFERENCES knowledge_base(base_id),
-    content TEXT NOT NULL,
-    embedding vector(1536),
-    metadata JSONB,
-    chunk_index INT NOT NULL,
-    content_tsv tsvector GENERATED ALWAYS AS (to_tsvector('simple', content)) STORED
+    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    content TEXT,
+    metadata JSON,
+    embedding vector,
+    content_tsv tsvector GENERATED ALWAYS AS (to_tsvector('simple', content)) STORED,
+    CONSTRAINT vector_store_pkey PRIMARY KEY ("id")
 );
 
-CREATE INDEX IF NOT EXISTS idx_document_chunk_base_id ON document_chunk(base_id);
-CREATE INDEX IF NOT EXISTS idx_document_chunk_doc_id ON document_chunk(doc_id);
+CREATE INDEX IF NOT EXISTS idx_document_chunk_base_id ON document_chunk((metadata->>'baseId'));
 CREATE INDEX IF NOT EXISTS idx_chunk_embedding ON document_chunk USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS idx_chunk_content_tsv ON document_chunk USING GIN (content_tsv);
 
