@@ -49,6 +49,12 @@ export interface WorkflowNode {
   ragEnabled?: boolean;
   /** 关联的知识库ID */
   knowledgeBaseId?: string;
+  /** 节点指令 */
+  instruction?: string;
+  /** 子引擎类型 */
+  subEngine?: 'GRAPH' | 'AGENTSCOPE';
+  /** MCP Server 配置列表 */
+  mcpServers?: McpServerConfig[];
 }
 
 /** 图边 */
@@ -88,7 +94,7 @@ export interface AgentDefinition {
 
   // GRAPH / HYBRID 专用
   /** 图起始节点 */
-  graphStart?: string;
+  graphStart?: string[];
   /** 图节点列表 */
   graphNodes?: WorkflowNode[];
   /** 图边列表 */

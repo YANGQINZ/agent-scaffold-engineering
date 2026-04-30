@@ -116,7 +116,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   loadFromAgentDefinition: (agent) => {
     const graphNodes: Node[] = (agent.graphNodes ?? []).map((n, idx) => ({
       id: n.id,
-      type: n.id === agent.graphStart ? 'start' : 'engine',
+      type: (agent.graphStart ?? []).includes(n.id) ? 'start' : 'engine',
       position: { x: 250 + idx * 200, y: 150 + (idx % 2) * 120 },
       data: {
         label: n.id,
@@ -128,10 +128,11 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       },
     }));
 
-    const startNode = graphNodes.find((n) => n.id === agent.graphStart);
-    if (!startNode && agent.graphStart) {
+    const startIds = agent.graphStart ?? [];
+    const startNode = graphNodes.find((n) => startIds.includes(n.id));
+    if (!startNode && startIds.length > 0) {
       graphNodes.unshift({
-        id: agent.graphStart,
+        id: startIds[0],
         type: 'start',
         position: { x: 250, y: 100 },
         data: { label: '开始' },
@@ -159,8 +160,15 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const state = get();
     const { nodes, edges, currentAgentName, currentEngineType } = state;
 
-    const startNode = nodes.find((n) => n.type === 'start');
-    const graphStart = startNode?.id ?? nodes[0]?.id ?? '';
+    // graphStart 应为 start 节点指向的第一个实际节点，而非 start 节点本身
+    const startNodes = nodes.filter((n) => n.type === 'start');
+    const graphStart: string[] = startNodes
+      .map((sn) => edges.find((e) => e.source === sn.id)?.target)
+      .filter((t): t is string => !!t);
+    if (graphStart.length === 0) {
+      const first = nodes.find((n) => n.type !== 'start' && n.type !== 'end')?.id;
+      if (first) graphStart.push(first);
+    }
 
     const graphNodes = nodes
       .filter((n) => n.type !== 'start' && n.type !== 'end')
@@ -172,11 +180,17 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         knowledgeBaseId: n.data?.knowledgeBaseId as string | undefined,
       }));
 
-    const graphEdges = edges.map((e) => ({
-      from: e.source,
-      to: e.target,
-      condition: (e.data as Record<string, unknown> | undefined)?.condition as string | undefined,
-    }));
+    // 导出边时排除引用 start/end 类型节点的边：
+    // start 节点由后端 graphStart + addEdge(START, ...) 处理，
+    // end 节点由后端叶子节点自动连 END 处理。
+    const validNodeIds = new Set(graphNodes.map((n) => n.id));
+    const graphEdges = edges
+      .filter((e) => validNodeIds.has(e.source) && validNodeIds.has(e.target))
+      .map((e) => ({
+        from: e.source,
+        to: e.target,
+        condition: (e.data as Record<string, unknown> | undefined)?.condition as string | undefined,
+      }));
 
     const subEngines: Record<string, EngineType> = {};
     nodes.forEach((n) => {

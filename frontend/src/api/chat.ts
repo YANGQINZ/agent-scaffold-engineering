@@ -145,6 +145,25 @@ export async function listSessions(
   return res.data.data;
 }
 
+/** 创建新会话 */
+export async function createSession(name?: string): Promise<string> {
+  const { data } = await apiClient.post('/chat/session', { name });
+  return data.data;
+}
+
+/** 获取会话列表 */
+export async function listAllSessions(): Promise<ChatSessionVO[]> {
+  const { data } = await apiClient.get('/chat/session/list');
+  return data.data;
+}
+
+export interface ChatSessionVO {
+  sessionId: string;
+  name: string;
+  createdAt: string;
+  lastMessage?: string;
+}
+
 /**
  * 查询会话消息历史
  * GET /chat/sessions/{sessionId}/messages
