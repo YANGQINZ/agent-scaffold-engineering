@@ -52,6 +52,12 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
 
       // 处理 SSE 事件
       const controller = streamChat(params, (event: StreamEvent) => {
+        // 如果收到错误事件，提前结束
+        if (event.type === 'ERROR' || (event.data && (event.data as Record<string, unknown>).errorCode)) {
+          setIsStreaming(false);
+          abortRef.current = null;
+          return;
+        }
         switch (event.type) {
           case 'TEXT_DELTA': {
             // data 可能是字符串或 { text: string }

@@ -9,6 +9,7 @@ import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
+import com.ai.agent.domain.knowledge.service.rag.NodeRagService;
 import com.ai.agent.types.enums.EngineType;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.model.ChatModel;
@@ -37,12 +38,12 @@ class GraphEngineAdapterTest {
         ChatModel chatModel = mock(ChatModel.class);
         ChatResponse aiResponse = mock(ChatResponse.class);
         when(chatModel.call(any(Prompt.class))).thenReturn(aiResponse);
-
+        NodeRagService nodeRagService =mock(NodeRagService.class);;
         AgentRegistry registry = mock(AgentRegistry.class);
         McpToolProvider toolProvider = mock(McpToolProvider.class);
         ConditionEvaluator evaluator = mock(ConditionEvaluator.class);
 
-        GraphEngineAdapter adapter = new GraphEngineAdapter(chatModel, registry, evaluator);
+        GraphEngineAdapter adapter = new GraphEngineAdapter(chatModel, registry, evaluator,nodeRagService);
 
         // 验证 Flux.defer() 内部不会阻塞当前线程
         // 由于 StateGraph 需要 YAML 配置，我们测试 Flux 结构的正确性

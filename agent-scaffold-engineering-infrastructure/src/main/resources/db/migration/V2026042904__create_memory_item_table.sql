@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS memory_item (
     id            BIGSERIAL PRIMARY KEY,
     session_id    VARCHAR(64) NOT NULL REFERENCES chat_session(session_id),
     content       TEXT NOT NULL,
-    embedding     vector(1536) NOT NULL,
+    embedding     vector(1024) NOT NULL,
     importance    FLOAT DEFAULT 0.5,
     tags          TEXT[] DEFAULT '{}',
     source_msg_ids BIGINT[] DEFAULT '{}',

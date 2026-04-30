@@ -38,6 +38,7 @@ interface NodeEditData {
   ragEnabled?: boolean;
   knowledgeBaseId?: string;
   mcpServers?: McpServerConfig[];
+  engineType?: string;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -102,6 +103,7 @@ function NodeEditPanel() {
   const [mcpServers, setMcpServers] = useState<McpServerConfig[]>(
     nodeData.mcpServers ?? [],
   );
+  const [engineType, setEngineType] = useState(nodeData.engineType ?? 'GRAPH');
 
   // ─── 知识库列表（延迟加载） ───
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
@@ -126,6 +128,7 @@ function NodeEditPanel() {
     setRagEnabled(data.ragEnabled ?? false);
     setKnowledgeBaseId(data.knowledgeBaseId ?? '');
     setMcpServers(data.mcpServers ?? []);
+    setEngineType(data.engineType ?? 'GRAPH');
   }, [selectedNode]);
 
   // ─── 更新节点 data ───
@@ -155,6 +158,14 @@ function NodeEditPanel() {
   const handleReactAgentIdBlur = useCallback(() => {
     updateNodeData({ reactAgentId: reactAgentId || undefined });
   }, [reactAgentId, updateNodeData]);
+
+  const handleEngineTypeChange = useCallback(
+    (value: string) => {
+      setEngineType(value);
+      updateNodeData({ engineType: value });
+    },
+    [updateNodeData],
+  );
 
   // ─── RAG 切换 ───
   const handleRagToggle = useCallback(() => {
@@ -293,6 +304,22 @@ function NodeEditPanel() {
             placeholder="引用的 React Agent ID"
           />
         </div>
+
+        {/* 引擎类型 —— 仅 engine 节点 */}
+        {selectedNode.type === 'engine' && (
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-gray-500">引擎类型</label>
+            <select
+              value={engineType}
+              onChange={(e) => handleEngineTypeChange(e.target.value)}
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="GRAPH">GRAPH</option>
+              <option value="AGENTSCOPE">AGENTSCOPE</option>
+              <option value="HYBRID">HYBRID</option>
+            </select>
+          </div>
+        )}
       </Section>
 
       <Separator />

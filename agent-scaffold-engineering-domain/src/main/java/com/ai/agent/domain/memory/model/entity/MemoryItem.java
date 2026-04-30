@@ -27,7 +27,7 @@ public class MemoryItem {
     /** 提炼的事实文本 */
     private String content;
 
-    /** 1536维向量 */
+    /** 1024维向量 */
     private float[] embedding;
 
     /** 重要性分数 0-1 */

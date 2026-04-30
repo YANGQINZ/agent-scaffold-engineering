@@ -65,7 +65,7 @@ public class SessionController {
                 .userId(session.getUserId())
                 .agentId(session.getAgentId())
                 .mode(session.getMode() != null ? session.getMode().name() : null)
-                .engine(session.getEngine() != null ? session.getEngine().name() : null)
+                .agentMode(session.getAgentMode() != null ? session.getAgentMode().name() : null)
                 .ragEnabled(session.getRagEnabled())
                 .knowledgeBaseId(session.getKnowledgeBaseId())
                 .createdAt(session.getCreatedAt())

@@ -29,7 +29,7 @@ public class ChatSessionDTO {
     private String mode;
 
     /** 引擎类型 */
-    private String engine;
+    private String agentMode;
 
     /** 是否启用RAG */
     private Boolean ragEnabled;

@@ -167,3 +167,17 @@ export async function updateAgent(
 export async function deleteAgent(agentId: string): Promise<void> {
   await apiClient.delete(`/agents/${agentId}`);
 }
+
+/**
+ * 保存或更新 Agent 定义
+ * 如果 agentId 存在则更新，否则创建
+ */
+export async function saveOrUpdateAgent(
+  agentId: string | null,
+  data: Omit<AgentDefinition, 'agentId'>,
+): Promise<AgentDefinition> {
+  if (agentId) {
+    return updateAgent(agentId, { ...data, agentId } as AgentDefinition);
+  }
+  return createAgent(data);
+}

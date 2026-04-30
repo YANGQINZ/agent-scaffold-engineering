@@ -1,0 +1,446 @@
+26-04-30.01:19:33.178 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.01:19:34.284 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.01:19:34.285 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.01:23:46.827 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.01:23:48.383 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.01:23:48.384 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.01:24:26.701 [http-nio-8091-exec-4] ERROR GlobalExceptionHandler - 系统异常
+org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public reactor.core.publisher.Flux<com.ai.agent.api.model.chat.StreamEventDTO> com.ai.agent.trigger.http.ChatController.chatStream(com.ai.agent.api.model.chat.ChatRequestDTO): [Field error in object 'chatRequestDTO' on field 'userId': rejected value [null]; codes [NotBlank.chatRequestDTO.userId,NotBlank.userId,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [chatRequestDTO.userId,userId]; arguments []; default message [userId]]; default message [userId不能为空]] 
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.resolveArgument(RequestResponseBodyMethodProcessor.java:159)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-04-30.01:28:21.443 [http-nio-8091-exec-6] WARN  ContextAssembler       - 语义检索失败 sessionId=fbc67513-cec0-488e-bea0-444884868d5b: 
+### Error querying database.  Cause: org.postgresql.util.PSQLException: ERROR: relation "memory_item" does not exist
+  位置：219
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/MemoryItemMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### SQL: SELECT id, session_id, content, importance,                tags,                source_msg_ids,                created_at,                metadata,                1 - (embedding  <=>  ?::vector) AS score         FROM memory_item         WHERE session_id = ?         ORDER BY embedding  <=>  ?::vector         LIMIT ?
+### Cause: org.postgresql.util.PSQLException: ERROR: relation "memory_item" does not exist
+  位置：219
+; bad SQL grammar []
+26-04-30.01:28:21.481 [http-nio-8091-exec-6] WARN  SessionContext         - 记忆写入降级: sessionId=fbc67513-cec0-488e-bea0-444884868d5b, error=
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatMessageMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IChatMessageDao.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO chat_message (session_id, role, content, token_count, created_at)         VALUES (?, ?, ?, ?, ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+; ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+26-04-30.01:28:22.232 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-04-30.01:28:23.300 [HttpClient-1-Worker-0] WARN  SessionContext         - 记忆写入降级: sessionId=fbc67513-cec0-488e-bea0-444884868d5b, error=
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatMessageMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IChatMessageDao.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO chat_message (session_id, role, content, token_count, created_at)         VALUES (?, ?, ?, ?, ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+; ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+26-04-30.01:33:51.951 [http-nio-8091-exec-2] WARN  SessionContext         - 记忆写入降级: sessionId=fbc67513-cec0-488e-bea0-444884868d5b, error=
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatMessageMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IChatMessageDao.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO chat_message (session_id, role, content, token_count, created_at)         VALUES (?, ?, ?, ?, ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+; ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+26-04-30.01:33:53.177 [HttpClient-1-Worker-2] WARN  SessionContext         - 记忆写入降级: sessionId=fbc67513-cec0-488e-bea0-444884868d5b, error=
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatMessageMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IChatMessageDao.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO chat_message (session_id, role, content, token_count, created_at)         VALUES (?, ?, ?, ?, ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+; ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(fbc67513-cec0-488e-bea0-444884868d5b) is not present in table "chat_session".
+26-04-30.01:47:35.937 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.01:47:37.232 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.01:47:37.233 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.01:48:18.459 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-04-30.01:48:18.798 [scheduling-1    ] WARN  MemoryExtractor        - 记忆提炼失败 sessionId=209b67e3-3202-427c-8315-1d7f22c12ab9 msgId=null: 
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: expected 1536 dimensions, not 1024
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/MemoryItemMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IMemoryItemDao.insertBatch-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO memory_item (session_id, content, embedding, importance, tags, source_msg_ids, metadata)         VALUES                        (?, ?, ?::vector, ?,              ?,              ?,              ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: expected 1536 dimensions, not 1024
+; ERROR: expected 1536 dimensions, not 1024
+26-04-30.01:48:19.994 [scheduling-1    ] WARN  MemoryExtractor        - 记忆提炼失败 sessionId=209b67e3-3202-427c-8315-1d7f22c12ab9 msgId=null: 
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: expected 1536 dimensions, not 1024
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/MemoryItemMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IMemoryItemDao.insertBatch-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO memory_item (session_id, content, embedding, importance, tags, source_msg_ids, metadata)         VALUES                        (?, ?, ?::vector, ?,              ?,              ?,              ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: expected 1536 dimensions, not 1024
+; ERROR: expected 1536 dimensions, not 1024
+26-04-30.01:53:33.981 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.01:53:34.452 [main            ] WARN  AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'chatController' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-trigger/target/classes/com/ai/agent/trigger/http/ChatController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'chatFacade' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/chat/service/ChatFacade.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'modeRouter' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/chat/service/ModeRouter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'taskRuntime' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/agent/service/TaskRuntime.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'contextStoreFactory' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/agent/service/ContextStoreFactory.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'memoryFacade' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/memory/service/MemoryFacade.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'memoryExtractor' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/memory/service/MemoryExtractor.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'embeddingServiceImpl' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-infrastructure/target/classes/com/ai/agent/infrastructure/persistent/repository/EmbeddingServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'org.springframework.ai.embedding.EmbeddingModel' available: expected single matching bean but found 2: embeddingModel,dashscopeEmbeddingModel
+26-04-30.01:53:34.512 [main            ] ERROR LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl required a single bean, but 2 were found:
+	- embeddingModel: defined by method 'embeddingModel' in class path resource [com/ai/agent/config/EmbeddingModelConfig.class]
+	- dashscopeEmbeddingModel: defined by method 'dashscopeEmbeddingModel' in class path resource [com/alibaba/cloud/ai/autoconfigure/dashscope/DashScopeEmbeddingAutoConfiguration.class]
+
+This may be due to missing parameter name information
+
+Action:
+
+Consider marking one of the beans as @Primary, updating the consumer to accept multiple beans, or using @Qualifier to identify the bean that should be consumed
+
+Ensure that your compiler is configured to use the '-parameters' flag.
+You may need to update both your build tool settings as well as your IDE.
+(See https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention)
+
+
+26-04-30.01:56:32.430 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.01:56:32.805 [main            ] WARN  AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'chatController' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-trigger/target/classes/com/ai/agent/trigger/http/ChatController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'chatFacade' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/chat/service/ChatFacade.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'modeRouter' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/chat/service/ModeRouter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'taskRuntime' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/agent/service/TaskRuntime.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'contextStoreFactory' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/agent/service/ContextStoreFactory.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'memoryFacade' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/memory/service/MemoryFacade.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'memoryExtractor' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-domain/target/classes/com/ai/agent/domain/memory/service/MemoryExtractor.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'embeddingServiceImpl' defined in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-infrastructure/target/classes/com/ai/agent/infrastructure/persistent/repository/EmbeddingServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'org.springframework.ai.embedding.EmbeddingModel' available: expected single matching bean but found 2: embeddingModel,dashscopeEmbeddingModel
+26-04-30.01:56:32.907 [main            ] ERROR LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl required a single bean, but 2 were found:
+	- embeddingModel: defined by method 'embeddingModel' in class path resource [com/ai/agent/config/EmbeddingModelConfig.class]
+	- dashscopeEmbeddingModel: defined by method 'dashscopeEmbeddingModel' in class path resource [com/alibaba/cloud/ai/autoconfigure/dashscope/DashScopeEmbeddingAutoConfiguration.class]
+
+This may be due to missing parameter name information
+
+Action:
+
+Consider marking one of the beans as @Primary, updating the consumer to accept multiple beans, or using @Qualifier to identify the bean that should be consumed
+
+Ensure that your compiler is configured to use the '-parameters' flag.
+You may need to update both your build tool settings as well as your IDE.
+(See https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention)
+
+
+26-04-30.01:57:48.042 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.01:57:49.012 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.01:57:49.013 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.01:57:59.223 [http-nio-8091-exec-1] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"<400> InternalError.Algo.InvalidParameter: Value error, dimension for embedding v3 is invalid, its value shold be in [64, 128, 256, 512, 768, 1024]: parameters.dimension","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"e48d6e78-ad3c-90ad-ad5c-1257f5d84faf","request_id":"e48d6e78-ad3c-90ad-ad5c-1257f5d84faf"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.ContextAssembler.assemble(ContextAssembler.java:55)
+	at com.ai.agent.domain.memory.service.MemoryFacade.assembleContext(MemoryFacade.java:70)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.assembleMemoryContext(SessionContext.java:135)
+	at com.ai.agent.domain.chat.service.strategy.MultiTurnChatStrategy.lambda$executeStream$2(MultiTurnChatStrategy.java:95)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891)
+	at org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler$AbstractEmitterSubscriber.connect(ReactiveTypeHandler.java:283)
+	at org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler.handleValue(ReactiveTypeHandler.java:167)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler.handleReturnValue(ResponseBodyEmitterReturnValueHandler.java:210)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:136)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-04-30.01:57:59.225 [http-nio-8091-exec-1] WARN  ContextAssembler       - 语义检索失败 sessionId=47b38893-4142-48ed-8978-89307f3040c6: 400 - {"error":{"message":"<400> InternalError.Algo.InvalidParameter: Value error, dimension for embedding v3 is invalid, its value shold be in [64, 128, 256, 512, 768, 1024]: parameters.dimension","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"e48d6e78-ad3c-90ad-ad5c-1257f5d84faf","request_id":"e48d6e78-ad3c-90ad-ad5c-1257f5d84faf"}
+26-04-30.01:57:59.895 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-04-30.01:58:00.813 [scheduling-1    ] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"<400> InternalError.Algo.InvalidParameter: Value error, dimension for embedding v3 is invalid, its value shold be in [64, 128, 256, 512, 768, 1024]: parameters.dimension","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"8c8c7d06-57cf-9c30-bd63-f0086411ab64","request_id":"8c8c7d06-57cf-9c30-bd63-f0086411ab64"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.MemoryExtractor.extractAsync(MemoryExtractor.java:73)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.interceptor.AsyncExecutionInterceptor.lambda$invoke$0(AsyncExecutionInterceptor.java:114)
+	at org.springframework.scheduling.concurrent.DelegatingErrorHandlingCallable.call(DelegatingErrorHandlingCallable.java:52)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-04-30.01:58:00.814 [scheduling-1    ] WARN  MemoryExtractor        - 记忆提炼失败 sessionId=47b38893-4142-48ed-8978-89307f3040c6 msgId=null: 400 - {"error":{"message":"<400> InternalError.Algo.InvalidParameter: Value error, dimension for embedding v3 is invalid, its value shold be in [64, 128, 256, 512, 768, 1024]: parameters.dimension","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"8c8c7d06-57cf-9c30-bd63-f0086411ab64","request_id":"8c8c7d06-57cf-9c30-bd63-f0086411ab64"}
+26-04-30.01:58:01.731 [scheduling-1    ] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"<400> InternalError.Algo.InvalidParameter: Value error, dimension for embedding v3 is invalid, its value shold be in [64, 128, 256, 512, 768, 1024]: parameters.dimension","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"dfb0eede-fe5c-9aae-920d-0618659b97e4","request_id":"dfb0eede-fe5c-9aae-920d-0618659b97e4"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.MemoryExtractor.extractAsync(MemoryExtractor.java:73)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.interceptor.AsyncExecutionInterceptor.lambda$invoke$0(AsyncExecutionInterceptor.java:114)
+	at org.springframework.scheduling.concurrent.DelegatingErrorHandlingCallable.call(DelegatingErrorHandlingCallable.java:52)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-04-30.01:58:01.731 [scheduling-1    ] WARN  MemoryExtractor        - 记忆提炼失败 sessionId=47b38893-4142-48ed-8978-89307f3040c6 msgId=null: 400 - {"error":{"message":"<400> InternalError.Algo.InvalidParameter: Value error, dimension for embedding v3 is invalid, its value shold be in [64, 128, 256, 512, 768, 1024]: parameters.dimension","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"dfb0eede-fe5c-9aae-920d-0618659b97e4","request_id":"dfb0eede-fe5c-9aae-920d-0618659b97e4"}
+26-04-30.02:02:49.057 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.02:02:50.075 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.02:02:50.075 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.02:02:59.428 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-04-30.02:07:58.557 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.02:08:00.156 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.02:08:00.157 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.02:08:51.936 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=53s635ms).
+26-04-30.02:12:22.115 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m30s179ms).
+26-04-30.02:13:17.812 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=55s699ms).
+26-04-30.02:12:22.131 [http-nio-8091-Acceptor] ERROR NioEndpoint            - Error setting socket options
+java.net.SocketException: Invalid argument
+	at java.base/sun.nio.ch.Net.setIntOption0(Native Method)
+	at java.base/sun.nio.ch.Net.setSocketOption(Net.java:455)
+	at java.base/sun.nio.ch.Net.setSocketOption(Net.java:393)
+	at java.base/sun.nio.ch.SocketChannelImpl.setOption(SocketChannelImpl.java:280)
+	at java.base/sun.nio.ch.SocketAdaptor.setIntOption(SocketAdaptor.java:247)
+	at java.base/sun.nio.ch.SocketAdaptor.setSoLinger(SocketAdaptor.java:285)
+	at org.apache.tomcat.util.net.SocketProperties.setProperties(SocketProperties.java:215)
+	at org.apache.tomcat.util.net.NioEndpoint.setSocketOptions(NioEndpoint.java:473)
+	at org.apache.tomcat.util.net.NioEndpoint.setSocketOptions(NioEndpoint.java:71)
+	at org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:148)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-04-30.02:13:17.849 [http-nio-8091-Acceptor] ERROR NioEndpoint            - Error setting socket options
+java.net.SocketException: Invalid argument
+	at java.base/sun.nio.ch.Net.setIntOption0(Native Method)
+	at java.base/sun.nio.ch.Net.setSocketOption(Net.java:455)
+	at java.base/sun.nio.ch.Net.setSocketOption(Net.java:393)
+	at java.base/sun.nio.ch.SocketChannelImpl.setOption(SocketChannelImpl.java:280)
+	at java.base/sun.nio.ch.SocketAdaptor.setIntOption(SocketAdaptor.java:247)
+	at java.base/sun.nio.ch.SocketAdaptor.setSoLinger(SocketAdaptor.java:285)
+	at org.apache.tomcat.util.net.SocketProperties.setProperties(SocketProperties.java:215)
+	at org.apache.tomcat.util.net.NioEndpoint.setSocketOptions(NioEndpoint.java:473)
+	at org.apache.tomcat.util.net.NioEndpoint.setSocketOptions(NioEndpoint.java:71)
+	at org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:148)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-04-30.02:14:23.622 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m5s808ms).
+26-04-30.02:15:51.807 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=56s248ms).
+26-04-30.02:17:05.751 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m13s932ms).
+26-04-30.02:17:48.983 [ForkJoinPool.commonPool-worker-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-04-30.02:20:01.107 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=50s447ms).
+26-04-30.16:29:21.438 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-04-30.16:29:22.676 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-04-30.16:29:22.677 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-04-30.16:31:49.935 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-04-30.16:52:12.146 [http-nio-8091-exec-1] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=不支持的引擎类型
+26-04-30.17:03:14.454 [http-nio-8091-exec-4] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=未找到Agent定义

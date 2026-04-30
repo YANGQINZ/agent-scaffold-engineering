@@ -36,7 +36,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         po.setUserId(session.getUserId());
         po.setAgentId(session.getAgentId());
         po.setMode(session.getMode().name());
-        po.setAgentMode(session.getEngine().name());
+        po.setAgentMode(session.getAgentMode().name());
         po.setRagEnabled(session.getRagEnabled());
         po.setKnowledgeBaseId(session.getKnowledgeBaseId());
         po.setCreatedAt(session.getCreatedAt());
@@ -99,7 +99,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
                 .userId(po.getUserId())
                 .agentId(po.getAgentId())
                 .mode(ChatMode.valueOf(po.getMode()))
-                .engine(EngineType.valueOf(po.getAgentMode()))
+                .agentMode(EngineType.valueOf(po.getAgentMode()))
                 .ragEnabled(po.getRagEnabled())
                 .knowledgeBaseId(po.getKnowledgeBaseId())
                 .createdAt(po.getCreatedAt())

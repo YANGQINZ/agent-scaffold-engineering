@@ -38,7 +38,7 @@ spring:
       pgvector:
         index-type: HNSW
         distance-type: COSINE_DISTANCE
-        dimensions: 1536  # text-embedding-v3实际生成的向量维度
+        dimensions: 1024  # text-embedding-v3支持的维度: 64,128,256,512,768,1024
         initialize-schema: false # 开发环境设置为 true，方便快速启动。生产环境设置为 false，手动管理数据库 schema，避免意外变更。
         remove-existing-vector-store-table: false  # 保留现有表和数据
         table-name: document_chunk

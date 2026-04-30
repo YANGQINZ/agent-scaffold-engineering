@@ -42,7 +42,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
 
         try {
             ContextStore ctx = contextStoreFactory.getOrCreate(
-                    sessionId, request.getUserId(), EngineType.GRAPH, false, null);
+                    sessionId, request.getUserId(), EngineType.CHAT, false, null);
 
             // 通过 ContextStore 追加用户消息历史（assistant消息由ChatFacade统一发布事件写入）
             ctx.appendHistory(request.getUserId(), request.getQuery(), Map.of("role", "user"));
@@ -90,7 +90,7 @@ public class MultiTurnChatStrategy implements ChatStrategy {
 
         return Flux.defer(() -> {
             ContextStore ctx = contextStoreFactory.getOrCreate(
-                    finalSessionId, request.getUserId(), EngineType.GRAPH, false, null);
+                    finalSessionId, request.getUserId(), EngineType.CHAT, false, null);
 
             String memoryContext = ctx.assembleMemoryContext(request.getQuery());
             List<Message> messages = new ArrayList<>();

@@ -32,7 +32,7 @@ public class ChatSession {
     private ChatMode mode;
 
     /** 引擎类型 */
-    private EngineType engine;
+    private EngineType agentMode;
 
     /** 是否启用RAG */
     private Boolean ragEnabled;

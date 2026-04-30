@@ -47,7 +47,6 @@ CREATE TABLE IF NOT EXISTS document_chunk (
     CONSTRAINT vector_store_pkey PRIMARY KEY ("id")
 );
 
-CREATE INDEX IF NOT EXISTS idx_document_chunk_base_id ON document_chunk((metadata->>'baseId'));
 CREATE INDEX IF NOT EXISTS idx_chunk_embedding ON document_chunk USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS idx_chunk_content_tsv ON document_chunk USING GIN (content_tsv);
 
@@ -56,7 +55,7 @@ CREATE TABLE IF NOT EXISTS memory_item (
     id            BIGSERIAL PRIMARY KEY,
     session_id    VARCHAR(64) NOT NULL REFERENCES chat_session(session_id),
     content       TEXT NOT NULL,
-    embedding     vector(1536) NOT NULL,
+    embedding     vector(1024) NOT NULL,
     importance    FLOAT DEFAULT 0.5,
     tags          TEXT[] DEFAULT '{}',
     source_msg_ids BIGINT[] DEFAULT '{}',

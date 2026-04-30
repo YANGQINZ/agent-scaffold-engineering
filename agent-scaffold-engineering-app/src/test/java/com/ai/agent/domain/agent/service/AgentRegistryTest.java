@@ -2,14 +2,15 @@ package com.ai.agent.domain.agent.service;
 
 import com.ai.agent.domain.agent.model.aggregate.ChatAgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.ModelConfig;
+import com.ai.agent.domain.agent.repository.IAgentDefinitionRepository;
 import com.ai.agent.types.enums.EngineType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AgentRegistryTest {
-
-    private AgentRegistry registry = new AgentRegistry();
+    private IAgentDefinitionRepository agentDefinitionRepository;
+    private AgentRegistry registry = new AgentRegistry(agentDefinitionRepository);
 
     private ChatAgentDefinition createDefinition(String id) {
         return ChatAgentDefinition.builder()

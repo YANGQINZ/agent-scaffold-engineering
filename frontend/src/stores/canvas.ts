@@ -12,7 +12,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from '@xyflow/react';
-import type { AgentDefinition } from '@/api/agent';
+import type { AgentDefinition, EngineType } from '@/api/agent';
 
 // ═══════════════════════════════════════════════════════════
 // 类型定义
@@ -42,6 +42,12 @@ interface CanvasState {
   agents: AgentDefinition[];
   /** 各节点运行状态映射 */
   nodeStates: Record<string, NodeState>;
+  /** 当前编辑的 Agent ID */
+  currentAgentId: string | null;
+  /** 当前编辑的 Agent 名称 */
+  currentAgentName: string;
+  /** 当前编辑的引擎类型 */
+  currentEngineType: EngineType;
 
   // ─── Actions ───
 
@@ -61,14 +67,23 @@ interface CanvasState {
   setNodeState: (nodeId: string, state: NodeState) => void;
   /** 清空所有节点运行状态 */
   clearNodeStates: () => void;
+  /** 设置当前编辑的 Agent 信息 */
+  setCurrentAgent: (agentId: string | null, name: string, engine: EngineType) => void;
+  /** 从 AgentDefinition 加载画布 */
+  loadFromAgentDefinition: (agent: AgentDefinition) => void;
+  /** 将画布导出为 AgentDefinition */
+  exportToAgentDefinition: () => Omit<AgentDefinition, 'agentId'>;
 }
 
-export const useCanvasStore = create<CanvasState>((set) => ({
+export const useCanvasStore = create<CanvasState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
   agents: [],
   nodeStates: {},
+  currentAgentId: null,
+  currentAgentName: '',
+  currentEngineType: 'GRAPH',
 
   setNodes: (nodes) => set({ nodes }),
 
@@ -94,4 +109,90 @@ export const useCanvasStore = create<CanvasState>((set) => ({
     })),
 
   clearNodeStates: () => set({ nodeStates: {} }),
+
+  setCurrentAgent: (currentAgentId, currentAgentName, currentEngineType) =>
+    set({ currentAgentId, currentAgentName, currentEngineType }),
+
+  loadFromAgentDefinition: (agent) => {
+    const graphNodes: Node[] = (agent.graphNodes ?? []).map((n, idx) => ({
+      id: n.id,
+      type: n.id === agent.graphStart ? 'start' : 'engine',
+      position: { x: 250 + idx * 200, y: 150 + (idx % 2) * 120 },
+      data: {
+        label: n.id,
+        agentId: n.agentId,
+        reactAgentId: n.reactAgentId,
+        ragEnabled: n.ragEnabled,
+        knowledgeBaseId: n.knowledgeBaseId,
+        engineType: agent.subEngines?.[n.id] ?? agent.engine,
+      },
+    }));
+
+    const startNode = graphNodes.find((n) => n.id === agent.graphStart);
+    if (!startNode && agent.graphStart) {
+      graphNodes.unshift({
+        id: agent.graphStart,
+        type: 'start',
+        position: { x: 250, y: 100 },
+        data: { label: '开始' },
+      });
+    }
+
+    const graphEdges: Edge[] = (agent.graphEdges ?? []).map((e) => ({
+      id: `e_${e.from}-${e.to}`,
+      source: e.from,
+      target: e.to,
+      type: e.condition ? 'condition' : 'default',
+      data: { condition: e.condition },
+    }));
+
+    set({
+      nodes: graphNodes,
+      edges: graphEdges,
+      currentAgentId: agent.agentId,
+      currentAgentName: agent.name,
+      currentEngineType: agent.engine,
+    });
+  },
+
+  exportToAgentDefinition: () => {
+    const state = get();
+    const { nodes, edges, currentAgentName, currentEngineType } = state;
+
+    const startNode = nodes.find((n) => n.type === 'start');
+    const graphStart = startNode?.id ?? nodes[0]?.id ?? '';
+
+    const graphNodes = nodes
+      .filter((n) => n.type !== 'start' && n.type !== 'end')
+      .map((n) => ({
+        id: n.id,
+        agentId: n.data?.agentId as string | undefined,
+        reactAgentId: n.data?.reactAgentId as string | undefined,
+        ragEnabled: n.data?.ragEnabled as boolean | undefined,
+        knowledgeBaseId: n.data?.knowledgeBaseId as string | undefined,
+      }));
+
+    const graphEdges = edges.map((e) => ({
+      from: e.source,
+      to: e.target,
+      condition: (e.data as Record<string, unknown> | undefined)?.condition as string | undefined,
+    }));
+
+    const subEngines: Record<string, EngineType> = {};
+    nodes.forEach((n) => {
+      const et = n.data?.engineType as EngineType | undefined;
+      if (et && et !== currentEngineType) {
+        subEngines[n.id] = et;
+      }
+    });
+
+    return {
+      name: currentAgentName || '未命名 Agent',
+      engine: currentEngineType,
+      graphStart,
+      graphNodes,
+      graphEdges,
+      ...(Object.keys(subEngines).length > 0 ? { subEngines } : {}),
+    };
+  },
 }));
