@@ -6,7 +6,10 @@ import com.ai.agent.domain.agent.model.entity.McpServerConfig;
 import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.mcp.McpClientBuilder;
 import io.agentscope.core.tool.mcp.McpClientWrapper;
+import io.agentscope.core.tool.mcp.McpSyncClientWrapper;
+import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.mcp.McpToolUtils;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 
@@ -53,16 +56,89 @@ public class McpToolProvider {
     }
 
     /**
-     * 为 Graph 引擎提供工具：转换为 Spring AI FunctionToolCallback
+     * 根据节点级 MCP 配置构建 Spring AI ToolCallback 列表
      *
-     * @param agentId Agent ID
+     * @param configs MCP Server 配置列表
+     * @return 所有配置对应的工具回调列表
+     */
+    public List<ToolCallback> buildGraphTools(List<McpServerConfig> configs) {
+        if (configs == null || configs.isEmpty()) {
+            return List.of();
+        }
+        List<ToolCallback> tools = new ArrayList<>();
+        for (McpServerConfig config : configs) {
+            try {
+                // 确保客户端已初始化
+                registerServer(config);
+                // 获取该 MCP 服务器的工具
+                List<ToolCallback> serverTools = getGraphTools(config.getName());
+                if (serverTools != null) {
+                    tools.addAll(serverTools);
+                }
+            } catch (Exception e) {
+                log.warn("构建Graph工具失败: server={}, error={}", config.getName(), e.getMessage());
+            }
+        }
+        log.info("构建Graph工具完成: 共{}个MCP Server, 工具数={}", configs.size(), tools.size());
+        return tools;
+    }
+
+    /**
+     * 为 Graph 引擎提供工具：从缓存的 MCP 客户端获取 Spring AI ToolCallback
+     *
+     * @param serverName MCP Server 名称
      * @return 工具回调列表
      */
-    public List<ToolCallback> getGraphTools(String agentId) {
-        log.debug("获取Graph工具: agentId={}", agentId);
-        // Graph 引擎使用 Spring AI 的 ToolCallback 体系
-        // MCP 工具通过 Spring AI MCP Client 自动注入，此处保留扩展入口
-        return List.of();
+    public List<ToolCallback> getGraphTools(String serverName) {
+        log.debug("获取Graph工具: serverName={}", serverName);
+        McpClientWrapper wrapper = clients.get(serverName);
+        if (wrapper == null) {
+            log.debug("MCP客户端不存在: serverName={}", serverName);
+            return List.of();
+        }
+
+        try {
+            // 确保客户端已初始化
+            if (!wrapper.isInitialized()) {
+                wrapper.initialize().block();
+            }
+
+            // 从 McpSyncClientWrapper 中提取 McpSyncClient
+            McpSyncClient syncClient = extractSyncClient(wrapper);
+            if (syncClient == null) {
+                log.warn("无法提取McpSyncClient: serverName={}, wrapper类型={}", serverName, wrapper.getClass().getSimpleName());
+                return List.of();
+            }
+
+            // 使用 Spring AI 工具类获取 ToolCallback 列表
+            return McpToolUtils.getToolCallbacksFromSyncClients(List.of(syncClient));
+        } catch (Exception e) {
+            log.error("获取Graph工具失败: serverName={}, error={}", serverName, e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * 从 McpSyncClientWrapper 中提取底层的 McpSyncClient
+     *
+     * McpSyncClientWrapper 将 McpSyncClient 作为私有字段存储，
+     * 需要通过反射获取以构建 Spring AI ToolCallback。
+     *
+     * @param wrapper MCP 客户端包装器
+     * @return McpSyncClient 实例，提取失败返回 null
+     */
+    private McpSyncClient extractSyncClient(McpClientWrapper wrapper) {
+        if (!(wrapper instanceof McpSyncClientWrapper)) {
+            return null;
+        }
+        try {
+            java.lang.reflect.Field clientField = McpSyncClientWrapper.class.getDeclaredField("client");
+            clientField.setAccessible(true);
+            return (McpSyncClient) clientField.get(wrapper);
+        } catch (Exception e) {
+            log.error("反射提取McpSyncClient失败: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**

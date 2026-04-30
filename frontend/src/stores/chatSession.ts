@@ -25,7 +25,7 @@ export const useChatSessionStore = create<ChatSessionState>((set) => ({
     set({ loading: true });
     try {
       const sessions = await listAllSessions();
-      set({ sessions, loading: false });
+      set({ sessions: Array.isArray(sessions) ? sessions : [], loading: false });
     } catch {
       set({ loading: false });
     }

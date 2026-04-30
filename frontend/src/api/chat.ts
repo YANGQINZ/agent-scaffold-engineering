@@ -37,6 +37,8 @@ export interface ChatRequest {
   agentId?: string;
   /** 内联 Agent 定义（未保存画布时使用） */
   agentDefinition?: AgentDefinition;
+  /** 测试运行标识 — 为 true 时跳过上下文注入和历史消息追加 */
+  testRun?: boolean;
 }
 
 /** RAG 来源信息 */
@@ -154,7 +156,7 @@ export async function createSession(name?: string): Promise<string> {
 /** 获取会话列表 */
 export async function listAllSessions(): Promise<ChatSessionVO[]> {
   const { data } = await apiClient.get('/chat/session/list');
-  return data.data;
+  return Array.isArray(data?.data) ? data.data : [];
 }
 
 export interface ChatSessionVO {

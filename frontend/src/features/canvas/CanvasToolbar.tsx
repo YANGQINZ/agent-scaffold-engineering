@@ -7,7 +7,6 @@ import {
   Plus,
   Save,
   FileDown,
-  MessageSquare,
   Cpu,
   CircleDot,
   ChevronDown,
@@ -44,22 +43,17 @@ function CanvasToolbar() {
   const addNode = useCallback(
     (type: string) => {
       const offset = nodes.length * 40;
+      const defaultData: Record<string, any> = {
+        label: type === 'start' ? '开始' : type === 'end' ? '结束' : 'Agent 节点',
+      };
+      if (type === 'agent') {
+        defaultData.subEngine = 'GRAPH';
+      }
       const newNode = {
         id: genId(),
         type,
         position: { x: 250 + offset, y: 100 + offset },
-        data: {
-          label:
-            type === 'start'
-              ? '开始'
-              : type === 'end'
-                ? '结束'
-                : type === 'chat'
-                  ? '对话节点'
-                  : '引擎节点',
-          ...(type === 'chat' ? { engine: 'CHAT' } : {}),
-          ...(type === 'engine' ? { engineType: 'GRAPH' } : {}),
-        },
+        data: defaultData,
       };
       setNodes([...nodes, newNode]);
       setAddMenuOpen(false);
@@ -116,8 +110,7 @@ function CanvasToolbar() {
   const menuItems = [
     { type: 'start', icon: CircleDot, label: '开始节点' },
     { type: 'end', icon: CircleDot, label: '结束节点' },
-    { type: 'chat', icon: MessageSquare, label: '对话节点' },
-    { type: 'engine', icon: Cpu, label: '引擎节点' },
+    { type: 'agent', icon: Cpu, label: 'Agent 节点' },
   ];
 
   return (

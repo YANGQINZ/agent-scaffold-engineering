@@ -87,6 +87,7 @@ function ChatPanel() {
               ...canvasDef,
             }
           : undefined,
+        testRun: isUnsavedCanvas,
       });
     },
     [addMessage, startStream, activeSessionId, selectedAgentId, agents],

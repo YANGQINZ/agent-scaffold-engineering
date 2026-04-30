@@ -111,7 +111,7 @@ class TaskRuntimeTest {
                 .agentId("temp_123")
                 .name("Temp")
                 .engine(EngineType.GRAPH)
-                .graphStart("start")
+                .graphStart(List.of("start"))
                 .graphNodes(List.of(WorkflowNode.builder().id("start").agentId("sub").build()))
                 .build();
 
@@ -190,7 +190,7 @@ class TaskRuntimeTest {
                 .agentId("temp_inline")
                 .name("InlineGraph")
                 .engine(EngineType.GRAPH)
-                .graphStart("start")
+                .graphStart(List.of("start"))
                 .graphNodes(List.of(WorkflowNode.builder().id("start").agentId("sub").build()))
                 .build();
 

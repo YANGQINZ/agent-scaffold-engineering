@@ -21,8 +21,8 @@ import java.util.Map;
 @SuperBuilder
 public class HybridAgentDefinition extends AgentDefinition {
 
-    /** Graph编排 - 起始节点ID */
-    private String graphStart;
+    /** Graph编排 - 起始节点ID列表 */
+    private List<String> graphStart;
 
     /** Graph编排 - 节点列表 */
     private List<WorkflowNode> graphNodes = List.of();

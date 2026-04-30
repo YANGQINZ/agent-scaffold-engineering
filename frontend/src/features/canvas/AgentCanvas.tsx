@@ -19,8 +19,7 @@ import '@xyflow/react/dist/style.css';
 import { useCanvasStore } from '@/stores/canvas';
 import StartNode from './nodes/StartNode';
 import EndNode from './nodes/EndNode';
-import ChatNode from './nodes/ChatNode';
-import EngineNode from './nodes/EngineNode';
+import { AgentNode } from './nodes/AgentNode';
 import DefaultEdge from './edges/DefaultEdge';
 import ConditionEdge from './edges/ConditionEdge';
 
@@ -28,8 +27,7 @@ import ConditionEdge from './edges/ConditionEdge';
 const nodeTypes = {
   start: StartNode,
   end: EndNode,
-  chat: ChatNode,
-  engine: EngineNode,
+  agent: AgentNode,
 };
 
 /** 注册自定义边类型 */
@@ -52,15 +50,17 @@ function AgentCanvas() {
   const { screenToFlowPosition } = useReactFlow();
 
   /** 追踪拖拽连线的起点 */
-  const connectingFrom = useRef<{ nodeId: string | null; handleType: string | null; edgeCount: number }>({
+  const connectingFrom = useRef<{ nodeId: string | null; handleType: string | null }>({
     nodeId: null,
     handleType: null,
-    edgeCount: 0,
   });
+  /** 标记本次拖拽是否成功连到有效 target */
+  const connectedRef = useRef(false);
 
   /** 连线回调：添加默认边 */
   const onConnect = useCallback(
     (connection: Connection) => {
+      connectedRef.current = true;
       if (!connection.source || !connection.target) return;
       const newEdge: Edge = {
         id: `e_${connection.source}-${connection.target}`,
@@ -89,56 +89,58 @@ function AgentCanvas() {
   /** 连线开始：记录起点 */
   const onConnectStart = useCallback(
     (_event: React.MouseEvent | React.TouchEvent, { nodeId, handleType }: { nodeId: string | null; handleType: string | null }) => {
+      connectedRef.current = false;
       connectingFrom.current = {
         nodeId: handleType === 'source' ? nodeId : null,
         handleType,
-        edgeCount: edges.length,
       };
     },
-    [edges.length],
+    [],
   );
 
-  /** 连线结束：如果拖到空白区域则自动添加 ChatNode */
+  /** 连线结束：如果拖到空白区域则自动添加 Agent 节点 */
   const onConnectEnd = useCallback(
     (event: MouseEvent | TouchEvent) => {
-      const { nodeId: sourceNodeId, handleType, edgeCount } = connectingFrom.current;
+      const { nodeId: sourceNodeId, handleType } = connectingFrom.current;
 
       // 重置追踪状态
-      connectingFrom.current = { nodeId: null, handleType: null, edgeCount: 0 };
+      connectingFrom.current = { nodeId: null, handleType: null };
 
       // 仅处理从 source handle 拖出
       if (handleType !== 'source' || !sourceNodeId) return;
 
-      // 如果已有新 edge 产生（连到了有效 target），不创建新节点
-      if (edges.length > edgeCount) return;
+      // 如果已成功连到有效 target，不创建新节点
+      if (connectedRef.current) {
+        connectedRef.current = false;
+        return;
+      }
 
       // 将鼠标屏幕坐标转为画布坐标
       const screenPoint = 'clientX' in event
         ? { x: event.clientX, y: event.clientY }
         : { x: 0, y: 0 };
-      const flowPosition = screenToFlowPosition(screenPoint);
+      const position = screenToFlowPosition(screenPoint);
 
-      // 创建新 ChatNode
-      const newNodeId = `node_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      // 创建新 Agent 节点
       const newNode: Node = {
-        id: newNodeId,
-        type: 'chat',
-        position: flowPosition,
-        data: { label: '对话节点', engine: 'CHAT' },
+        id: `agent_${Date.now()}`,
+        type: 'agent',
+        position,
+        data: { label: 'Agent 节点', subEngine: 'GRAPH' },
       };
 
       // 创建从源节点到新节点的边
       const newEdge: Edge = {
-        id: `e_${sourceNodeId}-${newNodeId}`,
+        id: `e_${sourceNodeId}-${newNode.id}`,
         source: sourceNodeId,
-        target: newNodeId,
+        target: newNode.id,
         type: 'default',
       };
 
       setNodes([...nodes, newNode]);
       setEdges([...edges, newEdge]);
     },
-    [nodes, edges, setNodes, setEdges, screenToFlowPosition],
+    [nodes, setNodes, edges, setEdges, screenToFlowPosition],
   );
 
   return (

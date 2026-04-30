@@ -88,7 +88,7 @@ public class ChatFacade {
                 .sessionId(sessionId)
                 .name(name)
                 .userId("default")
-                .mode(ChatMode.SIMPLE)
+                .mode(ChatMode.MULTI_TURN)
                 .agentMode(EngineType.CHAT)
                 .ragEnabled(false)
                 .createdAt(LocalDateTime.now())

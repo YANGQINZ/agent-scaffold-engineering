@@ -201,7 +201,7 @@ public class TaskRuntime implements ChatStrategy {
                         throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "GRAPH 类型 Agent 定义缺少 graphNodes 字段");
                     }
-                    if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isBlank()) {
+                    if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isEmpty()) {
                         throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "GRAPH 类型 Agent 定义缺少 graphStart 字段");
                     }
@@ -221,7 +221,7 @@ public class TaskRuntime implements ChatStrategy {
                         throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "HYBRID 类型 Agent 定义缺少 graphNodes 字段");
                     }
-                    if (hybridDef.getGraphStart() == null || hybridDef.getGraphStart().isBlank()) {
+                    if (hybridDef.getGraphStart() == null || hybridDef.getGraphStart().isEmpty()) {
                         throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "HYBRID 类型 Agent 定义缺少 graphStart 字段");
                     }

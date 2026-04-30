@@ -44,4 +44,7 @@ public class ChatRequest {
     /** 内联 Agent 定义（未保存画布时传递的临时画布数据） */
     private AgentDefinition agentDefinition;
 
+    /** 测试运行标识 — 为 true 时跳过上下文注入和历史消息追加 */
+    private Boolean testRun = false;
+
 }

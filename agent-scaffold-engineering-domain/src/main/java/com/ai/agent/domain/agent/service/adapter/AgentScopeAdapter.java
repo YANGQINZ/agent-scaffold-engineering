@@ -80,7 +80,7 @@ public class AgentScopeAdapter implements EngineAdapter {
 
         try {
             // 1. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
-            Msg inputMsg = toInputMsg(input, asDef, ctx);
+            Msg inputMsg = toInputMsg(input, ctx);
 
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
@@ -184,7 +184,8 @@ public class AgentScopeAdapter implements EngineAdapter {
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
             // 有子 Agent 配置时，逐个构建 ReActAgent
             for (var agentConfig : asDef.getAgentscopeAgents()) {
-                AgentDefinition subDef = agentRegistry.get(agentConfig.getAgentId());
+                AgentDefinition subDef = agentConfig.getAgentId() != null && !agentConfig.getAgentId().isBlank()
+                        ? agentRegistry.get(agentConfig.getAgentId()) : null;
                 String instruction = subDef != null ? subDef.getInstruction() : asDef.getInstruction();
                 String agentName = subDef != null ? subDef.getName() : agentConfig.getAgentId();
 
@@ -354,7 +355,7 @@ public class AgentScopeAdapter implements EngineAdapter {
      * 注入对话历史作为上下文（从 ContextStore 获取），
      * 确保跨引擎状态传递。
      */
-    private Msg toInputMsg(AgentMessage input, AgentDefinition def, ContextStore ctx) {
+    private Msg toInputMsg(AgentMessage input, ContextStore ctx) {
         String content = input.getContent() != null ? input.getContent() : "";
 
         // 注入记忆上下文（摘要 + 语义记忆 + 近期消息）

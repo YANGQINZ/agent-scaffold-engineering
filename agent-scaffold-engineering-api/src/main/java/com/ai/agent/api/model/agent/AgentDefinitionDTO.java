@@ -35,8 +35,8 @@ public class AgentDefinitionDTO {
 
     // GRAPH / HYBRID specific
 
-    /** 图起始节点 */
-    private String graphStart;
+    /** 图起始节点（支持多入口） */
+    private List<String> graphStart;
 
     /** 图节点列表 */
     private List<WorkflowNodeDTO> graphNodes;

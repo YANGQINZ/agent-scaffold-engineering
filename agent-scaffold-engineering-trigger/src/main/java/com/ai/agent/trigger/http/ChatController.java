@@ -86,6 +86,7 @@ public class ChatController implements IChatService {
                 .agentId(dto.getAgentId())
                 .agentDefinition(dto.getAgentDefinition() != null
                         ? AgentDefinitionConverter.toDomain(dto.getAgentDefinition()) : null)
+                .testRun(dto.getTestRun())
                 .build();
     }
 

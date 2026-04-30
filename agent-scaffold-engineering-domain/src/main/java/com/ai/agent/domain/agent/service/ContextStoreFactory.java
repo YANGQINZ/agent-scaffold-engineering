@@ -31,7 +31,8 @@ public class ContextStoreFactory {
     }
 
     public ContextStore getOrCreate(String sessionId) {
-        return store.computeIfAbsent(sessionId, id -> {
+        String key = sessionId != null ? sessionId : "test-" + java.util.UUID.randomUUID();
+        return store.computeIfAbsent(key, id -> {
             SessionContext ctx = createDefault(id);
             persistIfNeeded(ctx);
             return ctx;
@@ -47,7 +48,8 @@ public class ContextStoreFactory {
     public ContextStore getOrCreate(String sessionId, String userId, String agentId,
                                      EngineType engineType, boolean ragEnabled,
                                      String knowledgeBaseId) {
-        return store.computeIfAbsent(sessionId,
+        String key = sessionId != null ? sessionId : "test-" + java.util.UUID.randomUUID();
+        return store.computeIfAbsent(key,
                 id -> {
                     SessionContext ctx = SessionContext.create(id, userId, agentId, engineType,
                             ragEnabled, knowledgeBaseId, memoryPort);

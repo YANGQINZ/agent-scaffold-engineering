@@ -25,4 +25,6 @@ public class ChatRequestDTO {
     private String agentId;
     /** 内联 Agent 定义（未保存画布时使用） */
     private AgentDefinitionDTO agentDefinition;
+    /** 测试运行标识 — 为 true 时跳过上下文注入和历史消息追加 */
+    private Boolean testRun = false;
 }

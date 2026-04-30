@@ -42,8 +42,10 @@ class GraphEngineAdapterTest {
         AgentRegistry registry = mock(AgentRegistry.class);
         McpToolProvider toolProvider = mock(McpToolProvider.class);
         ConditionEvaluator evaluator = mock(ConditionEvaluator.class);
+        McpToolProvider mcpToolProvider = mock(McpToolProvider.class);
 
-        GraphEngineAdapter adapter = new GraphEngineAdapter(chatModel, registry, evaluator,nodeRagService);
+        GraphEngineAdapter adapter =
+            new GraphEngineAdapter(chatModel, registry, evaluator, nodeRagService, mcpToolProvider);
 
         // 验证 Flux.defer() 内部不会阻塞当前线程
         // 由于 StateGraph 需要 YAML 配置，我们测试 Flux 结构的正确性
@@ -52,8 +54,7 @@ class GraphEngineAdapterTest {
     }
 
     /**
-     * 验证重试不会导致过长的阻塞时间
-     * 重试 3 次的最大总延迟不应超过合理阈值
+     * 验证重试不会导致过长的阻塞时间 重试 3 次的最大总延迟不应超过合理阈值
      */
     @Test
     void retryTiming_totalDelayWithinBounds() {

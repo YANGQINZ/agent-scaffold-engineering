@@ -4,7 +4,9 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- Chat domain tables
 CREATE TABLE IF NOT EXISTS chat_session (
     session_id VARCHAR(64) PRIMARY KEY,
+    name VARCHAR(128),
     user_id VARCHAR(64) NOT NULL,
+    agent_id VARCHAR(64),
     mode VARCHAR(20) NOT NULL,
     agent_mode VARCHAR(20),
     rag_enabled BOOLEAN DEFAULT FALSE,
