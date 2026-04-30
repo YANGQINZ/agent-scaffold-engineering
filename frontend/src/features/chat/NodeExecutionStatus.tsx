@@ -1,10 +1,9 @@
 /**
- * 节点执行状态展示组件（专家模式）
+ * 节点执行状态展示组件
  * 水平排列的节点状态胶囊：运行中（紫色脉冲）、完成（绿色对勾）、错误（红色叉号）
  */
 import { memo } from 'react';
 import { Check, X, Loader2 } from 'lucide-react';
-import { useAppStore } from '@/stores/app';
 import { useChatStore, type NodeExecutionStatus as NodeStatus } from '@/stores/chat';
 import { cn } from '@/lib/utils';
 
@@ -33,11 +32,10 @@ function StatusIcon({ status }: { status: NodeStatus['status'] }) {
 }
 
 function NodeExecutionStatusView() {
-  const mode = useAppStore((s) => s.mode);
   const nodeExecutionStatus = useChatStore((s) => s.nodeExecutionStatus);
 
-  // 仅专家模式且有节点状态时展示
-  if (mode !== 'expert' || nodeExecutionStatus.length === 0) return null;
+  // 当有节点执行状态时显示（所有模式）
+  if (nodeExecutionStatus.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
