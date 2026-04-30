@@ -8,6 +8,7 @@ import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.engine.ConditionEvaluator;
+import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.ai.agent.domain.knowledge.service.rag.NodeRagService;
@@ -21,10 +22,12 @@ import com.alibaba.cloud.ai.graph.exception.GraphStateException;
 import com.alibaba.cloud.ai.graph.state.strategy.AppendStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -52,6 +55,7 @@ public class GraphEngineAdapter implements EngineAdapter {
     private final AgentRegistry agentRegistry;
     private final ConditionEvaluator conditionEvaluator;
     private final NodeRagService nodeRagService;
+    private final McpToolProvider mcpToolProvider;
 
     /** 最大重试次数 */
     private static final int MAX_RETRY = 3;
@@ -206,8 +210,10 @@ public class GraphEngineAdapter implements EngineAdapter {
             graph.addNode(node.getId(), node_async(buildNodeAction(def, node, ctx, enableThinking)));
         }
 
-        // 2. 添加起始边
-        graph.addEdge(START, def.getGraphStart());
+        // 2. 添加起始边（支持多起始节点）
+        for (String startTarget : def.getGraphStart()) {
+            graph.addEdge(START, startTarget);
+        }
 
         // 3. 构建边映射
         Map<String, List<GraphEdge>> edgeMap = def.getGraphEdges().stream()
@@ -338,28 +344,50 @@ public class GraphEngineAdapter implements EngineAdapter {
     }
 
     private NodeExecuteResult executeNodeLogic(AgentDefinition def, WorkflowNode node, String input, boolean enableThinking) {
-        String subAgentId = node.getAgentId();
-        AgentDefinition subAgentDef = agentRegistry.get(subAgentId);
+        // 1. 解析 instruction：节点内联 > agentId 子代理 > 默认
+        String systemPrompt;
+        if (node.getInstruction() != null && !node.getInstruction().isBlank()) {
+            systemPrompt = node.getInstruction();
+        } else if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
+            AgentDefinition subAgentDef = agentRegistry.get(node.getAgentId());
+            systemPrompt = (subAgentDef != null && subAgentDef.getInstruction() != null)
+                    ? subAgentDef.getInstruction()
+                    : "你是一个有用的助手。";
+        } else {
+            systemPrompt = "你是一个有用的助手。";
+        }
 
-        String instruction = subAgentDef != null ? subAgentDef.getInstruction() : def.getInstruction();
-
+        // 2. 构建 Prompt
         Prompt prompt;
         if (enableThinking) {
             DashScopeChatOptions options = DashScopeChatOptions.builder()
                     .enableThinking(true)
                     .build();
             prompt = new Prompt(List.of(
-                    new SystemMessage(instruction),
+                    new SystemMessage(systemPrompt),
                     new UserMessage(input)
             ), options);
         } else {
             prompt = new Prompt(List.of(
-                    new SystemMessage(instruction),
+                    new SystemMessage(systemPrompt),
                     new UserMessage(input)
             ));
         }
 
-        org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(prompt);
+        // 3. 执行：MCP 工具调用或普通 LLM 调用
+        org.springframework.ai.chat.model.ChatResponse aiResponse;
+        if (node.getMcpServers() != null && !node.getMcpServers().isEmpty()) {
+            List<ToolCallback> tools = mcpToolProvider.buildGraphTools(node.getMcpServers());
+            aiResponse = ChatClient.create(chatModel)
+                    .prompt(prompt)
+                    .tools(tools)
+                    .call()
+                    .chatResponse();
+        } else {
+            aiResponse = chatModel.call(prompt);
+        }
+
+        // 4. 提取结果
         ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(aiResponse);
         return new NodeExecuteResult(result.textContent(), result.hasThinking() ? result.thinkingContent() : null);
     }
@@ -412,7 +440,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Graph配置不完整: 缺少节点定义, agentId=" + graphDef.getAgentId());
         }
-        if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isBlank()) {
+        if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isEmpty()) {
             throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Graph配置不完整: 缺少起始节点, agentId=" + graphDef.getAgentId());
         }
