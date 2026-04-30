@@ -1,18 +1,28 @@
 package com.ai.agent.domain.agent.service;
 
+import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
+import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.agent.service.adapter.EngineAdapter;
+import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.enums.EngineType;
+import com.ai.agent.types.exception.AgentException;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class TaskRuntimeTest {
 
@@ -122,6 +132,118 @@ class TaskRuntimeTest {
 
         assertNull(request.getAgentId());
         assertNull(request.getAgentDefinition());
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 行为测试 — 通过 execute(ChatRequest) 测试 resolveAgentDefinition / validateInlineDefinition
+    // ═══════════════════════════════════════════════════════
+
+    /**
+     * 测试1: 既没有 agentId 也没有 agentDefinition 时，execute 抛出 AGENT_NOT_FOUND
+     */
+    @Test
+    void execute_noAgentIdNoDefinition_throwsAgentNotFound() {
+        AgentRegistry mockRegistry = Mockito.mock(AgentRegistry.class);
+        ContextStoreFactory mockCtxFactory = Mockito.mock(ContextStoreFactory.class);
+        EngineAdapter graphAdapter = new StubEngineAdapter(EngineType.GRAPH);
+
+        TaskRuntime runtime = new TaskRuntime(mockRegistry, mockCtxFactory, List.of(graphAdapter));
+
+        ChatRequest request = ChatRequest.builder()
+                .mode(ChatMode.AGENT)
+                .userId("user1")
+                .sessionId("session1")
+                .query("hello")
+                .build();
+
+        AgentException ex = assertThrows(AgentException.class, () -> runtime.execute(request));
+        assertEquals("1003", ex.getErrorCode(), "错误码应为 AGENT_NOT_FOUND(1003)");
+    }
+
+    /**
+     * 测试2: 内联 GraphAgentDefinition（合法数据）时，execute 走到适配器并返回结果
+     */
+    @Test
+    void execute_inlineGraphDefinition_proceedsToAdapter() {
+        AgentRegistry mockRegistry = Mockito.mock(AgentRegistry.class);
+        ContextStoreFactory mockCtxFactory = Mockito.mock(ContextStoreFactory.class);
+        ContextStore mockCtx = Mockito.mock(ContextStore.class);
+
+        // 构造一个返回固定内容的 EngineAdapter
+        AgentMessage expectedResult = AgentMessage.builder()
+                .content("graph executed")
+                .metadata(Map.of("sessionId", "session1"))
+                .build();
+        EngineAdapter graphAdapter = new StubEngineAdapter(EngineType.GRAPH) {
+            @Override
+            public AgentMessage execute(AgentDefinition def, AgentMessage input, ContextStore ctx) {
+                return expectedResult;
+            }
+        };
+
+        when(mockCtxFactory.getOrCreate(anyString(), anyString(), anyString(),
+                any(EngineType.class), anyBoolean(), any())).thenReturn(mockCtx);
+
+        TaskRuntime runtime = new TaskRuntime(mockRegistry, mockCtxFactory, List.of(graphAdapter));
+
+        GraphAgentDefinition inlineDef = GraphAgentDefinition.builder()
+                .agentId("temp_inline")
+                .name("InlineGraph")
+                .engine(EngineType.GRAPH)
+                .graphStart("start")
+                .graphNodes(List.of(WorkflowNode.builder().id("start").agentId("sub").build()))
+                .build();
+
+        ChatRequest request = ChatRequest.builder()
+                .mode(ChatMode.AGENT)
+                .userId("user1")
+                .sessionId("session1")
+                .query("hello")
+                .engine(EngineType.GRAPH)
+                .agentDefinition(inlineDef)
+                .build();
+
+        ChatResponse response = runtime.execute(request);
+        assertNotNull(response, "内联定义应成功执行并返回结果");
+        assertEquals("graph executed", response.getAnswer());
+
+        // 确认 registry.get() 没有被调用（因为没有 agentId）
+        verify(mockRegistry, never()).get(anyString());
+        // 确认 ContextStoreFactory 被调用了
+        verify(mockCtxFactory).getOrCreate(eq("session1"), eq("user1"), isNull(),
+                eq(EngineType.GRAPH), eq(false), isNull());
+    }
+
+    /**
+     * 测试3: 内联 GraphAgentDefinition 缺少 graphStart 时，execute 抛出异常并包含提示信息
+     */
+    @Test
+    void execute_inlineGraphDefinitionMissingGraphStart_throwsAgentNotFound() {
+        AgentRegistry mockRegistry = Mockito.mock(AgentRegistry.class);
+        ContextStoreFactory mockCtxFactory = Mockito.mock(ContextStoreFactory.class);
+        EngineAdapter graphAdapter = new StubEngineAdapter(EngineType.GRAPH);
+
+        TaskRuntime runtime = new TaskRuntime(mockRegistry, mockCtxFactory, List.of(graphAdapter));
+
+        GraphAgentDefinition inlineDef = GraphAgentDefinition.builder()
+                .agentId("temp_bad")
+                .name("BadGraph")
+                .engine(EngineType.GRAPH)
+                .graphStart(null)
+                .graphNodes(List.of(WorkflowNode.builder().id("start").agentId("sub").build()))
+                .build();
+
+        ChatRequest request = ChatRequest.builder()
+                .mode(ChatMode.AGENT)
+                .userId("user1")
+                .sessionId("session1")
+                .query("hello")
+                .agentDefinition(inlineDef)
+                .build();
+
+        AgentException ex = assertThrows(AgentException.class, () -> runtime.execute(request));
+        assertTrue(ex.getErrorMsg().contains("GRAPH 类型 Agent 定义缺少 graphStart 字段"),
+                "异常信息应包含缺少 graphStart 字段的提示");
     }
 
     private static class StubEngineAdapter implements EngineAdapter {

@@ -110,7 +110,7 @@ public class TaskRuntime implements ChatStrategy {
         // 1. 从 Registry 加载 AgentDefinition
         AgentDefinition def = agentRegistry.get(agentId);
         if (def == null) {
-            throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+            throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                     "未找到Agent定义: agentId=" + agentId);
         }
 
@@ -156,7 +156,7 @@ public class TaskRuntime implements ChatStrategy {
         }
         EngineAdapter adapter = getAdapters().get(engineType);
         if (adapter == null) {
-            throw new AgentException(ErrorCodeEnum.AGENT_ENGINE_INVALID,
+            throw new AgentException(ErrorCodeEnum.AGENT_ENGINE_INVALID.getErrorCode(),
                     "不支持的引擎类型: " + engineType);
         }
         return adapter;
@@ -185,7 +185,7 @@ public class TaskRuntime implements ChatStrategy {
         }
 
         // 3. 都没有
-        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                 "未提供 agentId 且未传递画布定义数据");
     }
 
@@ -198,11 +198,11 @@ public class TaskRuntime implements ChatStrategy {
             case GRAPH -> {
                 if (def instanceof GraphAgentDefinition graphDef) {
                     if (graphDef.getGraphNodes() == null || graphDef.getGraphNodes().isEmpty()) {
-                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "GRAPH 类型 Agent 定义缺少 graphNodes 字段");
                     }
                     if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isBlank()) {
-                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "GRAPH 类型 Agent 定义缺少 graphStart 字段");
                     }
                 }
@@ -210,7 +210,7 @@ public class TaskRuntime implements ChatStrategy {
             case AGENTSCOPE -> {
                 if (def instanceof AgentscopeAgentDefinition asDef) {
                     if (asDef.getAgentscopeAgents() == null || asDef.getAgentscopeAgents().isEmpty()) {
-                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "AGENTSCOPE 类型 Agent 定义缺少 agentscopeAgents 字段");
                     }
                 }
@@ -218,18 +218,18 @@ public class TaskRuntime implements ChatStrategy {
             case HYBRID -> {
                 if (def instanceof HybridAgentDefinition hybridDef) {
                     if (hybridDef.getGraphNodes() == null || hybridDef.getGraphNodes().isEmpty()) {
-                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "HYBRID 类型 Agent 定义缺少 graphNodes 字段");
                     }
                     if (hybridDef.getGraphStart() == null || hybridDef.getGraphStart().isBlank()) {
-                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                                 "HYBRID 类型 Agent 定义缺少 graphStart 字段");
                     }
                 }
             }
             case CHAT -> {
                 if (def.getInstruction() == null || def.getInstruction().isBlank()) {
-                    throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                    throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND.getErrorCode(),
                             "CHAT 类型 Agent 定义缺少 instruction 字段");
                 }
             }
