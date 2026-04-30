@@ -6,6 +6,7 @@
 import { useRef, useCallback, useState } from 'react';
 import { streamChat, type ChatRequest, type StreamEvent } from '@/api/chat';
 import { useChatStore } from '@/stores/chat';
+import { useCanvasStore } from '@/stores/canvas';
 
 interface UseSSEReturn {
   /** 发起流式对话 */
@@ -83,6 +84,8 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
                 : (event.data?.nodeName as string) ?? (event.data?.nodeId as string) ?? '';
             if (nodeId) {
               addNodeStatus({ nodeId, status: 'running' });
+              // 同步画布节点状态
+              useCanvasStore.getState().setNodeState(nodeId, { status: 'running' });
             }
             break;
           }
@@ -93,10 +96,14 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
                 : (event.data?.nodeName as string) ?? (event.data?.nodeId as string) ?? '';
             if (nodeId) {
               updateNodeStatus(nodeId, 'done');
+              // 同步画布节点状态
+              useCanvasStore.getState().setNodeState(nodeId, { status: 'done' });
             }
             break;
           }
           case 'DONE': {
+            // 清除画布节点运行状态
+            useCanvasStore.getState().clearNodeStates();
             if (event.sessionId) {
               setActiveSessionId(event.sessionId);
             }
