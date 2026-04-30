@@ -1,6 +1,9 @@
 package com.ai.agent.domain.agent.service;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.HybridAgentDefinition;
 import com.ai.agent.domain.agent.model.valobj.AgentMessage;
 import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.adapter.EngineAdapter;
@@ -62,7 +65,17 @@ public class TaskRuntime implements ChatStrategy {
     @Override
     public ChatResponse execute(ChatRequest request) {
         AgentMessage input = toAgentMessage(request);
-        AgentMessage result = execute(request.getAgentId(), input);
+        AgentDefinition def = resolveAgentDefinition(request);
+        EngineAdapter adapter = routeAdapter(def.getEngine());
+        ContextStore ctx = contextStoreFactory.getOrCreate(
+                request.getSessionId(),
+                request.getUserId(),
+                request.getAgentId(),
+                request.getEngine() != null ? request.getEngine() : EngineType.GRAPH,
+                Boolean.TRUE.equals(request.getRagEnabled()),
+                request.getKnowledgeBaseId()
+        );
+        AgentMessage result = adapter.execute(def, input, ctx);
         return toChatResponse(result);
     }
 
@@ -150,9 +163,13 @@ public class TaskRuntime implements ChatStrategy {
     }
 
     /**
-     * 解析 Agent 定义 — 优先按 agentId 查找
+     * 解析 Agent 定义 — 三级回退
+     * 1. agentId → 从 Registry 查找
+     * 2. request.agentDefinition → 直接使用内联定义（校验后）
+     * 3. 都没有 → 抛出 AGENT_NOT_FOUND
      */
     private AgentDefinition resolveAgentDefinition(ChatRequest request) {
+        // 1. 优先按 agentId 查找
         if (request.getAgentId() != null && !request.getAgentId().isBlank()) {
             AgentDefinition def = agentRegistry.get(request.getAgentId());
             if (def != null) {
@@ -161,16 +178,62 @@ public class TaskRuntime implements ChatStrategy {
             log.warn("未找到指定agentId的Agent定义: agentId={}", request.getAgentId());
         }
 
-        // 按 engine name 查找（兼容旧逻辑）
-        if (request.getEngine() != null) {
-            AgentDefinition def = agentRegistry.get(request.getEngine().name());
-            if (def != null) {
-                return def;
-            }
+        // 2. 使用内联定义
+        if (request.getAgentDefinition() != null) {
+            validateInlineDefinition(request.getAgentDefinition());
+            return request.getAgentDefinition();
         }
 
+        // 3. 都没有
         throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
-                "未找到Agent定义: agentId=" + request.getAgentId());
+                "未提供 agentId 且未传递画布定义数据");
+    }
+
+    /**
+     * 校验内联 Agent 定义的必填字段
+     */
+    private void validateInlineDefinition(AgentDefinition def) {
+        EngineType engine = def.getEngine() != null ? def.getEngine() : EngineType.CHAT;
+        switch (engine) {
+            case GRAPH -> {
+                if (def instanceof GraphAgentDefinition graphDef) {
+                    if (graphDef.getGraphNodes() == null || graphDef.getGraphNodes().isEmpty()) {
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                                "GRAPH 类型 Agent 定义缺少 graphNodes 字段");
+                    }
+                    if (graphDef.getGraphStart() == null || graphDef.getGraphStart().isBlank()) {
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                                "GRAPH 类型 Agent 定义缺少 graphStart 字段");
+                    }
+                }
+            }
+            case AGENTSCOPE -> {
+                if (def instanceof AgentscopeAgentDefinition asDef) {
+                    if (asDef.getAgentscopeAgents() == null || asDef.getAgentscopeAgents().isEmpty()) {
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                                "AGENTSCOPE 类型 Agent 定义缺少 agentscopeAgents 字段");
+                    }
+                }
+            }
+            case HYBRID -> {
+                if (def instanceof HybridAgentDefinition hybridDef) {
+                    if (hybridDef.getGraphNodes() == null || hybridDef.getGraphNodes().isEmpty()) {
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                                "HYBRID 类型 Agent 定义缺少 graphNodes 字段");
+                    }
+                    if (hybridDef.getGraphStart() == null || hybridDef.getGraphStart().isBlank()) {
+                        throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                                "HYBRID 类型 Agent 定义缺少 graphStart 字段");
+                    }
+                }
+            }
+            case CHAT -> {
+                if (def.getInstruction() == null || def.getInstruction().isBlank()) {
+                    throw new AgentException(ErrorCodeEnum.AGENT_NOT_FOUND,
+                            "CHAT 类型 Agent 定义缺少 instruction 字段");
+                }
+            }
+        }
     }
 
     /**

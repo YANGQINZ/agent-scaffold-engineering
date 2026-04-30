@@ -1,7 +1,11 @@
 package com.ai.agent.domain.agent.service;
 
+import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
 import com.ai.agent.domain.agent.service.adapter.EngineAdapter;
+import com.ai.agent.domain.common.valobj.ChatRequest;
+import com.ai.agent.types.enums.ChatMode;
 import com.ai.agent.types.enums.EngineType;
+import com.ai.agent.domain.agent.model.entity.WorkflowNode;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -89,6 +93,35 @@ class TaskRuntimeTest {
         EngineAdapter result = runtime.getAdapter(null);
         assertNotNull(result, "null 引擎类型应默认路由到 GRAPH");
         assertEquals(EngineType.GRAPH, result.getType());
+    }
+
+    @Test
+    void resolveAgentDefinition_withInlineDefinition_usesItDirectly() {
+        GraphAgentDefinition inlineDef = GraphAgentDefinition.builder()
+                .agentId("temp_123")
+                .name("Temp")
+                .engine(EngineType.GRAPH)
+                .graphStart("start")
+                .graphNodes(List.of(WorkflowNode.builder().id("start").agentId("sub").build()))
+                .build();
+
+        ChatRequest request = ChatRequest.builder()
+                .mode(ChatMode.AGENT)
+                .agentDefinition(inlineDef)
+                .build();
+
+        assertNotNull(request.getAgentDefinition());
+        assertEquals(EngineType.GRAPH, request.getAgentDefinition().getEngine());
+    }
+
+    @Test
+    void resolveAgentDefinition_withNeither_throwsAgentNotFound() {
+        ChatRequest request = ChatRequest.builder()
+                .mode(ChatMode.AGENT)
+                .build();
+
+        assertNull(request.getAgentId());
+        assertNull(request.getAgentDefinition());
     }
 
     private static class StubEngineAdapter implements EngineAdapter {
