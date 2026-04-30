@@ -160,6 +160,9 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         List<WorkflowNode> nodes = queryWorkflowNodes(po.getId());
         List<GraphEdge> edges = queryGraphEdges(po.getId());
 
+        List<String> graphStartList = parseJson(po.getGraphStart(),
+                new TypeReference<List<String>>() {}, List.of());
+
         return GraphAgentDefinition.builder()
                 .agentId(po.getAgentId())
                 .name(po.getName())
@@ -167,7 +170,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                 .instruction(po.getInstruction())
                 .modelConfig(modelConfig)
                 .mcpServers(mcpServers)
-                .graphStart(po.getGraphStart())
+                .graphStart(graphStartList)
                 .graphNodes(nodes)
                 .graphEdges(edges)
                 .build();
@@ -197,6 +200,8 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         List<GraphEdge> edges = queryGraphEdges(po.getId());
         Map<String, EngineType> subEngines = parseJson(po.getSubEngines(),
                 new TypeReference<>() {}, Map.of());
+        List<String> graphStartList = parseJson(po.getGraphStart(),
+                new TypeReference<List<String>>() {}, List.of());
 
         return HybridAgentDefinition.builder()
                 .agentId(po.getAgentId())
@@ -205,7 +210,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                 .instruction(po.getInstruction())
                 .modelConfig(modelConfig)
                 .mcpServers(mcpServers)
-                .graphStart(po.getGraphStart())
+                .graphStart(graphStartList)
                 .graphNodes(nodes)
                 .graphEdges(edges)
                 .subEngines(subEngines)
@@ -227,11 +232,11 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
 
         // 根据子类设置特有字段
         if (definition instanceof GraphAgentDefinition graphDef) {
-            po.setGraphStart(graphDef.getGraphStart());
+            po.setGraphStart(toJson(graphDef.getGraphStart()));
         } else if (definition instanceof AgentscopeAgentDefinition asDef) {
             po.setAgentscopePipelineType(asDef.getAgentscopePipelineType());
         } else if (definition instanceof HybridAgentDefinition hybridDef) {
-            po.setGraphStart(hybridDef.getGraphStart());
+            po.setGraphStart(toJson(hybridDef.getGraphStart()));
             po.setAgentscopePipelineType(null);
             po.setSubEngines(toJson(hybridDef.getSubEngines()));
         }
