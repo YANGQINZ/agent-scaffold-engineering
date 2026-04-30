@@ -1,5 +1,6 @@
 package com.ai.agent.api.model.chat;
 
+import com.ai.agent.api.model.agent.AgentDefinitionDTO;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.enums.ChatMode;
 import jakarta.validation.constraints.NotBlank;
@@ -22,4 +23,6 @@ public class ChatRequestDTO {
     private String knowledgeBaseId;
     /** 指定目标Agent（AGENT模式下使用） */
     private String agentId;
+    /** 内联 Agent 定义（未保存画布时使用） */
+    private AgentDefinitionDTO agentDefinition;
 }

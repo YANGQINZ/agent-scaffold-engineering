@@ -9,6 +9,7 @@ import com.ai.agent.domain.common.valobj.ChatRequest;
 import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.chat.service.ChatFacade;
+import com.ai.agent.trigger.converter.AgentDefinitionConverter;
 import com.ai.agent.types.model.Response;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +63,8 @@ public class ChatController implements IChatService {
                 .knowledgeBaseId(dto.getKnowledgeBaseId())
                 .enableThinking(dto.getEnableThinking())
                 .agentId(dto.getAgentId())
+                .agentDefinition(dto.getAgentDefinition() != null
+                        ? AgentDefinitionConverter.toDomain(dto.getAgentDefinition()) : null)
                 .build();
     }
 

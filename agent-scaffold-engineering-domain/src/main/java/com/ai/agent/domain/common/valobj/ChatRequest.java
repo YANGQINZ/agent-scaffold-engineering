@@ -1,5 +1,6 @@
 package com.ai.agent.domain.common.valobj;
 
+import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.enums.ChatMode;
 import lombok.AllArgsConstructor;
@@ -39,5 +40,8 @@ public class ChatRequest {
 
     /** 指定要使用的Agent ID（YAML配置中的agent定义标识） */
     private String agentId;
+
+    /** 内联 Agent 定义（未保存画布时传递的临时画布数据） */
+    private AgentDefinition agentDefinition;
 
 }
