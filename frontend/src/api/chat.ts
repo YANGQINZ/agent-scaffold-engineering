@@ -3,6 +3,7 @@
  * 对应后端 ChatController + SessionController
  */
 import { apiClient, fetchSSE, type ApiResponse } from './client';
+import type { AgentDefinition } from './agent';
 
 // ═══════════════════════════════════════════════════════════
 // 类型定义
@@ -34,6 +35,8 @@ export interface ChatRequest {
   enableThinking?: boolean;
   /** 指定目标 Agent ID */
   agentId?: string;
+  /** 内联 Agent 定义（未保存画布时使用） */
+  agentDefinition?: AgentDefinition;
 }
 
 /** RAG 来源信息 */
@@ -60,7 +63,8 @@ export type StreamEventType =
   | 'NODE_START'
   | 'NODE_END'
   | 'RAG_RETRIEVE'
-  | 'DONE';
+  | 'DONE'
+  | 'ERROR';
 
 /** SSE 流式事件 */
 export interface StreamEvent {
