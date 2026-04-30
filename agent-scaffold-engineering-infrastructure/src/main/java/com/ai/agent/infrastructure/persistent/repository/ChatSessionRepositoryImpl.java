@@ -33,6 +33,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
     public void save(ChatSession session) {
         ChatSessionPO po = new ChatSessionPO();
         po.setSessionId(session.getSessionId());
+        po.setName(session.getName());
         po.setUserId(session.getUserId());
         po.setAgentId(session.getAgentId());
         po.setMode(session.getMode().name());
@@ -90,12 +91,19 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         return poList.stream().map(this::toSession).toList();
     }
 
+    @Override
+    public List<ChatSession> findAll() {
+        List<ChatSessionPO> poList = chatSessionDao.selectAll();
+        return poList.stream().map(this::toSession).toList();
+    }
+
     /**
      * ChatSessionPO -> ChatSession 领域对象
      */
     private ChatSession toSession(ChatSessionPO po) {
         return ChatSession.builder()
                 .sessionId(po.getSessionId())
+                .name(po.getName())
                 .userId(po.getUserId())
                 .agentId(po.getAgentId())
                 .mode(ChatMode.valueOf(po.getMode()))

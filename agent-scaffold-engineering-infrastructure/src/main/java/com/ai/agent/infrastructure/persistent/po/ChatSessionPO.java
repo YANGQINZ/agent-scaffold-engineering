@@ -13,6 +13,9 @@ public class ChatSessionPO {
     /** 会话ID */
     private String sessionId;
 
+    /** 会话名称 */
+    private String name;
+
     /** 用户ID */
     private String userId;
 

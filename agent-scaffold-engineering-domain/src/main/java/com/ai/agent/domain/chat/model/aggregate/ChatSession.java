@@ -22,6 +22,9 @@ public class ChatSession {
     /** 会话ID */
     private String sessionId;
 
+    /** 会话名称 */
+    private String name;
+
     /** 用户ID */
     private String userId;
 
@@ -45,6 +48,9 @@ public class ChatSession {
 
     /** 最后活跃时间 */
     private LocalDateTime lastActiveAt;
+
+    /** 最后一条消息摘要（非持久化） */
+    private transient String lastMessageSummary;
 
     /** 过期时间（秒） */
     private Integer ttlSeconds;

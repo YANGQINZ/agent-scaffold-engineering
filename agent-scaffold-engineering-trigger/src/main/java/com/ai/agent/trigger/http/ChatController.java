@@ -1,10 +1,8 @@
 package com.ai.agent.trigger.http;
 
 import com.ai.agent.api.IChatService;
-import com.ai.agent.api.model.chat.ChatRequestDTO;
-import com.ai.agent.api.model.chat.ChatResponseDTO;
-import com.ai.agent.api.model.chat.SourceDTO;
-import com.ai.agent.api.model.chat.StreamEventDTO;
+import com.ai.agent.api.model.chat.*;
+import com.ai.agent.domain.chat.model.aggregate.ChatSession;
 import com.ai.agent.domain.common.valobj.ChatRequest;
 import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
@@ -17,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,6 +50,27 @@ public class ChatController implements IChatService {
     public Response<Void> removeSession(@PathVariable String sessionId) {
         chatFacade.removeSession(sessionId);
         return Response.buildSuccess();
+    }
+
+    /**
+     * 创建新会话
+     */
+    @PostMapping("/session")
+    public Response<String> createSession(@RequestBody(required = false) Map<String, String> body) {
+        String name = body != null ? body.get("name") : null;
+        return Response.buildSuccess(chatFacade.createSession(name));
+    }
+
+    /**
+     * 查询所有会话列表
+     */
+    @GetMapping("/session/list")
+    public Response<List<ChatSessionVO>> listSessions() {
+        List<ChatSession> sessions = chatFacade.listSessions();
+        List<ChatSessionVO> voList = sessions.stream()
+                .map(this::toSessionVO)
+                .collect(Collectors.toList());
+        return Response.buildSuccess(voList);
     }
 
     private ChatRequest convertRequest(ChatRequestDTO dto) {
@@ -86,6 +107,18 @@ public class ChatController implements IChatService {
                 .type(event.getType())
                 .data(event.getData())
                 .sessionId(event.getSessionId())
+                .build();
+    }
+
+    /**
+     * ChatSession -> ChatSessionVO
+     */
+    private ChatSessionVO toSessionVO(ChatSession session) {
+        return ChatSessionVO.builder()
+                .sessionId(session.getSessionId())
+                .name(session.getName())
+                .createdAt(session.getCreatedAt())
+                .lastMessage(session.getLastMessageSummary())
                 .build();
     }
 }
