@@ -50,4 +50,11 @@
         ORDER BY created_at DESC
     </select>
 
+    <delete id="deleteBySessionIds">
+        DELETE FROM memory_item WHERE session_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
 </mapper>

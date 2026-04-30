@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS chat_session (
     user_id VARCHAR(64) NOT NULL,
     agent_id VARCHAR(64),
     mode VARCHAR(20) NOT NULL,
-    agent_mode VARCHAR(20),
+    engine VARCHAR(20),
     rag_enabled BOOLEAN DEFAULT FALSE,
     knowledge_base_id VARCHAR(64),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

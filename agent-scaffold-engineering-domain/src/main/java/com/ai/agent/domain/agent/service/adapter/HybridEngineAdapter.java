@@ -132,7 +132,18 @@ public class HybridEngineAdapter implements EngineAdapter {
                 return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
                         "Hybrid流式执行失败: " + e.getMessage(), e));
             }
-        }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
+        })
+        .subscribeOn(Schedulers.boundedElastic()) // 避免阻塞WebFlux事件循环
+        .doOnError(e -> {
+            if (e instanceof java.io.IOException || (e.getMessage() != null
+                    && e.getMessage().contains("Broken pipe"))) {
+                log.warn("HybridEngineAdapter流式输出: 客户端已断开连接, agentId={}", def.getAgentId());
+            }
+        })
+        .onErrorResume(java.io.IOException.class, e -> {
+            log.warn("HybridEngineAdapter流式输出: 管道断裂，静默结束流, agentId={}", def.getAgentId());
+            return Flux.empty();
+        });
     }
 
     // ═══════════════════════════════════════════════════════
@@ -159,7 +170,7 @@ public class HybridEngineAdapter implements EngineAdapter {
                 graph.addNode(node.getId(), node_async(wrapAsGraphAction(hyDef, node, ctx, enableThinking)));
             } else {
                 // 复用 GraphEngineAdapter 的节点构建方法
-                graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(hyDef, node, ctx, enableThinking)));
+                graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(node, enableThinking)));
             }
         }
 

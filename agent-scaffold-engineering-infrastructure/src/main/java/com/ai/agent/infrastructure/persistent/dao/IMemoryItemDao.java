@@ -38,4 +38,9 @@ public interface IMemoryItemDao {
      * 按会话ID查询所有记忆
      */
     List<MemoryItemPO> findBySessionId(@Param("sessionId") String sessionId);
+
+    /**
+     * 根据会话ID列表批量删除记忆
+     */
+    int deleteBySessionIds(@Param("ids") List<String> sessionIds);
 }

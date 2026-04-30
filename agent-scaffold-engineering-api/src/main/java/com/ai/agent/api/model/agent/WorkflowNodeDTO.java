@@ -2,6 +2,9 @@ package com.ai.agent.api.model.agent;
 
 import lombok.*;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 工作流节点DTO
  */
@@ -28,5 +31,14 @@ public class WorkflowNodeDTO {
 
     /** 关联的知识库ID */
     private String knowledgeBaseId;
+
+    /** 内联提示词 */
+    private String instruction;
+
+    /** 子引擎类型 */
+    private String subEngine;
+
+    /** 节点级 MCP 工具配置 */
+    private List<McpServerConfigDTO> mcpServers;
 
 }

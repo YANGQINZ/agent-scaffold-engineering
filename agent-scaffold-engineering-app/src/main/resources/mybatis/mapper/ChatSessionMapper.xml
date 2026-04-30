@@ -3,12 +3,12 @@
 <mapper namespace="com.ai.agent.infrastructure.persistent.dao.IChatSessionDao">
 
     <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
-        INSERT INTO chat_session (session_id, name, user_id, agent_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at)
-        VALUES (#{sessionId}, #{name}, #{userId}, #{agentId}, #{mode}, #{agentMode}, #{ragEnabled}, #{knowledgeBaseId}, #{createdAt}, #{updatedAt}, #{ttlExpireAt})
+        INSERT INTO chat_session (session_id, name, user_id, agent_id, mode, engine, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at)
+        VALUES (#{sessionId}, #{name}, #{userId}, #{agentId}, #{mode}, #{engine}, #{ragEnabled}, #{knowledgeBaseId}, #{createdAt}, #{updatedAt}, #{ttlExpireAt})
     </insert>
 
     <select id="selectById" resultType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
-        SELECT session_id, name, user_id, agent_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
+        SELECT session_id, name, user_id, agent_id, mode, engine, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
         FROM chat_session WHERE session_id = #{sessionId}
     </select>
 
@@ -17,21 +17,28 @@
     </update>
 
     <select id="selectByUserId" resultType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
-        SELECT session_id, name, user_id, agent_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
+        SELECT session_id, name, user_id, agent_id, mode, engine, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
         FROM chat_session WHERE user_id = #{userId}
         ORDER BY updated_at DESC
     </select>
 
     <select id="selectByAgentId" resultType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
-        SELECT session_id, name, user_id, agent_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
+        SELECT session_id, name, user_id, agent_id, mode, engine, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
         FROM chat_session WHERE agent_id = #{agentId}
         ORDER BY updated_at DESC
     </select>
 
     <select id="selectAll" resultType="com.ai.agent.infrastructure.persistent.po.ChatSessionPO">
-        SELECT session_id, name, user_id, agent_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
+        SELECT session_id, name, user_id, agent_id, mode, engine, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at
         FROM chat_session
         ORDER BY updated_at DESC
     </select>
+
+    <delete id="deleteBySessionIds">
+        DELETE FROM chat_session WHERE session_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 
 </mapper>

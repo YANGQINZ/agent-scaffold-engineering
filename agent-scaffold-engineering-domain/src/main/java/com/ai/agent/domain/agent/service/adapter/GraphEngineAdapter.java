@@ -97,7 +97,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
             // 构建图并执行
-            StateGraph graph = buildGraph(graphDef, ctx, enableThinking);
+            StateGraph graph = buildGraph(graphDef, enableThinking);
             CompiledGraph compiled = graph.compile();
 
             RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
@@ -146,7 +146,7 @@ public class GraphEngineAdapter implements EngineAdapter {
 
                 boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
-                StateGraph graph = buildGraph(graphDef, ctx, enableThinking);
+                StateGraph graph = buildGraph(graphDef, enableThinking);
                 CompiledGraph compiled = graph.compile();
                 RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
                 Map<String, Object> graphInput = new HashMap<>();
@@ -193,21 +193,32 @@ public class GraphEngineAdapter implements EngineAdapter {
                 return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
                         "Graph编排流式执行失败: " + e.getMessage(), e));
             }
-        }).subscribeOn(Schedulers.boundedElastic()); // 避免阻塞WebFlux事件循环
+        })
+        .subscribeOn(Schedulers.boundedElastic()) // 避免阻塞WebFlux事件循环
+        .doOnError(e -> {
+            if (e instanceof java.io.IOException || e.getMessage() != null
+                    && e.getMessage().contains("Broken pipe")) {
+                log.warn("GraphEngineAdapter流式输出: 客户端已断开连接, agentId={}", graphDef.getAgentId());
+            }
+        })
+        .onErrorResume(java.io.IOException.class, e -> {
+            log.warn("GraphEngineAdapter流式输出: 管道断裂，静默结束流, agentId={}", graphDef.getAgentId());
+            return Flux.empty();
+        });
     }
 
     // ═══════════════════════════════════════════════════════
     // StateGraph 构建
     // ═══════════════════════════════════════════════════════
 
-    private StateGraph buildGraph(GraphAgentDefinition def, ContextStore ctx, boolean enableThinking) throws GraphStateException {
+    private StateGraph buildGraph(GraphAgentDefinition def, boolean enableThinking) throws GraphStateException {
         StateGraph graph = new StateGraph(defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
 
         // 1. 添加节点
         for (WorkflowNode node : def.getGraphNodes()) {
-            graph.addNode(node.getId(), node_async(buildNodeAction(def, node, ctx, enableThinking)));
+            graph.addNode(node.getId(), node_async(buildNodeAction(node, enableThinking)));
         }
 
         // 2. 添加起始边（支持多起始节点）
@@ -279,7 +290,7 @@ public class GraphEngineAdapter implements EngineAdapter {
      * 设为 protected 供 HybridEngineAdapter 复用。
      * 中间节点不注入记忆上下文，不追加历史，仅通过 StateGraph state 传递结果。
      */
-    protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx, boolean enableThinking) {
+    protected NodeAction buildNodeAction(WorkflowNode node, boolean enableThinking) {
         return state -> {
             String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
@@ -289,7 +300,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             // 节点级 RAG 增强：根据节点的 ragEnabled/knowledgeBaseId 配置决定是否增强
             input = nodeRagService.enhancePrompt(input, node);
 
-            NodeExecuteResult execResult = executeWithRetry(def, node, input, ctx, nodeId, enableThinking);
+            NodeExecuteResult execResult = executeWithRetry(node, input, nodeId, enableThinking);
 
             Map<String, Object> result = new HashMap<>();
             result.put("output", execResult.textContent());
@@ -302,24 +313,17 @@ public class GraphEngineAdapter implements EngineAdapter {
         };
     }
 
-    /**
-     * 构建节点执行动作 — 不启用思考过程（兼容 HybridEngineAdapter 调用）
-     */
-    protected NodeAction buildNodeAction(AgentDefinition def, WorkflowNode node, ContextStore ctx) {
-        return buildNodeAction(def, node, ctx, false);
-    }
-
     // ═══════════════════════════════════════════════════════
     // 异常重试机制
     // ═══════════════════════════════════════════════════════
 
-    private NodeExecuteResult executeWithRetry(AgentDefinition def, WorkflowNode node,
-                                     String input, ContextStore ctx, String nodeId, boolean enableThinking) {
+    private NodeExecuteResult executeWithRetry(WorkflowNode node,
+                                     String input, String nodeId, boolean enableThinking) {
         Exception lastException = null;
 
         for (int attempt = 1; attempt <= MAX_RETRY; attempt++) {
             try {
-                return executeNodeLogic(def, node, input, enableThinking);
+                return executeNodeLogic(node, input, enableThinking);
             } catch (Exception e) {
                 lastException = e;
                 log.warn("Graph节点执行失败(第{}/{}次): nodeId={}, error={}",
@@ -343,7 +347,7 @@ public class GraphEngineAdapter implements EngineAdapter {
         return new NodeExecuteResult(errorMsg, null);
     }
 
-    private NodeExecuteResult executeNodeLogic(AgentDefinition def, WorkflowNode node, String input, boolean enableThinking) {
+    private NodeExecuteResult executeNodeLogic(WorkflowNode node, String input, boolean enableThinking) {
         // 1. 解析 instruction：节点内联 > agentId 子代理 > 默认
         String systemPrompt;
         if (node.getInstruction() != null && !node.getInstruction().isBlank()) {
@@ -380,7 +384,7 @@ public class GraphEngineAdapter implements EngineAdapter {
             List<ToolCallback> tools = mcpToolProvider.buildGraphTools(node.getMcpServers());
             aiResponse = ChatClient.create(chatModel)
                     .prompt(prompt)
-                    .tools(tools)
+                    .toolCallbacks(tools)
                     .call()
                     .chatResponse();
         } else {
@@ -455,7 +459,7 @@ public class GraphEngineAdapter implements EngineAdapter {
      */
     public CompiledGraph buildAndCompile(GraphAgentDefinition graphDef, ContextStore ctx) {
         try {
-            StateGraph graph = buildGraph(graphDef, ctx, false);
+            StateGraph graph = buildGraph(graphDef, false);
             return graph.compile();
         } catch (GraphStateException e) {
             throw new AgentException(ErrorCodeEnum.AGENT_FAILED,

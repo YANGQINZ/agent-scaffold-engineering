@@ -7,6 +7,7 @@ import com.ai.agent.domain.agent.model.aggregate.SessionContext;
 import com.ai.agent.domain.agent.repository.ISessionRepository;
 import com.ai.agent.infrastructure.persistent.dao.IChatMessageDao;
 import com.ai.agent.infrastructure.persistent.dao.IChatSessionDao;
+import com.ai.agent.infrastructure.persistent.dao.IMemoryItemDao;
 import com.ai.agent.infrastructure.persistent.po.ChatMessagePO;
 import com.ai.agent.infrastructure.persistent.po.ChatSessionPO;
 import com.ai.agent.types.enums.EngineType;
@@ -28,6 +29,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
 
     private final IChatSessionDao chatSessionDao;
     private final IChatMessageDao chatMessageDao;
+    private final IMemoryItemDao memoryItemDao;
 
     @Override
     public void save(ChatSession session) {
@@ -37,7 +39,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         po.setUserId(session.getUserId());
         po.setAgentId(session.getAgentId());
         po.setMode(session.getMode().name());
-        po.setAgentMode(session.getAgentMode().name());
+        po.setEngine(session.getEngine().name());
         po.setRagEnabled(session.getRagEnabled());
         po.setKnowledgeBaseId(session.getKnowledgeBaseId());
         po.setCreatedAt(session.getCreatedAt());
@@ -107,7 +109,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
                 .userId(po.getUserId())
                 .agentId(po.getAgentId())
                 .mode(ChatMode.valueOf(po.getMode()))
-                .agentMode(EngineType.valueOf(po.getAgentMode()))
+                .engine(EngineType.valueOf(po.getEngine()))
                 .ragEnabled(po.getRagEnabled())
                 .knowledgeBaseId(po.getKnowledgeBaseId())
                 .createdAt(po.getCreatedAt())
@@ -140,7 +142,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         po.setUserId(session.getUserId());
         po.setAgentId(session.getAgentId());
         po.setMode(ChatMode.AGENT.name());
-        po.setAgentMode(session.getEngineType().name());
+        po.setEngine(session.getEngine().name());
         po.setRagEnabled(session.isRagEnabled());
         po.setKnowledgeBaseId(session.getKnowledgeBaseId());
         po.setCreatedAt(session.getCreatedAt());
@@ -165,6 +167,17 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
         chatSessionDao.updateTtl(sessionId);
     }
 
+    @Override
+    public void deleteBySessionIds(List<String> sessionIds) {
+        if (sessionIds == null || sessionIds.isEmpty()) {
+            return;
+        }
+        // 先删子表 memory_item，再删 chat_message，最后删父表 chat_session
+        memoryItemDao.deleteBySessionIds(sessionIds);
+        chatMessageDao.deleteBySessionIds(sessionIds);
+        chatSessionDao.deleteBySessionIds(sessionIds);
+    }
+
     /**
      * ChatSessionPO -> SessionContext 领域对象（session域）
      */
@@ -173,7 +186,7 @@ public class ChatSessionRepositoryImpl implements IChatSessionRepository, ISessi
                 .sessionId(po.getSessionId())
                 .userId(po.getUserId())
                 .agentId(po.getAgentId())
-                .engineType(EngineType.valueOf(po.getAgentMode()))
+                .engine(EngineType.valueOf(po.getEngine()))
                 .ragEnabled(po.getRagEnabled() != null ? po.getRagEnabled() : false)
                 .knowledgeBaseId(po.getKnowledgeBaseId())
                 .createdAt(po.getCreatedAt())

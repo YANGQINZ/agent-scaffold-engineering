@@ -76,7 +76,7 @@ function ChatPanel() {
         query: text,
         userId: 'web-user',
         sessionId: activeSessionId ?? undefined,
-        agentId: canvasAgentId || selectedAgentId || undefined,
+        agentId: isUnsavedCanvas ? undefined : (canvasAgentId || selectedAgentId || undefined),
         mode: (canvasAgentId || selectedAgentId || hasCanvasNodes) ? 'AGENT' : 'MULTI_TURN',
         engine: hasCanvasNodes
           ? (canvasDef?.engine ?? 'GRAPH')

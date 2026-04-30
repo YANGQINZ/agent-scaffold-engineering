@@ -2,6 +2,8 @@ package com.ai.agent.domain.agent.repository;
 
 import com.ai.agent.domain.agent.model.aggregate.SessionContext;
 
+import java.util.List;
+
 /**
  * 会话仓储接口 — SessionContext 的持久化契约
  *
@@ -25,5 +27,10 @@ public interface ISessionRepository {
      * 更新会话TTL
      */
     void updateTtl(String sessionId, int ttlSeconds);
+
+    /**
+     * 根据会话ID列表批量删除会话及相关数据（memory_item、chat_message、chat_session）
+     */
+    void deleteBySessionIds(List<String> sessionIds);
 
 }

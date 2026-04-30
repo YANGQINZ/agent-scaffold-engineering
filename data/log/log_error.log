@@ -1775,3 +1775,373 @@ java.lang.NullPointerException: Name is null
  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
 26-05-01.00:32:04.261 [http-nio-8091-exec-9] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:20:40.581 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:20:40.600 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:20:40.948 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.01:20:42.802 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.01:20:42.803 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.01:43:55.971 [http-nio-8091-exec-2] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:43:55.975 [http-nio-8091-exec-2] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:44:08.605 [http-nio-8091-exec-6] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:44:08.619 [http-nio-8091-exec-6] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:45:41.308 [http-nio-8091-exec-7] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:45:41.318 [http-nio-8091-exec-7] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:54:14.769 [http-nio-8091-exec-10] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:54:14.776 [http-nio-8091-exec-10] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.01:55:23.929 [http-nio-8091-exec-7] ERROR GlobalExceptionHandler - 系统异常
+org.springframework.web.multipart.MaxUploadSizeExceededException: Maximum upload size exceeded
+	at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.handleParseFailure(StandardMultipartHttpServletRequest.java:125)
+	at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.parseRequest(StandardMultipartHttpServletRequest.java:112)
+	at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.<init>(StandardMultipartHttpServletRequest.java:88)
+	at org.springframework.web.multipart.support.StandardServletMultipartResolver.resolveMultipart(StandardServletMultipartResolver.java:112)
+	at org.springframework.web.servlet.DispatcherServlet.checkMultipart(DispatcherServlet.java:1227)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1060)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.lang.IllegalStateException: org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException: The field file exceeds its maximum permitted size of 1048576 bytes.
+	at org.apache.catalina.connector.Request.parseParts(Request.java:2629)
+	at org.apache.catalina.connector.Request.getParts(Request.java:2488)
+	at org.apache.catalina.connector.RequestFacade.getParts(RequestFacade.java:773)
+	at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.parseRequest(StandardMultipartHttpServletRequest.java:95)
+	... 51 common frames omitted
+Caused by: org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException: The field file exceeds its maximum permitted size of 1048576 bytes.
+	at org.apache.tomcat.util.http.fileupload.impl.FileItemStreamImpl$1.raiseError(FileItemStreamImpl.java:117)
+	at org.apache.tomcat.util.http.fileupload.util.LimitedInputStream.checkLimit(LimitedInputStream.java:76)
+	at org.apache.tomcat.util.http.fileupload.util.LimitedInputStream.read(LimitedInputStream.java:135)
+	at java.base/java.io.FilterInputStream.read(FilterInputStream.java:106)
+	at org.apache.tomcat.util.http.fileupload.util.Streams.copy(Streams.java:96)
+	at org.apache.tomcat.util.http.fileupload.FileUploadBase.parseRequest(FileUploadBase.java:292)
+	at org.apache.catalina.connector.Request.parseParts(Request.java:2588)
+	... 54 common frames omitted
+26-05-01.01:58:05.176 [http-nio-8091-exec-8] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=不支持的引擎类型: CHAT
+26-05-01.01:59:50.317 [http-nio-8091-exec-9] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=不支持的引擎类型: CHAT
+26-05-01.02:04:51.438 [http-nio-8091-exec-1] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=GRAPH 类型 Agent 定义缺少 graphStart 字段
+26-05-01.02:09:26.002 [http-nio-8091-exec-6] WARN  ContextStoreFactory    - 会话持久化降级（可能已存在）: sessionId=test-939bcb40-c15d-44ba-82c8-4711c09f8a8e, error=
+### Error querying database.  Cause: org.postgresql.util.PSQLException: ERROR: column "agent_mode" does not exist
+  建议：Perhaps you meant to reference the column "chat_session.agent_id".
+  位置：51
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatSessionMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### SQL: SELECT session_id, name, user_id, agent_id, mode, agent_mode, rag_enabled, knowledge_base_id, created_at, updated_at, ttl_expire_at         FROM chat_session WHERE session_id = ?
+### Cause: org.postgresql.util.PSQLException: ERROR: column "agent_mode" does not exist
+  建议：Perhaps you meant to reference the column "chat_session.agent_id".
+  位置：51
+; bad SQL grammar []
+26-05-01.02:09:26.598 [boundedElastic-2] WARN  SessionContext         - 记忆写入降级: sessionId=test-939bcb40-c15d-44ba-82c8-4711c09f8a8e, error=
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(test-939bcb40-c15d-44ba-82c8-4711c09f8a8e) is not present in table "chat_session".
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatMessageMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IChatMessageDao.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO chat_message (session_id, role, content, token_count, created_at)         VALUES (?, ?, ?, ?, ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(test-939bcb40-c15d-44ba-82c8-4711c09f8a8e) is not present in table "chat_session".
+; ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(test-939bcb40-c15d-44ba-82c8-4711c09f8a8e) is not present in table "chat_session".
+26-05-01.02:09:26.633 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-01.02:09:33.066 [boundedElastic-2] WARN  SessionContext         - 记忆写入降级: sessionId=test-939bcb40-c15d-44ba-82c8-4711c09f8a8e, error=
+### Error updating database.  Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(test-939bcb40-c15d-44ba-82c8-4711c09f8a8e) is not present in table "chat_session".
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/ChatMessageMapper.xml]
+### The error may involve com.ai.agent.infrastructure.persistent.dao.IChatMessageDao.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO chat_message (session_id, role, content, token_count, created_at)         VALUES (?, ?, ?, ?, ?)
+### Cause: org.postgresql.util.PSQLException: ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(test-939bcb40-c15d-44ba-82c8-4711c09f8a8e) is not present in table "chat_session".
+; ERROR: insert or update on table "chat_message" violates foreign key constraint "chat_message_session_id_fkey"
+  详细：Key (session_id)=(test-939bcb40-c15d-44ba-82c8-4711c09f8a8e) is not present in table "chat_session".
+26-05-01.02:14:43.309 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:14:43.320 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:14:43.537 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.02:14:44.673 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.02:14:44.673 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.02:15:00.793 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-01.02:23:14.427 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m1s76ms).
+26-05-01.02:26:26.410 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:26:26.421 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:26:26.666 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.02:26:27.846 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.02:26:27.847 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.02:27:21.128 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:27:21.139 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:27:21.355 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.02:27:22.411 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.02:27:22.412 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.02:29:46.559 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m55s434ms).
+26-05-01.02:29:46.632 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-01.02:36:56.603 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:36:56.627 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:36:56.833 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.02:36:57.901 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.02:36:57.902 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.02:43:37.163 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-01.02:44:27.752 [boundedElastic-2] ERROR McpToolProvider        - MCP客户端创建失败: name=百度, error=Transport must be configured
+26-05-01.02:45:15.695 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=49s35ms).
+26-05-01.02:45:15.755 [boundedElastic-2] WARN  GraphEngineAdapter     - Graph节点执行失败(第1/3次): nodeId=agent_1777574465674, error=No @Tool annotated methods found in [].Did you mean to pass a ToolCallback or ToolCallbackProvider? If so, you have to use .toolCallbacks() instead of .tool()
+26-05-01.02:45:21.871 [boundedElastic-2] ERROR McpToolProvider        - MCP客户端创建失败: name=百度, error=Transport must be configured
+26-05-01.02:45:21.872 [boundedElastic-2] WARN  GraphEngineAdapter     - Graph节点执行失败(第2/3次): nodeId=agent_1777574465674, error=No @Tool annotated methods found in [].Did you mean to pass a ToolCallback or ToolCallbackProvider? If so, you have to use .toolCallbacks() instead of .tool()
+26-05-01.02:45:25.306 [boundedElastic-2] ERROR McpToolProvider        - MCP客户端创建失败: name=百度, error=Transport must be configured
+26-05-01.02:45:25.306 [boundedElastic-2] WARN  GraphEngineAdapter     - Graph节点执行失败(第3/3次): nodeId=agent_1777574465674, error=No @Tool annotated methods found in [].Did you mean to pass a ToolCallback or ToolCallbackProvider? If so, you have to use .toolCallbacks() instead of .tool()
+26-05-01.02:45:25.307 [boundedElastic-2] ERROR GraphEngineAdapter     - Graph节点重试超限: nodeId=agent_1777574465674, 返回ERROR标记
+26-05-01.02:52:16.748 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:52:16.760 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:52:16.993 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.02:52:18.252 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.02:52:18.252 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.02:52:25.621 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'classify': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:52:25.630 [main            ] ERROR AgentDefinitionRepositoryImpl - JSON反序列化失败: Unrecognized token 'research': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 9]
+26-05-01.02:52:25.895 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-01.02:52:27.155 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-01.02:52:27.156 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-01.02:52:34.362 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-01.02:52:54.007 [HttpClient-11-Worker-3] WARN  LifecycleInitializer   - Handling exception
+io.modelcontextprotocol.spec.McpTransportException: Invalid SSE response. Status code: 200 Line: Streaming unsupported
+	at io.modelcontextprotocol.client.transport.ResponseSubscribers$SseLineSubscriber.hookOnNext(ResponseSubscribers.java:185)
+	at io.modelcontextprotocol.client.transport.ResponseSubscribers$SseLineSubscriber.hookOnNext(ResponseSubscribers.java:72)
+	at reactor.core.publisher.BaseSubscriber.onNext(BaseSubscriber.java:160)
+	at org.reactivestreams.FlowAdapters$FlowToReactiveSubscriber.onNext(FlowAdapters.java:211)
+	at java.net.http/jdk.internal.net.http.LineSubscriberAdapter$LineSubscription.loop(LineSubscriberAdapter.java:447)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$LockingRestartableTask.run(SequentialScheduler.java:205)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$CompleteRestartableTask.run(SequentialScheduler.java:149)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$SchedulableTask.run(SequentialScheduler.java:230)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler.runOrSchedule(SequentialScheduler.java:303)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler.runOrSchedule(SequentialScheduler.java:256)
+	at java.net.http/jdk.internal.net.http.LineSubscriberAdapter$LineSubscription.submit(LineSubscriberAdapter.java:188)
+	at java.net.http/jdk.internal.net.http.LineSubscriberAdapter.onNext(LineSubscriberAdapter.java:95)
+	at java.net.http/jdk.internal.net.http.LineSubscriberAdapter.onNext(LineSubscriberAdapter.java:53)
+	at java.net.http/jdk.internal.net.http.Http1Response$Http1BodySubscriber.onNext(Http1Response.java:382)
+	at java.net.http/jdk.internal.net.http.Http1Response$Http1BodySubscriber.onNext(Http1Response.java:297)
+	at java.net.http/jdk.internal.net.http.ResponseContent$FixedLengthBodyParser.accept(ResponseContent.java:600)
+	at java.net.http/jdk.internal.net.http.ResponseContent$FixedLengthBodyParser.accept(ResponseContent.java:529)
+	at java.net.http/jdk.internal.net.http.Http1Response$BodyReader.handle(Http1Response.java:790)
+	at java.net.http/jdk.internal.net.http.Http1Response$BodyReader.handle(Http1Response.java:720)
+	at java.net.http/jdk.internal.net.http.Http1Response$Receiver.accept(Http1Response.java:612)
+	at java.net.http/jdk.internal.net.http.Http1Response$BodyReader.tryAsyncReceive(Http1Response.java:750)
+	at java.net.http/jdk.internal.net.http.Http1AsyncReceiver.flush(Http1AsyncReceiver.java:233)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$LockingRestartableTask.run(SequentialScheduler.java:205)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$CompleteRestartableTask.run(SequentialScheduler.java:149)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$SchedulableTask.run(SequentialScheduler.java:230)
+	at java.net.http/jdk.internal.net.http.HttpClientImpl$DelegatingExecutor.execute(HttpClientImpl.java:157)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler.runOrSchedule(SequentialScheduler.java:305)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler.runOrSchedule(SequentialScheduler.java:274)
+	at java.net.http/jdk.internal.net.http.Http1AsyncReceiver.asyncReceive(Http1AsyncReceiver.java:464)
+	at java.net.http/jdk.internal.net.http.Http1AsyncReceiver$Http1TubeSubscriber.onNext(Http1AsyncReceiver.java:584)
+	at java.net.http/jdk.internal.net.http.Http1AsyncReceiver$Http1TubeSubscriber.onNext(Http1AsyncReceiver.java:541)
+	at java.net.http/jdk.internal.net.http.common.SSLTube$DelegateWrapper.onNext(SSLTube.java:210)
+	at java.net.http/jdk.internal.net.http.common.SSLTube$SSLSubscriberWrapper.onNext(SSLTube.java:492)
+	at java.net.http/jdk.internal.net.http.common.SSLTube$SSLSubscriberWrapper.onNext(SSLTube.java:295)
+	at java.net.http/jdk.internal.net.http.common.SubscriberWrapper$DownstreamPusher.run1(SubscriberWrapper.java:316)
+	at java.net.http/jdk.internal.net.http.common.SubscriberWrapper$DownstreamPusher.run(SubscriberWrapper.java:259)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$LockingRestartableTask.run(SequentialScheduler.java:205)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$CompleteRestartableTask.run(SequentialScheduler.java:149)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$SchedulableTask.run(SequentialScheduler.java:230)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler.runOrSchedule(SequentialScheduler.java:303)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler.runOrSchedule(SequentialScheduler.java:256)
+	at java.net.http/jdk.internal.net.http.common.SubscriberWrapper.outgoing(SubscriberWrapper.java:232)
+	at java.net.http/jdk.internal.net.http.common.SubscriberWrapper.outgoing(SubscriberWrapper.java:198)
+	at java.net.http/jdk.internal.net.http.common.SSLFlowDelegate$Reader.processData(SSLFlowDelegate.java:444)
+	at java.net.http/jdk.internal.net.http.common.SSLFlowDelegate$Reader$ReaderDownstreamPusher.run(SSLFlowDelegate.java:268)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$LockingRestartableTask.run(SequentialScheduler.java:205)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$CompleteRestartableTask.run(SequentialScheduler.java:149)
+	at java.net.http/jdk.internal.net.http.common.SequentialScheduler$SchedulableTask.run(SequentialScheduler.java:230)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-01.03:03:41.467 [http-nio-8091-exec-9] ERROR GlobalExceptionHandler - 系统异常
+org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to flush: java.io.IOException: Broken pipe
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleHttpServletResponse.handleIOException(StandardServletAsyncWebRequest.java:346)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:418)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:486)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:310)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:297)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:228)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:219)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:135)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler$SseEmitterSubscriber.send(ReactiveTypeHandler.java:440)
+	at org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler$AbstractEmitterSubscriber.run(ReactiveTypeHandler.java:359)
+	at io.micrometer.context.ContextSnapshot.lambda$wrap$0(ContextSnapshot.java:91)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: org.apache.catalina.connector.ClientAbortException: java.io.IOException: Broken pipe
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:308)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:270)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	... 16 common frames omitted
+Caused by: java.io.IOException: Broken pipe
+	at java.base/sun.nio.ch.FileDispatcherImpl.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:62)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:122)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1380)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:764)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:728)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:712)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1274)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:304)
+	... 19 common frames omitted
+26-05-01.03:03:41.469 [http-nio-8091-exec-9] WARN  ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.ai.agent.trigger.http.GlobalExceptionHandler#handleException(Exception)
+org.springframework.http.converter.HttpMessageNotWritableException: No converter for [class com.ai.agent.types.model.Response] with preset Content-Type 'text/event-stream'
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor.writeWithMessageConverters(AbstractMessageConverterMethodProcessor.java:365)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.handleReturnValue(RequestResponseBodyMethodProcessor.java:208)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:136)
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:471)
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:73)
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:182)
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:80)
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1357)
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1160)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1105)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:633)
+	at org.apache.catalina.core.ApplicationDispatcher.doDispatch(ApplicationDispatcher.java:561)
+	at org.apache.catalina.core.ApplicationDispatcher.dispatch(ApplicationDispatcher.java:532)
+	at org.apache.catalina.core.AsyncContextImpl$AsyncRunnable.run(AsyncContextImpl.java:601)
+	at org.apache.catalina.core.AsyncContextImpl.doInternalDispatch(AsyncContextImpl.java:344)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.asyncDispatch(CoyoteAdapter.java:239)
+	at org.apache.coyote.AbstractProcessor.dispatch(AbstractProcessor.java:243)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:57)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)

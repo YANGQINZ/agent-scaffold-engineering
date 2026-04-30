@@ -26,7 +26,7 @@ public class ChatSessionPO {
     private String mode;
 
     /** 智能体模式 */
-    private String agentMode;
+    private String engine;
 
     /** 是否启用RAG */
     private Boolean ragEnabled;

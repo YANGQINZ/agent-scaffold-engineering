@@ -119,6 +119,9 @@ public class AgentDefinitionConverter {
                         .next(d.getNext())
                         .ragEnabled(d.getRagEnabled())
                         .knowledgeBaseId(d.getKnowledgeBaseId())
+                        .instruction(d.getInstruction())
+                        .subEngine(d.getSubEngine())
+                        .mcpServers(convertMcpServersToDomain(d.getMcpServers()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -208,6 +211,9 @@ public class AgentDefinitionConverter {
                         .id(n.getId()).agentId(n.getAgentId())
                         .reactAgentId(n.getReactAgentId()).next(n.getNext())
                         .ragEnabled(n.getRagEnabled()).knowledgeBaseId(n.getKnowledgeBaseId())
+                        .instruction(n.getInstruction())
+                        .subEngine(n.getSubEngine())
+                        .mcpServers(convertMcpServersToDTO(n.getMcpServers()))
                         .build())
                 .collect(Collectors.toList());
     }

@@ -31,7 +31,7 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  mode: 'simple',
+  mode: 'expert',
   language: 'zh',
   activeTab: 'workspace',
 

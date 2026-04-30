@@ -12,4 +12,11 @@
         FROM chat_message WHERE session_id = #{sessionId} ORDER BY created_at ASC
     </select>
 
+    <delete id="deleteBySessionIds">
+        DELETE FROM chat_message WHERE session_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
 </mapper>

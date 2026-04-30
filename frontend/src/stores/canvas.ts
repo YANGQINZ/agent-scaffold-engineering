@@ -33,10 +33,11 @@ export interface NodeState {
 
 /** 根据 agent 节点的 subEngine 自动推断引擎类型 */
 function inferEngineType(agentNodes: Node[]): EngineType {
-  const hasAnyAgentscope = agentNodes.some(
-    (n) => (n.data as any).subEngine === 'AGENTSCOPE',
-  );
-  return hasAnyAgentscope ? 'HYBRID' : 'GRAPH';
+  const hasAgentscope = agentNodes.some((n) => (n.data as any).subEngine === 'AGENTSCOPE');
+  const hasGraph = agentNodes.some((n) => (n.data as any).subEngine !== 'AGENTSCOPE');
+  if (hasAgentscope && hasGraph) return 'HYBRID';
+  if (hasAgentscope) return 'AGENTSCOPE';
+  return 'GRAPH';
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -219,9 +220,26 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const agentNodeIds = new Set(agentNodes.map((n) => n.id));
 
     // graphStart: all targets from start node's outgoing edges
-    const graphStart = edges
-      .filter((e) => e.source === 'start' && agentNodeIds.has(e.target))
+    // 通过节点 type 查找 Start 节点（兼容手动添加的动态 ID）
+    const startNodeIds = new Set(
+      nodes.filter((n) => n.type === 'start').map((n) => n.id),
+    );
+    let graphStart = edges
+      .filter((e) => startNodeIds.has(e.source) && agentNodeIds.has(e.target))
       .map((e) => e.target);
+
+    if (graphStart.length === 0) {
+      const nodesWithIncoming = new Set(
+        edges
+          .filter((e) => agentNodeIds.has(e.target))
+          .map((e) => e.target),
+      );
+      graphStart = agentNodeIds
+        ? agentNodes
+            .filter((n) => !nodesWithIncoming.has(n.id))
+            .map((n) => n.id)
+        : [];
+    }
 
     // graphNodes: all agent nodes with their data
     const graphNodes = agentNodes.map((n) => {

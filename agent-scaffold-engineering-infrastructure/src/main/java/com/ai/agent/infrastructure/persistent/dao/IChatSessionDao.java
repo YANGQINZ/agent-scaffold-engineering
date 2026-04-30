@@ -2,6 +2,7 @@ package com.ai.agent.infrastructure.persistent.dao;
 
 import com.ai.agent.infrastructure.persistent.po.ChatSessionPO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -40,5 +41,10 @@ public interface IChatSessionDao {
      * 查询所有会话列表
      */
     List<ChatSessionPO> selectAll();
+
+    /**
+     * 根据会话ID列表批量删除会话
+     */
+    int deleteBySessionIds(@Param("ids") List<String> sessionIds);
 
 }
