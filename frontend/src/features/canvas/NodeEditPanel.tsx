@@ -33,12 +33,11 @@ type SectionKey = 'basic' | 'rag' | 'mcp' | 'edges';
 /** 节点自定义数据结构 */
 interface NodeEditData {
   label: string;
-  agentId?: string;
-  reactAgentId?: string;
+  instruction?: string;
+  subEngine?: 'GRAPH' | 'AGENTSCOPE';
   ragEnabled?: boolean;
   knowledgeBaseId?: string;
   mcpServers?: McpServerConfig[];
-  engineType?: string;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -47,8 +46,9 @@ interface NodeEditData {
 
 interface SectionProps {
   title: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   defaultOpen?: boolean;
+  sectionKey?: SectionKey;
   children: React.ReactNode;
 }
 
@@ -92,9 +92,9 @@ function NodeEditPanel() {
 
   // ─── 本地表单状态 ───
   const [label, setLabel] = useState(nodeData.label ?? '');
-  const [agentId, setAgentId] = useState(nodeData.agentId ?? '');
-  const [reactAgentId, setReactAgentId] = useState(
-    nodeData.reactAgentId ?? '',
+  const [instruction, setInstruction] = useState(nodeData.instruction ?? '');
+  const [subEngine, setSubEngine] = useState<'GRAPH' | 'AGENTSCOPE'>(
+    nodeData.subEngine ?? 'GRAPH',
   );
   const [ragEnabled, setRagEnabled] = useState(nodeData.ragEnabled ?? false);
   const [knowledgeBaseId, setKnowledgeBaseId] = useState(
@@ -103,7 +103,6 @@ function NodeEditPanel() {
   const [mcpServers, setMcpServers] = useState<McpServerConfig[]>(
     nodeData.mcpServers ?? [],
   );
-  const [engineType, setEngineType] = useState(nodeData.engineType ?? 'GRAPH');
 
   // ─── 知识库列表（延迟加载） ───
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
@@ -121,14 +120,13 @@ function NodeEditPanel() {
   // ─── 同步选中节点数据到本地 ───
   useEffect(() => {
     if (!selectedNode) return;
-    const data = selectedNode.data as NodeEditData;
-    setLabel(data.label ?? '');
-    setAgentId(data.agentId ?? '');
-    setReactAgentId(data.reactAgentId ?? '');
-    setRagEnabled(data.ragEnabled ?? false);
-    setKnowledgeBaseId(data.knowledgeBaseId ?? '');
-    setMcpServers(data.mcpServers ?? []);
-    setEngineType(data.engineType ?? 'GRAPH');
+    const d = selectedNode.data as NodeEditData;
+    setLabel(d.label ?? '');
+    setInstruction(d.instruction || '');
+    setSubEngine(d.subEngine || 'GRAPH');
+    setRagEnabled(d.ragEnabled ?? false);
+    setKnowledgeBaseId(d.knowledgeBaseId ?? '');
+    setMcpServers(d.mcpServers ?? []);
   }, [selectedNode]);
 
   // ─── 更新节点 data ───
@@ -144,27 +142,6 @@ function NodeEditPanel() {
       );
     },
     [selectedNodeId, nodes, setNodes],
-  );
-
-  // ─── 基础信息 blur 提交 ───
-  const handleLabelBlur = useCallback(() => {
-    updateNodeData({ label });
-  }, [label, updateNodeData]);
-
-  const handleAgentIdBlur = useCallback(() => {
-    updateNodeData({ agentId: agentId || undefined });
-  }, [agentId, updateNodeData]);
-
-  const handleReactAgentIdBlur = useCallback(() => {
-    updateNodeData({ reactAgentId: reactAgentId || undefined });
-  }, [reactAgentId, updateNodeData]);
-
-  const handleEngineTypeChange = useCallback(
-    (value: string) => {
-      setEngineType(value);
-      updateNodeData({ engineType: value });
-    },
-    [updateNodeData],
   );
 
   // ─── RAG 切换 ───
@@ -239,10 +216,19 @@ function NodeEditPanel() {
     [edges, setEdges],
   );
 
+  // ─── Start/End 节点无可配置项 ───
+  if (selectedNode && (selectedNode.type === 'start' || selectedNode.type === 'end')) {
+    return (
+      <div className="w-80 border-r bg-white p-4 flex items-center justify-center text-slate-400 text-sm">
+        该节点无可配置项
+      </div>
+    );
+  }
+
   // ─── 无选中节点时不渲染 ───
   if (!selectedNodeId || !selectedNode) {
     return (
-      <div className="flex h-full w-[320px] items-center justify-center border-l border-gray-200 bg-white">
+      <div className="flex h-full w-[320px] items-center justify-center border-r border-gray-200 bg-white shadow-lg">
         <p className="text-sm text-gray-400">点击节点以编辑属性</p>
       </div>
     );
@@ -251,7 +237,7 @@ function NodeEditPanel() {
   const isExpert = mode === 'expert';
 
   return (
-    <div className="flex h-full w-[320px] flex-col border-l border-gray-200 bg-white overflow-y-auto">
+    <div className="flex h-full w-[320px] flex-col border-r border-gray-200 bg-white overflow-y-auto shadow-lg">
       {/* 面板标题 */}
       <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2.5">
         <span className="text-sm font-semibold text-gray-800">节点属性</span>
@@ -261,65 +247,45 @@ function NodeEditPanel() {
       </div>
 
       {/* ─────── 1. 基础信息 ─────── */}
-      <Section
-        title="基础信息"
-        icon={<Pencil className="size-4 text-indigo-500" />}
-        defaultOpen
-      >
-        {/* 节点 ID（只读） */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500">节点 ID</label>
-          <Input value={selectedNodeId} readOnly className="bg-gray-50 text-gray-400" />
-        </div>
-
-        {/* 节点名称 */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500">节点名称</label>
-          <Input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onBlur={handleLabelBlur}
-            placeholder="输入节点名称"
-          />
-        </div>
-
-        {/* Agent ID */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500">Agent ID</label>
-          <Input
-            value={agentId}
-            onChange={(e) => setAgentId(e.target.value)}
-            onBlur={handleAgentIdBlur}
-            placeholder="关联的 Agent 定义 ID"
-          />
-        </div>
-
-        {/* React Agent ID */}
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-500">React Agent ID（可选）</label>
-          <Input
-            value={reactAgentId}
-            onChange={(e) => setReactAgentId(e.target.value)}
-            onBlur={handleReactAgentIdBlur}
-            placeholder="引用的 React Agent ID"
-          />
-        </div>
-
-        {/* 引擎类型 —— 仅 engine 节点 */}
-        {selectedNode.type === 'engine' && (
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-500">引擎类型</label>
+      <Section title="基础信息" defaultOpen sectionKey="basic">
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-slate-500">节点名称</label>
+            <input
+              className="w-full border rounded px-2 py-1 text-sm"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onBlur={() => updateNodeData({ label })}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-slate-500">
+              提示词 <span className="text-red-400">*</span>
+            </label>
+            <textarea
+              className="w-full border rounded px-2 py-1 text-sm min-h-[80px] resize-y"
+              value={instruction}
+              onChange={(e) => setInstruction(e.target.value)}
+              onBlur={() => updateNodeData({ instruction })}
+              placeholder="请输入提示词..."
+            />
+          </div>
+          <div>
+            <label className="text-xs text-slate-500">子引擎类型</label>
             <select
-              value={engineType}
-              onChange={(e) => handleEngineTypeChange(e.target.value)}
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="w-full border rounded px-2 py-1 text-sm"
+              value={subEngine}
+              onChange={(e) => {
+                const val = e.target.value as 'GRAPH' | 'AGENTSCOPE';
+                setSubEngine(val);
+                updateNodeData({ subEngine: val });
+              }}
             >
-              <option value="GRAPH">GRAPH</option>
+              <option value="GRAPH">GRAPH（默认）</option>
               <option value="AGENTSCOPE">AGENTSCOPE</option>
-              <option value="HYBRID">HYBRID</option>
             </select>
           </div>
-        )}
+        </div>
       </Section>
 
       <Separator />
@@ -423,43 +389,44 @@ function NodeEditPanel() {
           </Section>
 
           <Separator />
-
-          {/* ─────── 4. 出边条件（专家模式） ─────── */}
-          <Section
-            title="出边条件"
-            icon={<GitBranch className="size-4 text-purple-500" />}
-          >
-            {outgoingEdges.length === 0 && (
-              <p className="text-xs text-gray-400">该节点无出边</p>
-            )}
-
-            {outgoingEdges.map((edge) => {
-              const condition =
-                (edge.data as Record<string, unknown> | undefined)?.condition as
-                  | string
-                  | undefined ?? '';
-
-              return (
-                <div key={edge.id} className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1 text-xs text-gray-400">
-                    <GitBranch className="size-3" />
-                    <span>
-                      {edge.source} → {edge.target}
-                    </span>
-                  </div>
-                  <Input
-                    value={condition}
-                    onChange={(e) =>
-                      handleConditionChange(edge.id, e.target.value)
-                    }
-                    placeholder="条件表达式（可选）"
-                  />
-                </div>
-              );
-            })}
-          </Section>
         </>
       )}
+
+      {/* ─────── 4. 出边条件（所有模式可见） ─────── */}
+      <Section
+        title="出边条件"
+        icon={<GitBranch className="size-4 text-purple-500" />}
+        defaultOpen
+      >
+        {outgoingEdges.length === 0 && (
+          <p className="text-xs text-gray-400">该节点无出边</p>
+        )}
+
+        {outgoingEdges.map((edge) => {
+          const condition =
+            (edge.data as Record<string, unknown> | undefined)?.condition as
+              | string
+              | undefined ?? '';
+
+          return (
+            <div key={edge.id} className="flex flex-col gap-1">
+              <div className="flex items-center gap-1 text-xs text-gray-400">
+                <GitBranch className="size-3" />
+                <span>
+                  {edge.source} → {edge.target}
+                </span>
+              </div>
+              <Input
+                value={condition}
+                onChange={(e) =>
+                  handleConditionChange(edge.id, e.target.value)
+                }
+                placeholder="条件表达式（可选）"
+              />
+            </div>
+          );
+        })}
+      </Section>
 
       {/* MCP Server 编辑弹窗 */}
       <McpServerForm
