@@ -146,9 +146,16 @@ public class HybridEngineAdapter implements EngineAdapter {
 
         // 1. 添加节点，根据 subEngines 决定委托给哪个引擎
         for (WorkflowNode node : hyDef.getGraphNodes()) {
-            EngineType subEngine = hyDef.getSubEngine(node.getId());
+            // Priority: WorkflowNode.subEngine > hyDef.subEngines map
+            String subEngine = node.getSubEngine();
+            EngineType engineType;
+            if (subEngine != null && !subEngine.isBlank()) {
+                engineType = EngineType.valueOf(subEngine);
+            } else {
+                engineType = hyDef.getSubEngine(node.getId());
+            }
 
-            if (subEngine == EngineType.AGENTSCOPE) {
+            if (engineType == EngineType.AGENTSCOPE) {
                 graph.addNode(node.getId(), node_async(wrapAsGraphAction(hyDef, node, ctx, enableThinking)));
             } else {
                 // 复用 GraphEngineAdapter 的节点构建方法
@@ -157,7 +164,9 @@ public class HybridEngineAdapter implements EngineAdapter {
         }
 
         // 2. 添加起始边
-        graph.addEdge(START, hyDef.getGraphStart());
+        for (String startTarget : hyDef.getGraphStart()) {
+            graph.addEdge(START, startTarget);
+        }
 
         // 3. 构建边映射
         Map<String, List<GraphEdge>> edgeMap = hyDef.getGraphEdges().stream()
@@ -281,7 +290,7 @@ public class HybridEngineAdapter implements EngineAdapter {
             throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Hybrid配置不完整: 缺少节点定义, agentId=" + hyDef.getAgentId());
         }
-        if (hyDef.getGraphStart() == null || hyDef.getGraphStart().isBlank()) {
+        if (hyDef.getGraphStart() == null || hyDef.getGraphStart().isEmpty()) {
             throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
                     "Hybrid配置不完整: 缺少起始节点, agentId=" + hyDef.getAgentId());
         }
