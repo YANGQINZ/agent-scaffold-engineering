@@ -1,27 +1,42 @@
 /**
  * 画布顶部工具栏
- * 包含：添加节点（专家模式）、保存、测试运行、导出 YAML（专家模式）
+ * 包含：添加节点（专家模式）、保存、导出 YAML（专家模式）
  */
 import { memo, useCallback, useState } from 'react';
 import {
   Plus,
   Save,
-  Play,
   FileDown,
   MessageSquare,
   Cpu,
   CircleDot,
   ChevronDown,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/stores/app';
 import { useCanvasStore } from '@/stores/canvas';
-import { cn } from '@/lib/utils';
+import { saveOrUpdateAgent, type EngineType } from '@/api/agent';
 
 function CanvasToolbar() {
   const mode = useAppStore((s) => s.mode);
-  const { nodes, setNodes } = useCanvasStore();
+  const {
+    nodes,
+    setNodes,
+    currentAgentId,
+    currentAgentName,
+    currentEngineType,
+    setCurrentAgent,
+    exportToAgentDefinition,
+  } = useCanvasStore();
+
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [draftName, setDraftName] = useState('');
+  const [draftAgentId, setDraftAgentId] = useState('');
+  const [draftEngine, setDraftEngine] = useState<EngineType>('GRAPH');
 
   /** 生成唯一 ID */
   const genId = () =>
@@ -54,20 +69,54 @@ function CanvasToolbar() {
     [nodes, setNodes],
   );
 
-  /** 保存（占位） */
+  /** 打开保存弹窗 */
   const handleSave = useCallback(() => {
-    // TODO: 调用后端保存接口
-  }, []);
+    setDraftName(currentAgentName || '');
+    setDraftAgentId(currentAgentId || '');
+    setDraftEngine(currentEngineType);
+    setSaveDialogOpen(true);
+  }, [currentAgentName, currentAgentId, currentEngineType]);
 
-  /** 测试运行（占位） */
-  const handleTest = useCallback(() => {
-    // TODO: 触发测试运行流程
-  }, []);
+  /** 确认保存 */
+  const handleConfirmSave = useCallback(async () => {
+    if (!draftName.trim()) return;
+    setSaveLoading(true);
+    try {
+      setCurrentAgent(draftAgentId || null, draftName, draftEngine);
+      const payload = exportToAgentDefinition();
+      const saved = await saveOrUpdateAgent(draftAgentId || null, {
+        ...payload,
+        name: draftName,
+        engine: draftEngine,
+      });
+      setCurrentAgent(saved.agentId, saved.name, saved.engine);
+      setSaveDialogOpen(false);
+    } catch (err) {
+      console.error('保存失败', err);
+      alert('保存失败，请检查控制台');
+    } finally {
+      setSaveLoading(false);
+    }
+  }, [
+    draftName,
+    draftAgentId,
+    draftEngine,
+    setCurrentAgent,
+    exportToAgentDefinition,
+  ]);
 
   /** 导出 YAML（占位） */
   const handleExportYaml = useCallback(() => {
-    // TODO: 导出 YAML
-  }, []);
+    const payload = exportToAgentDefinition();
+    const yaml = JSON.stringify(payload, null, 2);
+    const blob = new Blob([yaml], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentAgentName || 'agent'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [exportToAgentDefinition, currentAgentName]);
 
   const menuItems = [
     { type: 'start', icon: CircleDot, label: '开始节点' },
@@ -77,62 +126,115 @@ function CanvasToolbar() {
   ];
 
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-gray-200 bg-white/90 px-3 py-2 shadow-sm backdrop-blur-sm">
-      {/* 添加节点 —— 仅专家模式可见 */}
-      {mode === 'expert' && (
-        <div className="relative">
+    <>
+      <div className="pointer-events-auto absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-gray-200 bg-white/90 px-3 py-2 shadow-sm backdrop-blur-sm">
+        {/* 添加节点 —— 仅专家模式可见 */}
+        {mode === 'expert' && (
+          <div className="relative">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              onClick={() => setAddMenuOpen((prev) => !prev)}
+            >
+              <Plus className="size-4" />
+              添加节点
+              <ChevronDown className="size-3" />
+            </Button>
+            {addMenuOpen && (
+              <div className="absolute left-0 top-full z-50 mt-1 min-w-[140px] rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.type}
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => addNode(item.type)}
+                  >
+                    <item.icon className="size-4 text-gray-400" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 保存 */}
+        <Button variant="outline" size="sm" className="gap-1" onClick={handleSave}>
+          <Save className="size-4" />
+          保存
+        </Button>
+
+        {/* 导出 YAML —— 仅专家模式可见 */}
+        {mode === 'expert' && (
           <Button
             variant="outline"
             size="sm"
             className="gap-1"
-            onClick={() => setAddMenuOpen((prev) => !prev)}
+            onClick={handleExportYaml}
           >
-            <Plus className="size-4" />
-            添加节点
-            <ChevronDown className="size-3" />
+            <FileDown className="size-4" />
+            导出 YAML
           </Button>
-          {addMenuOpen && (
-            <div className="absolute left-0 top-full z-50 mt-1 min-w-[140px] rounded-md border border-gray-200 bg-white py-1 shadow-lg">
-              {menuItems.map((item) => (
-                <button
-                  key={item.type}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                  onClick={() => addNode(item.type)}
-                >
-                  <item.icon className="size-4 text-gray-400" />
-                  {item.label}
-                </button>
-              ))}
+        )}
+      </div>
+
+      {/* 保存弹窗 */}
+      {saveDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-[400px] rounded-lg border border-gray-200 bg-white p-5 shadow-lg">
+            <h3 className="mb-4 text-base font-semibold text-gray-900">
+              {currentAgentId ? '更新 Agent' : '创建新 Agent'}
+            </h3>
+            <div className="mb-3 flex flex-col gap-1">
+              <label className="text-xs text-gray-500">Agent 名称 *</label>
+              <Input
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                placeholder="输入 Agent 名称"
+              />
             </div>
-          )}
+            <div className="mb-3 flex flex-col gap-1">
+              <label className="text-xs text-gray-500">Agent ID（留空则自动生成）</label>
+              <Input
+                value={draftAgentId}
+                onChange={(e) => setDraftAgentId(e.target.value)}
+                placeholder="可选，自定义唯一标识"
+              />
+            </div>
+            <div className="mb-5 flex flex-col gap-1">
+              <label className="text-xs text-gray-500">引擎类型</label>
+              <select
+                value={draftEngine}
+                onChange={(e) => setDraftEngine(e.target.value as EngineType)}
+                className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
+              >
+                <option value="GRAPH">GRAPH</option>
+                <option value="AGENTSCOPE">AGENTSCOPE</option>
+                <option value="HYBRID">HYBRID</option>
+                <option value="CHAT">CHAT</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSaveDialogOpen(false)}
+              >
+                取消
+              </Button>
+              <Button
+                size="sm"
+                disabled={!draftName.trim() || saveLoading}
+                onClick={handleConfirmSave}
+              >
+                {saveLoading && <Loader2 className="mr-1 size-3 animate-spin" />}
+                确认保存
+              </Button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* 保存 */}
-      <Button variant="outline" size="sm" className="gap-1" onClick={handleSave}>
-        <Save className="size-4" />
-        保存
-      </Button>
-
-      {/* 测试运行 */}
-      <Button variant="default" size="sm" className="gap-1" onClick={handleTest}>
-        <Play className="size-4" />
-        测试运行
-      </Button>
-
-      {/* 导出 YAML —— 仅专家模式可见 */}
-      {mode === 'expert' && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1"
-          onClick={handleExportYaml}
-        >
-          <FileDown className="size-4" />
-          导出 YAML
-        </Button>
-      )}
-    </div>
+    </>
   );
 }
 

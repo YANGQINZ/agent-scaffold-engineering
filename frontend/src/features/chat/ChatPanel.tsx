@@ -10,7 +10,6 @@ import { useChatStore } from '@/stores/chat';
 import { useCanvasStore } from '@/stores/canvas';
 import { useAppStore } from '@/stores/app';
 import { useSSE } from '@/hooks/useSSE';
-import { cn } from '@/lib/utils';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
 import NodeExecutionStatus from './NodeExecutionStatus';
@@ -23,7 +22,6 @@ function ChatPanel() {
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const addMessage = useChatStore((s) => s.addMessage);
-  const setIsStreaming = useChatStore((s) => s.setIsStreaming);
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const selectedAgentId = useChatStore((s) => s.selectedAgentId);
   const agents = useCanvasStore((s) => s.agents);
@@ -62,16 +60,32 @@ function ChatPanel() {
         timestamp: Date.now(),
       });
 
-      // 3. 发起流式请求
+      // 3. 构建请求参数 — 区分工作区页面和 /chat 页面
+      const canvasNodes = useCanvasStore.getState().nodes;
+      const canvasAgentId = useCanvasStore.getState().currentAgentId;
+      const canvasEngineType = useCanvasStore.getState().currentEngineType;
+
+      const hasCanvasNodes = canvasNodes.length > 0;
+      const isUnsavedCanvas = hasCanvasNodes && !canvasAgentId;
+
       startStream({
         query: text,
         userId: 'web-user',
         sessionId: activeSessionId ?? undefined,
-        agentId: selectedAgentId ?? undefined,
-        mode: selectedAgentId ? 'AGENT' : 'MULTI_TURN',
+        agentId: canvasAgentId || selectedAgentId || undefined,
+        mode: (canvasAgentId || selectedAgentId || hasCanvasNodes) ? 'AGENT' : 'MULTI_TURN',
+        engine: hasCanvasNodes
+          ? (canvasEngineType || 'GRAPH')
+          : (agents.find((a) => a.agentId === selectedAgentId)?.engine ?? undefined),
+        agentDefinition: isUnsavedCanvas
+          ? {
+              agentId: `temp_${Date.now()}`,
+              ...useCanvasStore.getState().exportToAgentDefinition(),
+            }
+          : undefined,
       });
     },
-    [addMessage, startStream, activeSessionId, selectedAgentId],
+    [addMessage, startStream, activeSessionId, selectedAgentId, agents],
   );
 
   return (
@@ -83,10 +97,15 @@ function ChatPanel() {
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-sm font-semibold text-gray-900">
-            {activeAgent?.name ?? 'Agent 对话'}
+            {activeAgent?.name ?? (useCanvasStore.getState().nodes.length > 0 ? '未保存画布' : 'Agent 对话')}
           </h2>
           {activeAgent && (
             <span className="text-xs text-gray-400">{activeAgent.agentId}</span>
+          )}
+          {!activeAgent && useCanvasStore.getState().currentEngineType && useCanvasStore.getState().nodes.length > 0 && (
+            <Badge variant="outline" className="ml-1 text-xs text-amber-600 border-amber-300">
+              未保存
+            </Badge>
           )}
         </div>
         {mode === 'expert' && (

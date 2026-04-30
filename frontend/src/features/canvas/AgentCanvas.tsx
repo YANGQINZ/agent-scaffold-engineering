@@ -21,7 +21,6 @@ import ChatNode from './nodes/ChatNode';
 import EngineNode from './nodes/EngineNode';
 import DefaultEdge from './edges/DefaultEdge';
 import ConditionEdge from './edges/ConditionEdge';
-import CanvasToolbar from './CanvasToolbar';
 
 /** 注册自定义节点类型 */
 const nodeTypes = {
@@ -104,7 +103,6 @@ function AgentCanvas() {
           className="!rounded-lg !border-gray-200 !shadow-sm"
         />
       </ReactFlow>
-      <CanvasToolbar />
     </div>
   );
 }
