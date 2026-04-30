@@ -63,10 +63,14 @@ function ChatPanel() {
       // 3. 构建请求参数 — 区分工作区页面和 /chat 页面
       const canvasNodes = useCanvasStore.getState().nodes;
       const canvasAgentId = useCanvasStore.getState().currentAgentId;
-      const canvasEngineType = useCanvasStore.getState().currentEngineType;
 
       const hasCanvasNodes = canvasNodes.length > 0;
       const isUnsavedCanvas = hasCanvasNodes && !canvasAgentId;
+
+      // 导出画布定义以获取自动推断的引擎类型
+      const canvasDef = hasCanvasNodes
+        ? useCanvasStore.getState().exportToAgentDefinition()
+        : null;
 
       startStream({
         query: text,
@@ -75,12 +79,12 @@ function ChatPanel() {
         agentId: canvasAgentId || selectedAgentId || undefined,
         mode: (canvasAgentId || selectedAgentId || hasCanvasNodes) ? 'AGENT' : 'MULTI_TURN',
         engine: hasCanvasNodes
-          ? (canvasEngineType || 'GRAPH')
+          ? (canvasDef?.engine ?? 'GRAPH')
           : (agents.find((a) => a.agentId === selectedAgentId)?.engine ?? undefined),
         agentDefinition: isUnsavedCanvas
           ? {
               agentId: `temp_${Date.now()}`,
-              ...useCanvasStore.getState().exportToAgentDefinition(),
+              ...canvasDef,
             }
           : undefined,
       });
@@ -102,7 +106,7 @@ function ChatPanel() {
           {activeAgent && (
             <span className="text-xs text-gray-400">{activeAgent.agentId}</span>
           )}
-          {!activeAgent && useCanvasStore.getState().currentEngineType && useCanvasStore.getState().nodes.length > 0 && (
+          {!activeAgent && useCanvasStore.getState().nodes.length > 0 && (
             <Badge variant="outline" className="ml-1 text-xs text-amber-600 border-amber-300">
               未保存
             </Badge>

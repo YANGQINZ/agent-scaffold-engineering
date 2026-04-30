@@ -28,6 +28,18 @@ export interface NodeState {
 }
 
 // ═══════════════════════════════════════════════════════════
+// 辅助函数
+// ═══════════════════════════════════════════════════════════
+
+/** 根据 agent 节点的 subEngine 自动推断引擎类型 */
+function inferEngineType(agentNodes: Node[]): EngineType {
+  const hasAnyAgentscope = agentNodes.some(
+    (n) => (n.data as any).subEngine === 'AGENTSCOPE',
+  );
+  return hasAnyAgentscope ? 'HYBRID' : 'GRAPH';
+}
+
+// ═══════════════════════════════════════════════════════════
 // Store 定义
 // ═══════════════════════════════════════════════════════════
 
@@ -46,8 +58,6 @@ interface CanvasState {
   currentAgentId: string | null;
   /** 当前编辑的 Agent 名称 */
   currentAgentName: string;
-  /** 当前编辑的引擎类型 */
-  currentEngineType: EngineType;
 
   // ─── Actions ───
 
@@ -68,7 +78,7 @@ interface CanvasState {
   /** 清空所有节点运行状态 */
   clearNodeStates: () => void;
   /** 设置当前编辑的 Agent 信息 */
-  setCurrentAgent: (agentId: string | null, name: string, engine: EngineType) => void;
+  setCurrentAgent: (agentId: string | null, name: string) => void;
   /** 从 AgentDefinition 加载画布 */
   loadFromAgentDefinition: (agent: AgentDefinition) => void;
   /** 将画布导出为 AgentDefinition */
@@ -83,7 +93,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   nodeStates: {},
   currentAgentId: null,
   currentAgentName: '',
-  currentEngineType: 'GRAPH',
 
   setNodes: (nodes) => set({ nodes }),
 
@@ -110,103 +119,156 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   clearNodeStates: () => set({ nodeStates: {} }),
 
-  setCurrentAgent: (currentAgentId, currentAgentName, currentEngineType) =>
-    set({ currentAgentId, currentAgentName, currentEngineType }),
+  setCurrentAgent: (currentAgentId, currentAgentName) =>
+    set({ currentAgentId, currentAgentName }),
 
   loadFromAgentDefinition: (agent) => {
-    const graphNodes: Node[] = (agent.graphNodes ?? []).map((n, idx) => ({
-      id: n.id,
-      type: (agent.graphStart ?? []).includes(n.id) ? 'start' : 'engine',
-      position: { x: 250 + idx * 200, y: 150 + (idx % 2) * 120 },
-      data: {
-        label: n.id,
-        agentId: n.agentId,
-        reactAgentId: n.reactAgentId,
-        ragEnabled: n.ragEnabled,
-        knowledgeBaseId: n.knowledgeBaseId,
-        engineType: agent.subEngines?.[n.id] ?? agent.engine,
-      },
-    }));
+    const nodes: Node[] = [];
+    const edges: Edge[] = [];
 
-    const startIds = agent.graphStart ?? [];
-    const startNode = graphNodes.find((n) => startIds.includes(n.id));
-    if (!startNode && startIds.length > 0) {
-      graphNodes.unshift({
-        id: startIds[0],
-        type: 'start',
-        position: { x: 250, y: 100 },
-        data: { label: '开始' },
+    // 1. Start node
+    nodes.push({
+      id: 'start',
+      type: 'start',
+      position: { x: 400, y: 50 },
+      data: { label: '开始' },
+    });
+
+    // 2. graphNodes → Agent nodes
+    const agentNodeIds: string[] = [];
+    (agent.graphNodes || []).forEach((gn, i) => {
+      agentNodeIds.push(gn.id);
+      nodes.push({
+        id: gn.id,
+        type: 'agent',
+        position: {
+          x: 150 + (i % 3) * 200,
+          y: 150 + Math.floor(i / 3) * 150,
+        },
+        data: {
+          label: gn.id,
+          instruction: gn.instruction,
+          subEngine: gn.subEngine || 'GRAPH',
+          ragEnabled: gn.ragEnabled,
+          knowledgeBaseId: gn.knowledgeBaseId,
+          mcpServers: gn.mcpServers,
+          agentId: gn.agentId,
+        },
       });
-    }
+    });
 
-    const graphEdges: Edge[] = (agent.graphEdges ?? []).map((e) => ({
-      id: `e_${e.from}-${e.to}`,
-      source: e.from,
-      target: e.to,
-      type: e.condition ? 'condition' : 'default',
-      data: { condition: e.condition },
-    }));
+    // 3. graphStart → Start outgoing edges
+    const starts = agent.graphStart || [];
+    starts.forEach((target) => {
+      edges.push({
+        id: `e_start-${target}`,
+        source: 'start',
+        target,
+        type: 'default',
+      });
+    });
+
+    // 4. graphEdges → Agent-to-Agent edges
+    const graphEdges = agent.graphEdges || [];
+    graphEdges.forEach((e) => {
+      edges.push({
+        id: `e_${e.from}-${e.to}`,
+        source: e.from,
+        target: e.to,
+        type: e.condition ? 'condition' : 'default',
+        data: { condition: e.condition || undefined },
+      });
+    });
+
+    // 5. Find leaf nodes (no outgoing edges)
+    const nodesWithOutgoing = new Set(graphEdges.map((e) => e.from));
+    const leafNodes = agentNodeIds.filter((id) => !nodesWithOutgoing.has(id));
+
+    // 6. End node
+    nodes.push({
+      id: 'end',
+      type: 'end',
+      position: {
+        x: 400,
+        y: 150 + (Math.ceil(agentNodeIds.length / 3) + 1) * 150,
+      },
+      data: { label: '结束' },
+    });
+
+    // 7. Leaf → End edges
+    leafNodes.forEach((leafId) => {
+      edges.push({
+        id: `e_${leafId}-end`,
+        source: leafId,
+        target: 'end',
+        type: 'default',
+      });
+    });
 
     set({
-      nodes: graphNodes,
-      edges: graphEdges,
+      nodes,
+      edges,
       currentAgentId: agent.agentId,
       currentAgentName: agent.name,
-      currentEngineType: agent.engine,
     });
   },
 
   exportToAgentDefinition: () => {
-    const state = get();
-    const { nodes, edges, currentAgentName, currentEngineType } = state;
+    const { nodes, edges, currentAgentId, currentAgentName } = get();
+    const agentNodes = nodes.filter((n) => n.type === 'agent');
+    const agentNodeIds = new Set(agentNodes.map((n) => n.id));
 
-    // graphStart 应为 start 节点指向的第一个实际节点，而非 start 节点本身
-    const startNodes = nodes.filter((n) => n.type === 'start');
-    const graphStart: string[] = startNodes
-      .map((sn) => edges.find((e) => e.source === sn.id)?.target)
-      .filter((t): t is string => !!t);
-    if (graphStart.length === 0) {
-      const first = nodes.find((n) => n.type !== 'start' && n.type !== 'end')?.id;
-      if (first) graphStart.push(first);
-    }
+    // graphStart: all targets from start node's outgoing edges
+    const graphStart = edges
+      .filter((e) => e.source === 'start' && agentNodeIds.has(e.target))
+      .map((e) => e.target);
 
-    const graphNodes = nodes
-      .filter((n) => n.type !== 'start' && n.type !== 'end')
-      .map((n) => ({
+    // graphNodes: all agent nodes with their data
+    const graphNodes = agentNodes.map((n) => {
+      const d = n.data as any;
+      return {
         id: n.id,
-        agentId: n.data?.agentId as string | undefined,
-        reactAgentId: n.data?.reactAgentId as string | undefined,
-        ragEnabled: n.data?.ragEnabled as boolean | undefined,
-        knowledgeBaseId: n.data?.knowledgeBaseId as string | undefined,
-      }));
+        instruction: d.instruction || undefined,
+        subEngine: d.subEngine || undefined,
+        agentId: d.agentId || undefined,
+        ragEnabled: d.ragEnabled || false,
+        knowledgeBaseId: d.knowledgeBaseId || undefined,
+        mcpServers: d.mcpServers || undefined,
+      };
+    });
 
-    // 导出边时排除引用 start/end 类型节点的边：
-    // start 节点由后端 graphStart + addEdge(START, ...) 处理，
-    // end 节点由后端叶子节点自动连 END 处理。
-    const validNodeIds = new Set(graphNodes.map((n) => n.id));
+    // graphEdges: agent-to-agent edges only
     const graphEdges = edges
-      .filter((e) => validNodeIds.has(e.source) && validNodeIds.has(e.target))
+      .filter((e) => agentNodeIds.has(e.source) && agentNodeIds.has(e.target))
       .map((e) => ({
         from: e.source,
         to: e.target,
-        condition: (e.data as Record<string, unknown> | undefined)?.condition as string | undefined,
+        condition: (e.data as any)?.condition || undefined,
       }));
 
-    const subEngines: Record<string, EngineType> = {};
-    nodes.forEach((n) => {
-      const et = n.data?.engineType as EngineType | undefined;
-      if (et && et !== currentEngineType) {
-        subEngines[n.id] = et;
-      }
-    });
+    // Auto-infer engine type
+    const engine = inferEngineType(agentNodes);
+
+    // subEngines: only for HYBRID
+    let subEngines: Record<string, string> | undefined;
+    if (engine === 'HYBRID') {
+      subEngines = {};
+      agentNodes.forEach((n) => {
+        const d = n.data as any;
+        if (d.subEngine === 'AGENTSCOPE') {
+          subEngines![n.id] = 'AGENTSCOPE';
+        }
+      });
+    }
 
     return {
-      name: currentAgentName || '未命名 Agent',
-      engine: currentEngineType,
+      agentId: currentAgentId || '',
+      name: currentAgentName,
+      engine,
       graphStart,
       graphNodes,
       graphEdges,
-      ...(Object.keys(subEngines).length > 0 ? { subEngines } : {}),
+      subEngines,
     };
   },
 }));

@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/stores/app';
 import { useCanvasStore } from '@/stores/canvas';
-import { saveOrUpdateAgent, type EngineType } from '@/api/agent';
+import { saveOrUpdateAgent } from '@/api/agent';
 
 function CanvasToolbar() {
   const mode = useAppStore((s) => s.mode);
@@ -26,7 +26,6 @@ function CanvasToolbar() {
     setNodes,
     currentAgentId,
     currentAgentName,
-    currentEngineType,
     setCurrentAgent,
     exportToAgentDefinition,
   } = useCanvasStore();
@@ -36,7 +35,6 @@ function CanvasToolbar() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [draftAgentId, setDraftAgentId] = useState('');
-  const [draftEngine, setDraftEngine] = useState<EngineType>('GRAPH');
 
   /** 生成唯一 ID */
   const genId = () =>
@@ -73,23 +71,21 @@ function CanvasToolbar() {
   const handleSave = useCallback(() => {
     setDraftName(currentAgentName || '');
     setDraftAgentId(currentAgentId || '');
-    setDraftEngine(currentEngineType);
     setSaveDialogOpen(true);
-  }, [currentAgentName, currentAgentId, currentEngineType]);
+  }, [currentAgentName, currentAgentId]);
 
   /** 确认保存 */
   const handleConfirmSave = useCallback(async () => {
     if (!draftName.trim()) return;
     setSaveLoading(true);
     try {
-      setCurrentAgent(draftAgentId || null, draftName, draftEngine);
+      setCurrentAgent(draftAgentId || null, draftName);
       const payload = exportToAgentDefinition();
       const saved = await saveOrUpdateAgent(draftAgentId || null, {
         ...payload,
         name: draftName,
-        engine: draftEngine,
       });
-      setCurrentAgent(saved.agentId, saved.name, saved.engine);
+      setCurrentAgent(saved.agentId, saved.name);
       setSaveDialogOpen(false);
     } catch (err) {
       console.error('保存失败', err);
@@ -100,7 +96,6 @@ function CanvasToolbar() {
   }, [
     draftName,
     draftAgentId,
-    draftEngine,
     setCurrentAgent,
     exportToAgentDefinition,
   ]);
@@ -200,19 +195,6 @@ function CanvasToolbar() {
                 onChange={(e) => setDraftAgentId(e.target.value)}
                 placeholder="可选，自定义唯一标识"
               />
-            </div>
-            <div className="mb-5 flex flex-col gap-1">
-              <label className="text-xs text-gray-500">引擎类型</label>
-              <select
-                value={draftEngine}
-                onChange={(e) => setDraftEngine(e.target.value as EngineType)}
-                className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
-              >
-                <option value="GRAPH">GRAPH</option>
-                <option value="AGENTSCOPE">AGENTSCOPE</option>
-                <option value="HYBRID">HYBRID</option>
-                <option value="CHAT">CHAT</option>
-              </select>
             </div>
             <div className="flex justify-end gap-2">
               <Button
