@@ -7,7 +7,8 @@ agent:
     name: "qwq-plus"
     temperature: 0.5
   graph:
-    start: "research"
+    start:
+      - "research"
     nodes:
       - id: "research"
         reactAgentId: "deep-researcher"
