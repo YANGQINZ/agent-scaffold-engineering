@@ -18,7 +18,7 @@ import NodeExecutionStatus from './NodeExecutionStatus';
 const genMsgId = () =>
   `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-function ChatPanel() {
+function ChatPanel({ context }: { context?: 'chat' | 'workspace' }) {
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const addMessage = useChatStore((s) => s.addMessage);
@@ -27,11 +27,14 @@ function ChatPanel() {
   const agents = useCanvasStore((s) => s.agents);
   const mode = useAppStore((s) => s.mode);
 
+  // 工作台模式下忽略 ChatPage 的 selectedAgentId，只用画布 agent
+  const effectiveAgentId = context === 'workspace' ? null : selectedAgentId;
+
   const { startStream } = useSSE();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   /** 当前选中的 Agent 定义 */
-  const activeAgent = agents.find((a) => a.agentId === selectedAgentId);
+  const activeAgent = agents.find((a) => a.agentId === effectiveAgentId);
 
   /** 自动滚动到底部 */
   useEffect(() => {
@@ -76,11 +79,11 @@ function ChatPanel() {
         query: text,
         userId: 'web-user',
         sessionId: activeSessionId ?? undefined,
-        agentId: isUnsavedCanvas ? undefined : (canvasAgentId || selectedAgentId || undefined),
-        mode: (canvasAgentId || selectedAgentId || hasCanvasNodes) ? 'AGENT' : 'MULTI_TURN',
+        agentId: isUnsavedCanvas ? undefined : (canvasAgentId || effectiveAgentId || undefined),
+        mode: (canvasAgentId || effectiveAgentId || hasCanvasNodes) ? 'AGENT' : 'MULTI_TURN',
         engine: hasCanvasNodes
           ? (canvasDef?.engine ?? 'GRAPH')
-          : (agents.find((a) => a.agentId === selectedAgentId)?.engine ?? undefined),
+          : (agents.find((a) => a.agentId === effectiveAgentId)?.engine ?? undefined),
         agentDefinition: isUnsavedCanvas
           ? {
               agentId: `temp_${Date.now()}`,
@@ -90,7 +93,7 @@ function ChatPanel() {
         testRun: isUnsavedCanvas,
       });
     },
-    [addMessage, startStream, activeSessionId, selectedAgentId, agents],
+    [addMessage, startStream, activeSessionId, effectiveAgentId, agents],
   );
 
   return (

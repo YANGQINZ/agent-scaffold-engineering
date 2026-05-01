@@ -38,7 +38,7 @@ import static com.alibaba.cloud.ai.graph.action.AsyncEdgeAction.edge_async;
  * - 外层使用 StateGraph 编排流程骨架
  * - 子节点根据 subEngines 映射委托给 GraphEngineAdapter 或 AgentScopeAdapter
  * - 记忆上下文在入口处注入1次，最终响应追加历史1次
- * - HybridChannel 双通道同时暴露 GraphChannel 和 AgentScopeChannel
+ * - 流式执行：中间节点同步执行发进度保活，叶子节点 token 级流式
  */
 @Slf4j
 @Service
@@ -109,31 +109,48 @@ public class HybridEngineAdapter implements EngineAdapter {
 
     @Override
     public Flux<StreamEvent> executeStream(AgentDefinition def, AgentMessage input, ContextStore ctx) {
+        HybridAgentDefinition hyDef = (HybridAgentDefinition) def;
         return Flux.defer(() -> {
+            log.info("HybridEngineAdapter流式执行: agentId={}", hyDef.getAgentId());
+            validateHybridConfig(hyDef);
+
             try {
-                AgentMessage result = execute(def, input, ctx);
-                String sessionId = ctx.getSessionId();
-
-                ctx.appendHistory(result.getSenderId(), result.getContent(), result.getMetadata());
-                Flux<StreamEvent> events = Flux.empty();
-
-                // 先发射思考过程
-                if (result.getThinkingContent() != null && !result.getThinkingContent().isBlank()) {
-                    events = events.concatWith(Flux.just(
-                            StreamEvent.thinking(result.getThinkingContent(), sessionId)));
+                // 入口处注入记忆上下文（1次）
+                String enrichedInput = input.getContent() != null ? input.getContent() : "";
+                String memoryContext = ctx.assembleMemoryContext(enrichedInput);
+                if (!memoryContext.isBlank()) {
+                    enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
                 }
+                ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
+                boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
-                // 再发射文本内容
-                return events.concatWith(Flux.just(
-                        StreamEvent.textDelta(result.getContent(), sessionId),
-                        StreamEvent.done(false, null, sessionId)
-                ));
+                // 识别叶子节点
+                Set<String> leafIds = identifyLeafNodes(hyDef);
+
+                if (leafIds.size() == 1) {
+                    String leafId = leafIds.iterator().next();
+                    WorkflowNode leafNode = hyDef.getGraphNodes().stream()
+                            .filter(n -> n.getId().equals(leafId)).findFirst().orElseThrow();
+                    EngineType leafEngine = resolveSubEngine(hyDef, leafNode);
+
+                    if (leafEngine == EngineType.GRAPH) {
+                        // 单叶子 GRAPH 节点：中间同步 + 叶子 token 级流式
+                        return executeWithLeafStreaming(hyDef, enrichedInput, ctx, enableThinking, leafNode);
+                    } else {
+                        // 单叶子 AGENTSCOPE 节点：中间同步 + 叶子同步执行（agentscope 限制）
+                        return executeWithAgentscopeLeaf(hyDef, enrichedInput, ctx, enableThinking, leafNode);
+                    }
+                } else {
+                    // 多叶子节点：全部同步执行，节点级渐进输出
+                    return executeWithNodeProgress(hyDef, enrichedInput, ctx, enableThinking);
+                }
             } catch (Exception e) {
+                log.error("HybridEngineAdapter流式执行失败: {}", e.getMessage(), e);
                 return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
-                        "Hybrid流式执行失败: " + e.getMessage(), e));
+                        "Hybrid编排流式执行失败: " + e.getMessage(), e));
             }
         })
-        .subscribeOn(Schedulers.boundedElastic()) // 避免阻塞WebFlux事件循环
+        .subscribeOn(Schedulers.boundedElastic())
         .doOnError(e -> {
             if (e instanceof java.io.IOException || (e.getMessage() != null
                     && e.getMessage().contains("Broken pipe"))) {
@@ -143,7 +160,256 @@ public class HybridEngineAdapter implements EngineAdapter {
         .onErrorResume(java.io.IOException.class, e -> {
             log.warn("HybridEngineAdapter流式输出: 管道断裂，静默结束流, agentId={}", def.getAgentId());
             return Flux.empty();
+        })
+        .onErrorResume(java.util.concurrent.TimeoutException.class, e -> {
+            log.warn("HybridEngineAdapter流式输出: 执行超时, agentId={}", def.getAgentId());
+            return Flux.just(StreamEvent.done(false, Map.of("error", "timeout"), ctx.getSessionId()));
         });
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 流式执行策略
+    // ═══════════════════════════════════════════════════════
+
+    /**
+     * 识别叶子节点（无出边的节点）
+     */
+    private Set<String> identifyLeafNodes(HybridAgentDefinition hyDef) {
+        Set<String> nodesWithOutEdges = hyDef.getGraphEdges().stream()
+                .map(GraphEdge::getFrom).collect(Collectors.toSet());
+        return hyDef.getGraphNodes().stream()
+                .map(WorkflowNode::getId)
+                .filter(id -> !nodesWithOutEdges.contains(id))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 解析节点的子引擎类型
+     */
+    private EngineType resolveSubEngine(HybridAgentDefinition hyDef, WorkflowNode node) {
+        String subEngine = node.getSubEngine();
+        if (subEngine != null && !subEngine.isBlank()) {
+            return EngineType.valueOf(subEngine);
+        }
+        EngineType engineType = hyDef.getSubEngine(node.getId());
+        return engineType != null ? engineType : EngineType.GRAPH;
+    }
+
+    /**
+     * 单叶子 GRAPH 节点：中间节点同步执行 + 叶子节点 token 级流式
+     * 复用 GraphEngineAdapter 的 streamLeafNodeTokens 方法
+     */
+    private Flux<StreamEvent> executeWithLeafStreaming(
+            HybridAgentDefinition hyDef, String enrichedInput, ContextStore ctx,
+            boolean enableThinking, WorkflowNode leafNode) throws GraphStateException {
+
+        String sessionId = ctx.getSessionId();
+        String leafNodeId = leafNode.getId();
+
+        // 累积器
+        String[] intermediateOutput = {enrichedInput};
+        String[] leafFullText = {""};
+        String[] thinkingContent = {null};
+
+        // Phase 1: 构建图 — 叶子节点替换为透传 Action
+        Map<String, NodeAction> overrides = Map.of(leafNodeId, state -> {
+            String passthrough = (String) state.value("output").orElse("");
+            Map<String, Object> result = new HashMap<>();
+            result.put("output", passthrough);
+            result.put("decision", passthrough);
+            return result;
+        });
+
+        StateGraph graph = buildHybridGraph(hyDef, ctx, enableThinking, overrides);
+        CompiledGraph compiled = graph.compile();
+        RunnableConfig config = graphAdapter.buildRunnableConfig(sessionId);
+        Map<String, Object> graphInput = new HashMap<>();
+        graphInput.put("output", enrichedInput);
+
+        Flux<StreamEvent> intermediateFlux = compiled.stream(graphInput, config)
+                .flatMap(nodeOutput -> {
+                    String nodeName = nodeOutput.node();
+                    String output = (String) nodeOutput.state().value("output").orElse("");
+
+                    if (nodeName.equals(leafNodeId)) {
+                        intermediateOutput[0] = output;
+                        return Flux.just(
+                                StreamEvent.nodeStart(nodeName, sessionId),
+                                StreamEvent.nodeEnd(nodeName, sessionId)
+                        );
+                    }
+
+                    if (!output.isBlank()) {
+                        intermediateOutput[0] = output;
+                    }
+                    nodeOutput.state().value("thinkingContent")
+                            .ifPresent(tc -> thinkingContent[0] = tc.toString());
+                    return Flux.just(
+                            StreamEvent.nodeStart(nodeName, sessionId),
+                            StreamEvent.nodeEnd(nodeName, sessionId)
+                    );
+                });
+
+        // Phase 2: 叶子节点 token 级流式（复用 GraphEngineAdapter）
+        Flux<StreamEvent> leafFlux = Flux.defer(() -> {
+            String leafInput = nodeRagService.enhancePrompt(intermediateOutput[0], leafNode);
+            return graphAdapter.streamLeafNodeTokens(leafNode, leafInput, enableThinking,
+                    sessionId, leafFullText, thinkingContent);
+        });
+
+        // Phase 3: 完成阶段
+        Flux<StreamEvent> doneFlux = Flux.defer(() -> {
+            String finalContent = leafFullText[0].isEmpty()
+                    ? intermediateOutput[0] : leafFullText[0];
+            AgentMessage response = toAgentMessage(finalContent, thinkingContent[0],
+                    hyDef.getAgentId(), sessionId);
+            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+
+            Flux<StreamEvent> thinkingFlux = Flux.empty();
+            if (thinkingContent[0] != null && !thinkingContent[0].isBlank()) {
+                thinkingFlux = Flux.just(StreamEvent.thinking(thinkingContent[0], sessionId));
+            }
+            return thinkingFlux.concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
+        });
+
+        return Flux.concat(intermediateFlux, leafFlux, doneFlux);
+    }
+
+    /**
+     * 单叶子 AGENTSCOPE 节点：中间节点同步 + 叶子节点同步执行
+     * agentscope-java 不支持 token 级流式，叶子节点同步执行后发 textDelta
+     */
+    private Flux<StreamEvent> executeWithAgentscopeLeaf(
+            HybridAgentDefinition hyDef, String enrichedInput, ContextStore ctx,
+            boolean enableThinking, WorkflowNode leafNode) throws GraphStateException {
+
+        String sessionId = ctx.getSessionId();
+        String leafNodeId = leafNode.getId();
+
+        String[] intermediateOutput = {enrichedInput};
+        String[] thinkingContent = {null};
+
+        // Phase 1: 构建图 — 叶子节点替换为透传
+        Map<String, NodeAction> overrides = Map.of(leafNodeId, state -> {
+            String passthrough = (String) state.value("output").orElse("");
+            Map<String, Object> result = new HashMap<>();
+            result.put("output", passthrough);
+            result.put("decision", passthrough);
+            return result;
+        });
+
+        StateGraph graph = buildHybridGraph(hyDef, ctx, enableThinking, overrides);
+        CompiledGraph compiled = graph.compile();
+        RunnableConfig config = graphAdapter.buildRunnableConfig(sessionId);
+        Map<String, Object> graphInput = new HashMap<>();
+        graphInput.put("output", enrichedInput);
+
+        Flux<StreamEvent> intermediateFlux = compiled.stream(graphInput, config)
+                .flatMap(nodeOutput -> {
+                    String nodeName = nodeOutput.node();
+                    String output = (String) nodeOutput.state().value("output").orElse("");
+
+                    if (!output.isBlank()) {
+                        intermediateOutput[0] = output;
+                    }
+                    nodeOutput.state().value("thinkingContent")
+                            .ifPresent(tc -> thinkingContent[0] = tc.toString());
+                    return Flux.just(
+                            StreamEvent.nodeStart(nodeName, sessionId),
+                            StreamEvent.nodeEnd(nodeName, sessionId)
+                    );
+                });
+
+        // Phase 2: 叶子节点同步执行（agentscope 限制）
+        Flux<StreamEvent> leafFlux = Flux.defer(() -> {
+            String leafInput = nodeRagService.enhancePrompt(intermediateOutput[0], leafNode);
+            AgentMessage subInput = AgentMessage.builder()
+                    .senderId("hybrid_" + leafNodeId)
+                    .content(leafInput)
+                    .timestamp(System.currentTimeMillis())
+                    .metadata(Map.of("role", "user", "enableThinking", enableThinking))
+                    .build();
+
+            AgentDefinition subDef = findSubAgentDef(hyDef, leafNode);
+            AgentMessage result = agentscopeAdapter.execute(subDef, subInput, ctx);
+
+            Flux<StreamEvent> events = Flux.just(
+                    StreamEvent.nodeStart(leafNodeId, sessionId),
+                    StreamEvent.textDelta(result.getContent(), sessionId),
+                    StreamEvent.nodeEnd(leafNodeId, sessionId)
+            );
+
+            if (result.getThinkingContent() != null && !result.getThinkingContent().isBlank()) {
+                thinkingContent[0] = result.getThinkingContent();
+            }
+
+            AgentMessage response = toAgentMessage(result.getContent(), thinkingContent[0],
+                    hyDef.getAgentId(), sessionId);
+            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+
+            Flux<StreamEvent> thinkingFlux = Flux.empty();
+            if (thinkingContent[0] != null && !thinkingContent[0].isBlank()) {
+                thinkingFlux = Flux.just(StreamEvent.thinking(thinkingContent[0], sessionId));
+            }
+            return events.concatWith(thinkingFlux)
+                    .concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
+        });
+
+        return Flux.concat(intermediateFlux, leafFlux);
+    }
+
+    /**
+     * 多叶子节点场景：全部同步执行，叶子节点发 textDelta，中间节点仅发 nodeStart/nodeEnd
+     */
+    private Flux<StreamEvent> executeWithNodeProgress(
+            HybridAgentDefinition hyDef, String enrichedInput, ContextStore ctx,
+            boolean enableThinking) throws GraphStateException {
+
+        String sessionId = ctx.getSessionId();
+        StateGraph graph = buildHybridGraph(hyDef, ctx, enableThinking);
+        CompiledGraph compiled = graph.compile();
+        RunnableConfig config = graphAdapter.buildRunnableConfig(sessionId);
+        Map<String, Object> graphInput = new HashMap<>();
+        graphInput.put("output", enrichedInput);
+
+        String[] finalAnswer = {enrichedInput};
+        String[] finalThinking = {null};
+
+        Set<String> leafIds = identifyLeafNodes(hyDef);
+
+        return compiled.stream(graphInput, config)
+                .flatMap(nodeOutput -> {
+                    String nodeName = nodeOutput.node();
+                    String output = (String) nodeOutput.state().value("output").orElse("");
+                    if (!output.isBlank()) {
+                        finalAnswer[0] = output;
+                    }
+                    nodeOutput.state().value("thinkingContent")
+                            .ifPresent(tc -> finalThinking[0] = tc.toString());
+
+                    if (leafIds.contains(nodeName)) {
+                        return Flux.just(
+                                StreamEvent.nodeStart(nodeName, sessionId),
+                                StreamEvent.textDelta(output, sessionId),
+                                StreamEvent.nodeEnd(nodeName, sessionId)
+                        );
+                    }
+                    return Flux.just(
+                            StreamEvent.nodeStart(nodeName, sessionId),
+                            StreamEvent.nodeEnd(nodeName, sessionId)
+                    );
+                })
+                .concatWith(Flux.defer(() -> {
+                    AgentMessage response = toAgentMessage(finalAnswer[0], finalThinking[0],
+                            hyDef.getAgentId(), sessionId);
+                    ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+
+                    Flux<StreamEvent> thinkingFlux = Flux.empty();
+                    if (finalThinking[0] != null && !finalThinking[0].isBlank()) {
+                        thinkingFlux = Flux.just(StreamEvent.thinking(finalThinking[0], sessionId));
+                    }
+                    return thinkingFlux.concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
+                }));
     }
 
     // ═══════════════════════════════════════════════════════
@@ -151,13 +417,26 @@ public class HybridEngineAdapter implements EngineAdapter {
     // ═══════════════════════════════════════════════════════
 
     private StateGraph buildHybridGraph(HybridAgentDefinition hyDef, ContextStore ctx, boolean enableThinking) throws GraphStateException {
+        return buildHybridGraph(hyDef, ctx, enableThinking, Collections.emptyMap());
+    }
+
+    /**
+     * 构建 Hybrid StateGraph，支持指定节点使用自定义 Action（用于流式场景下叶子节点透传）
+     */
+    private StateGraph buildHybridGraph(HybridAgentDefinition hyDef, ContextStore ctx,
+                                         boolean enableThinking, Map<String, NodeAction> actionOverrides) throws GraphStateException {
         StateGraph graph = new StateGraph(graphAdapter.defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
 
         // 1. 添加节点，根据 subEngines 决定委托给哪个引擎
         for (WorkflowNode node : hyDef.getGraphNodes()) {
-            // Priority: WorkflowNode.subEngine > hyDef.subEngines map
+            // 有 override 的优先使用 override（流式场景下叶子节点透传）
+            if (actionOverrides.containsKey(node.getId())) {
+                graph.addNode(node.getId(), node_async(actionOverrides.get(node.getId())));
+                continue;
+            }
+
             String subEngine = node.getSubEngine();
             EngineType engineType;
             if (subEngine != null && !subEngine.isBlank()) {
@@ -169,7 +448,6 @@ public class HybridEngineAdapter implements EngineAdapter {
             if (engineType == EngineType.AGENTSCOPE) {
                 graph.addNode(node.getId(), node_async(wrapAsGraphAction(hyDef, node, ctx, enableThinking)));
             } else {
-                // 复用 GraphEngineAdapter 的节点构建方法
                 graph.addNode(node.getId(), node_async(graphAdapter.buildNodeAction(node, enableThinking)));
             }
         }
@@ -244,7 +522,7 @@ public class HybridEngineAdapter implements EngineAdapter {
 
             log.info("Hybrid子节点委托AgentScope: nodeId={}", nodeId);
 
-            // 节点级 RAG 增强：根据节点的 ragEnabled/knowledgeBaseId 配置决定是否增强
+            // 节点级 RAG 增强
             input = nodeRagService.enhancePrompt(input, node);
 
             // 构建子 Agent 输入

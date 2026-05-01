@@ -32,6 +32,15 @@ public class AgentWorkflowNodePO {
     /** 知识库ID */
     private String knowledgeBaseId;
 
+    /** 节点指令 */
+    private String instruction;
+
+    /** 子引擎类型 */
+    private String subEngine;
+
+    /** MCP 服务器配置（JSONB） */
+    private String mcpServers;
+
     /** 排序序号 */
     private Integer sortOrder;
 

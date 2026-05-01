@@ -80,7 +80,7 @@ public class SessionController {
         return ChatMessageDTO.builder()
                 .messageId(message.getMessageId())
                 .sessionId(message.getSessionId())
-                .role(message.getRole() != null ? message.getRole().name() : null)
+                .role(message.getRole() != null ? message.getRole().name().toLowerCase() : null)
                 .content(message.getContent())
                 .tokenCount(message.getTokenCount())
                 .createdAt(message.getCreatedAt())

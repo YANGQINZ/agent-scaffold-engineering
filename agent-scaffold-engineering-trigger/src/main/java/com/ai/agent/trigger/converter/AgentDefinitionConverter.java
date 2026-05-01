@@ -50,7 +50,7 @@ public class AgentDefinitionConverter {
                     .modelConfig(modelConfig)
                     .mcpServers(mcpServers)
                     .graphStart(dto.getGraphStart())
-                    .graphNodes(convertWorkflowNodesToDomain(dto.getGraphNodes()))
+                    .graphNodes(convertWorkflowNodesToDomain(dto.getGraphNodes(), dto.getAgentId()))
                     .graphEdges(convertGraphEdgesToDomain(dto.getGraphEdges()))
                     .build();
 
@@ -62,7 +62,7 @@ public class AgentDefinitionConverter {
                     .modelConfig(modelConfig)
                     .mcpServers(mcpServers)
                     .agentscopePipelineType(dto.getAgentscopePipelineType())
-                    .agentscopeAgents(convertAgentscopeAgentsToDomain(dto.getAgentscopeAgents()))
+                    .agentscopeAgents(convertAgentscopeAgentsToDomain(dto.getAgentscopeAgents(), dto.getAgentId()))
                     .build();
 
             case HYBRID -> HybridAgentDefinition.builder()
@@ -73,7 +73,7 @@ public class AgentDefinitionConverter {
                     .modelConfig(modelConfig)
                     .mcpServers(mcpServers)
                     .graphStart(dto.getGraphStart())
-                    .graphNodes(convertWorkflowNodesToDomain(dto.getGraphNodes()))
+                    .graphNodes(convertWorkflowNodesToDomain(dto.getGraphNodes(), dto.getAgentId()))
                     .graphEdges(convertGraphEdgesToDomain(dto.getGraphEdges()))
                     .subEngines(dto.getSubEngines() != null ? dto.getSubEngines() : Map.of())
                     .build();
@@ -107,10 +107,11 @@ public class AgentDefinitionConverter {
                 .collect(Collectors.toList());
     }
 
-    private static List<WorkflowNode> convertWorkflowNodesToDomain(List<WorkflowNodeDTO> dtos) {
+    private static List<WorkflowNode> convertWorkflowNodesToDomain(List<WorkflowNodeDTO> dtos, String agentId) {
         if (dtos == null) {
             return List.of();
         }
+        dtos.forEach(data->data.setAgentId(agentId));
         return dtos.stream()
                 .map(d -> WorkflowNode.builder()
                         .id(d.getId())
@@ -139,13 +140,14 @@ public class AgentDefinitionConverter {
                 .collect(Collectors.toList());
     }
 
-    private static List<AgentscopeAgentConfig> convertAgentscopeAgentsToDomain(List<AgentscopeAgentConfigDTO> dtos) {
+    private static List<AgentscopeAgentConfig> convertAgentscopeAgentsToDomain(List<AgentscopeAgentConfigDTO> dtos, String agentId) {
         if (dtos == null) {
             return List.of();
         }
         return dtos.stream()
                 .map(d -> AgentscopeAgentConfig.builder()
-                        .agentId(d.getAgentId())
+                        .agentId(agentId)
+                        .instruction(d.getInstruction())
                         .mcpServers(convertMcpServersToDomain(d.getMcpServers()))
                         .enableTools(d.getEnableTools())
                         .build())

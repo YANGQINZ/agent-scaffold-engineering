@@ -2,6 +2,7 @@ package com.ai.agent.infrastructure.persistent.dao;
 
 import com.ai.agent.infrastructure.persistent.po.DocumentChunkPO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -14,26 +15,30 @@ public interface IDocumentChunkDao {
     /**
      * 批量插入文档分块
      */
-    void insertBatch(List<DocumentChunkPO> list);
+    void insertBatch(@Param("list") List<DocumentChunkPO> list);
 
     /**
      * 向量相似度搜索
      */
-    List<DocumentChunkPO> vectorSearch(String baseId, String embedding, int topK);
+    List<DocumentChunkPO> vectorSearch(@Param("baseId") String baseId,
+                                       @Param("embedding") String embedding,
+                                       @Param("topK") int topK);
 
     /**
      * BM25关键词搜索
      */
-    List<DocumentChunkPO> bm25Search(String baseId, String query, int topK);
+    List<DocumentChunkPO> bm25Search(@Param("baseId") String baseId,
+                                      @Param("query") String query,
+                                      @Param("topK") int topK);
 
     /**
      * 根据知识库ID查询文档分块列表
      */
-    List<DocumentChunkPO> selectByBaseId(String baseId);
+    List<DocumentChunkPO> selectByBaseId(@Param("baseId") String baseId);
 
     /**
      * 根据知识库ID删除文档分块
      */
-    int deleteByBaseId(String baseId);
+    int deleteByBaseId(@Param("baseId") String baseId);
 
 }

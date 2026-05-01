@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +55,7 @@ public class AgentController {
     @PostMapping
     public Response<AgentDefinitionDTO> create(@Validated @RequestBody AgentDefinitionDTO dto) {
         AgentDefinition definition = AgentDefinitionConverter.toDomain(dto);
+        definition.setAgentId(java.util.UUID.randomUUID().toString());
         agentDefinitionRepository.save(definition);
         agentRegistry.register(definition);
         log.info("创建Agent定义: agentId={}, engine={}", definition.getAgentId(), definition.getEngine());

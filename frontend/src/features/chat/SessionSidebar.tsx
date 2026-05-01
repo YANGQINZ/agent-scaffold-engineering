@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore, type SessionInfo } from '@/stores/chat';
 import { useCanvasStore } from '@/stores/canvas';
-import { getSessionMessages, listSessions } from '@/api/chat';
+import { useAppStore } from '@/stores/app';
+import { getSessionMessages, listSessions, createSession } from '@/api/chat';
 import { cn } from '@/lib/utils';
 
 /** 日期分组标签 */
@@ -50,6 +51,7 @@ function SessionSidebar() {
   const addMessage = useChatStore((s) => s.addMessage);
   const setSessions = useChatStore((s) => s.setSessions);
   const agents = useCanvasStore((s) => s.agents);
+  const mode = useAppStore((s) => s.mode);
 
   /** 当前 Agent 的名称 */
   const activeAgent = useMemo(
@@ -119,10 +121,36 @@ function SessionSidebar() {
   );
 
   /** 新建对话 */
-  const handleNewChat = useCallback(() => {
+  const handleNewChat = useCallback(async () => {
     setActiveSessionId(null);
     clearMessages();
-  }, [setActiveSessionId, clearMessages]);
+
+    // 专家模式下创建带 agentId 的会话
+    if (mode === 'expert' && selectedAgentId) {
+      const agent = agents.find((a) => a.agentId === selectedAgentId);
+      try {
+        const sessionId = await createSession({
+          agentId: selectedAgentId,
+          mode: 'AGENT',
+          engine: agent?.engine,
+        });
+        // 刷新该 Agent 的会话列表
+        const res = await listSessions(selectedAgentId);
+        setSessions(
+          selectedAgentId,
+          res.map((s) => ({
+            sessionId: s.sessionId,
+            title: s.sessionId.slice(0, 8),
+            lastActiveAt: s.lastActiveAt,
+            messageCount: 0,
+          })),
+        );
+        setActiveSessionId(sessionId);
+      } catch {
+        // 创建失败也允许继续对话
+      }
+    }
+  }, [mode, selectedAgentId, agents, setActiveSessionId, clearMessages, setSessions]);
 
   return (
     <div className="flex w-[220px] shrink-0 flex-col border-r border-gray-200 bg-gray-50">

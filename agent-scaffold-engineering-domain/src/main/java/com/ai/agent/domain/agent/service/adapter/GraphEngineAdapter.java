@@ -132,7 +132,6 @@ public class GraphEngineAdapter implements EngineAdapter {
         GraphAgentDefinition graphDef = (GraphAgentDefinition) def;
         return Flux.defer(() -> {
             log.info("GraphEngineAdapter流式执行: agentId={}", graphDef.getAgentId());
-
             validateGraphConfig(graphDef);
 
             try {
@@ -143,68 +142,318 @@ public class GraphEngineAdapter implements EngineAdapter {
                     enrichedInput = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + enrichedInput;
                 }
                 ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
-
                 boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
-                StateGraph graph = buildGraph(graphDef, enableThinking);
-                CompiledGraph compiled = graph.compile();
-                RunnableConfig config = buildRunnableConfig(ctx.getSessionId());
-                Map<String, Object> graphInput = new HashMap<>();
-                graphInput.put("output", enrichedInput);
+                // 识别叶子节点
+                Set<String> leafNodeIds = identifyLeafNodes(graphDef);
 
-                String[] finalAnswer = {enrichedInput};
-                String[] finalThinking = {null};
-
-                return compiled.stream(graphInput, config)
-                        .flatMap(nodeOutput -> {
-                            String nodeName = nodeOutput.node();
-                            String output = (String) nodeOutput.state().value("output").orElse("");
-                            if (!output.isBlank()) {
-                                finalAnswer[0] = output;
-                            }
-                            // 追踪思考内容（REPLACE 策略，最终保留叶子节点的思考）
-                            nodeOutput.state().value("thinkingContent")
-                                .ifPresent(tc -> finalThinking[0] = tc.toString());
-                            return Flux.just(
-                                    StreamEvent.nodeStart(nodeName, ctx.getSessionId()),
-                                    StreamEvent.nodeEnd(nodeName, ctx.getSessionId())
-                            );
-                        })
-                        .concatWith(Flux.defer(() -> {
-                            AgentMessage response = toAgentMessage(finalAnswer[0], finalThinking[0],
-                                graphDef.getAgentId(), ctx.getSessionId());
-                            // 最终响应追加历史（1次）
-                            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
-
-                            Flux<StreamEvent> thinkingFlux = Flux.empty();
-                            if (finalThinking[0] != null && !finalThinking[0].isBlank()) {
-                                thinkingFlux = Flux.just(StreamEvent.thinking(finalThinking[0], ctx.getSessionId()));
-                            }
-
-                            return thinkingFlux
-                                    .concatWith(Flux.just(
-                                            StreamEvent.textDelta(finalAnswer[0], ctx.getSessionId()),
-                                            StreamEvent.done(false, null, ctx.getSessionId())
-                                    ));
-                        }));
-
+                if (leafNodeIds.size() == 1) {
+                    // 单叶子节点：中间节点同步执行 + 叶子节点 token 级流式
+                    String leafNodeId = leafNodeIds.iterator().next();
+                    WorkflowNode leafNode = graphDef.getGraphNodes().stream()
+                            .filter(n -> n.getId().equals(leafNodeId)).findFirst().orElseThrow();
+                    return executeWithLeafStreaming(graphDef, enrichedInput, ctx, enableThinking, leafNode);
+                } else {
+                    // 多叶子节点：全部同步执行，节点级渐进输出
+                    return executeWithNodeProgress(graphDef, enrichedInput, ctx, enableThinking);
+                }
             } catch (Exception e) {
                 log.error("GraphEngineAdapter流式执行失败: {}", e.getMessage(), e);
                 return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
                         "Graph编排流式执行失败: " + e.getMessage(), e));
             }
         })
-        .subscribeOn(Schedulers.boundedElastic()) // 避免阻塞WebFlux事件循环
+        .subscribeOn(Schedulers.boundedElastic())
         .doOnError(e -> {
-            if (e instanceof java.io.IOException || e.getMessage() != null
-                    && e.getMessage().contains("Broken pipe")) {
+            if (e instanceof java.io.IOException || (e.getMessage() != null
+                    && e.getMessage().contains("Broken pipe"))) {
                 log.warn("GraphEngineAdapter流式输出: 客户端已断开连接, agentId={}", graphDef.getAgentId());
             }
         })
         .onErrorResume(java.io.IOException.class, e -> {
             log.warn("GraphEngineAdapter流式输出: 管道断裂，静默结束流, agentId={}", graphDef.getAgentId());
             return Flux.empty();
+        })
+        .onErrorResume(java.util.concurrent.TimeoutException.class, e -> {
+            log.warn("GraphEngineAdapter流式输出: 执行超时, agentId={}", graphDef.getAgentId());
+            return Flux.just(StreamEvent.done(false, Map.of("error", "timeout"), ctx.getSessionId()));
         });
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 流式执行策略
+    // ═══════════════════════════════════════════════════════
+
+    /**
+     * 识别叶子节点（无出边的节点）
+     */
+    private Set<String> identifyLeafNodes(GraphAgentDefinition def) {
+        Set<String> nodesWithOutEdges = def.getGraphEdges().stream()
+                .map(GraphEdge::getFrom).collect(Collectors.toSet());
+        return def.getGraphNodes().stream()
+                .map(WorkflowNode::getId)
+                .filter(id -> !nodesWithOutEdges.contains(id))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 单叶子节点场景：中间节点同步执行（逐节点推送输出保活）+ 叶子节点 token 级流式
+     * 历史追加在所有流完成后一次性写入。
+     */
+    private Flux<StreamEvent> executeWithLeafStreaming(
+            GraphAgentDefinition graphDef, String enrichedInput, ContextStore ctx,
+            boolean enableThinking, WorkflowNode leafNode) throws GraphStateException {
+
+        String sessionId = ctx.getSessionId();
+        String leafNodeId = leafNode.getId();
+
+        // 累积器
+        String[] intermediateOutput = {enrichedInput};
+        String[] leafFullText = {""};
+        String[] thinkingContent = {null};
+
+        // Phase 1: 构建图 — 叶子节点替换为透传 Action（不调用 LLM）
+        Map<String, NodeAction> overrides = Map.of(leafNodeId, state -> {
+            String passthrough = (String) state.value("output").orElse("");
+            Map<String, Object> result = new HashMap<>();
+            result.put("output", passthrough);
+            result.put("decision", passthrough);
+            return result;
+        });
+
+        StateGraph graph = buildGraph(graphDef, enableThinking, overrides);
+        CompiledGraph compiled = graph.compile();
+        RunnableConfig config = buildRunnableConfig(sessionId);
+        Map<String, Object> graphInput = new HashMap<>();
+        graphInput.put("output", enrichedInput);
+
+        Flux<StreamEvent> intermediateFlux = compiled.stream(graphInput, config)
+                .flatMap(nodeOutput -> {
+                    String nodeName = nodeOutput.node();
+                    String output = (String) nodeOutput.state().value("output").orElse("");
+
+                    if (nodeName.equals(leafNodeId)) {
+                        // 叶子节点是透传，记录输入但不发 textDelta
+                        intermediateOutput[0] = output;
+                        return Flux.just(
+                                StreamEvent.nodeStart(nodeName, sessionId),
+                                StreamEvent.nodeEnd(nodeName, sessionId)
+                        );
+                    }
+
+                    // 中间节点：仅推送进度事件保活（不发 textDelta，输出是内部处理结果）
+                    if (!output.isBlank()) {
+                        intermediateOutput[0] = output;
+                    }
+                    nodeOutput.state().value("thinkingContent")
+                            .ifPresent(tc -> thinkingContent[0] = tc.toString());
+                    return Flux.just(
+                            StreamEvent.nodeStart(nodeName, sessionId),
+                            StreamEvent.nodeEnd(nodeName, sessionId)
+                    );
+                });
+
+        // Phase 2: 叶子节点 token 级流式
+        Flux<StreamEvent> leafFlux = Flux.defer(() -> {
+            String leafInput = nodeRagService.enhancePrompt(intermediateOutput[0], leafNode);
+            return streamLeafNodeTokens(leafNode, leafInput, enableThinking,
+                    sessionId, leafFullText, thinkingContent);
+        });
+
+        // Phase 3: 完成阶段 — 历史追加 + done
+        Flux<StreamEvent> doneFlux = Flux.defer(() -> {
+            String finalContent = leafFullText[0].isEmpty()
+                    ? intermediateOutput[0] : leafFullText[0];
+            AgentMessage response = toAgentMessage(finalContent, thinkingContent[0],
+                    graphDef.getAgentId(), sessionId);
+            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+
+            Flux<StreamEvent> thinkingFlux = Flux.empty();
+            if (thinkingContent[0] != null && !thinkingContent[0].isBlank()) {
+                thinkingFlux = Flux.just(StreamEvent.thinking(thinkingContent[0], sessionId));
+            }
+            return thinkingFlux.concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
+        });
+
+        return Flux.concat(intermediateFlux, leafFlux, doneFlux);
+    }
+
+    /**
+     * 多叶子节点场景：所有节点同步执行，每完成一个节点立即推送输出（节点级渐进）
+     */
+    private Flux<StreamEvent> executeWithNodeProgress(
+            GraphAgentDefinition graphDef, String enrichedInput, ContextStore ctx,
+            boolean enableThinking) throws GraphStateException {
+
+        String sessionId = ctx.getSessionId();
+        StateGraph graph = buildGraph(graphDef, enableThinking);
+        CompiledGraph compiled = graph.compile();
+        RunnableConfig config = buildRunnableConfig(sessionId);
+        Map<String, Object> graphInput = new HashMap<>();
+        graphInput.put("output", enrichedInput);
+
+        String[] finalAnswer = {enrichedInput};
+        String[] finalThinking = {null};
+
+        // 收集所有叶子节点 ID（最后一批节点，它们的输出是最终答案）
+        Set<String> leafIds = identifyLeafNodes(graphDef);
+
+        return compiled.stream(graphInput, config)
+                .flatMap(nodeOutput -> {
+                    String nodeName = nodeOutput.node();
+                    String output = (String) nodeOutput.state().value("output").orElse("");
+                    if (!output.isBlank()) {
+                        finalAnswer[0] = output;
+                    }
+                    nodeOutput.state().value("thinkingContent")
+                            .ifPresent(tc -> finalThinking[0] = tc.toString());
+
+                    // 叶子节点：输出就是最终答案，发 textDelta
+                    // 中间节点：仅发进度事件
+                    if (leafIds.contains(nodeName)) {
+                        return Flux.just(
+                                StreamEvent.nodeStart(nodeName, sessionId),
+                                StreamEvent.textDelta(output, sessionId),
+                                StreamEvent.nodeEnd(nodeName, sessionId)
+                        );
+                    }
+                    return Flux.just(
+                            StreamEvent.nodeStart(nodeName, sessionId),
+                            StreamEvent.nodeEnd(nodeName, sessionId)
+                    );
+                })
+                .concatWith(Flux.defer(() -> {
+                    AgentMessage response = toAgentMessage(finalAnswer[0], finalThinking[0],
+                            graphDef.getAgentId(), sessionId);
+                    ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+
+                    Flux<StreamEvent> thinkingFlux = Flux.empty();
+                    if (finalThinking[0] != null && !finalThinking[0].isBlank()) {
+                        thinkingFlux = Flux.just(StreamEvent.thinking(finalThinking[0], sessionId));
+                    }
+                    return thinkingFlux.concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
+                }));
+    }
+
+    /**
+     * 叶子节点 token 级流式输出 — 复用 SimpleChatStrategy 的流式模式
+     * 当模型不支持流式时，自动降级为同步调用
+     */
+    protected Flux<StreamEvent> streamLeafNodeTokens(
+            WorkflowNode node, String input, boolean enableThinking,
+            String sessionId, String[] textAccumulator, String[] thinkingAccumulator) {
+
+        String systemPrompt = resolveSystemPrompt(node);
+        Prompt prompt = buildNodePrompt(systemPrompt, input, enableThinking);
+
+        Flux<org.springframework.ai.chat.model.ChatResponse> streamFlux;
+        try {
+            if (node.getMcpServers() != null && !node.getMcpServers().isEmpty()) {
+                List<ToolCallback> tools = mcpToolProvider.buildGraphTools(node.getMcpServers());
+                streamFlux = ChatClient.create(chatModel)
+                        .prompt(prompt).toolCallbacks(tools).stream().chatResponse();
+            } else {
+                streamFlux = chatModel.stream(prompt);
+            }
+        } catch (Exception e) {
+            // MCP客户端初始化失败等，降级为同步调用
+            log.warn("叶子节点流式初始化失败，降级为同步调用: {}", e.getMessage());
+            return syncLeafNodeFallback(prompt, sessionId, textAccumulator, thinkingAccumulator);
+        }
+
+        return streamFlux
+                .flatMap(cr -> extractStreamingToken(cr, sessionId, textAccumulator, thinkingAccumulator))
+                .onErrorResume(e -> {
+                    log.warn("叶子节点流式输出失败，降级为同步调用: {}", e.getMessage());
+                    return syncLeafNodeFallback(prompt, sessionId, textAccumulator, thinkingAccumulator);
+                });
+    }
+
+    /**
+     * 叶子节点同步降级 — 模型不支持流式或流式失败时调用
+     */
+    protected Flux<StreamEvent> syncLeafNodeFallback(
+            Prompt prompt, String sessionId,
+            String[] textAccumulator, String[] thinkingAccumulator) {
+        try {
+            org.springframework.ai.chat.model.ChatResponse syncResponse = chatModel.call(prompt);
+            ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(syncResponse);
+            textAccumulator[0] = result.textContent();
+            if (result.hasThinking()) {
+                thinkingAccumulator[0] = result.thinkingContent();
+            }
+            Flux<StreamEvent> events = Flux.empty();
+            if (result.hasThinking()) {
+                events = events.concatWith(Flux.just(
+                        StreamEvent.thinking(result.thinkingContent(), sessionId)));
+            }
+            return events.concatWith(Flux.just(
+                    StreamEvent.textDelta(result.textContent(), sessionId)));
+        } catch (Exception fallbackEx) {
+            log.error("叶子节点同步降级也失败: {}", fallbackEx.getMessage(), fallbackEx);
+            return Flux.error(fallbackEx);
+        }
+    }
+
+    /**
+     * 从流式 ChatResponse 中提取 token 级事件
+     */
+    protected Flux<StreamEvent> extractStreamingToken(
+            org.springframework.ai.chat.model.ChatResponse cr, String sessionId,
+            String[] textAccumulator, String[] thinkingAccumulator) {
+
+        if (cr.getResult() == null || cr.getResult().getOutput() == null) {
+            return Flux.empty();
+        }
+
+        // 复用 ThinkingExtractor 统一提取
+        ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(cr);
+        Flux<StreamEvent> events = Flux.empty();
+
+        if (result.hasThinking()) {
+            thinkingAccumulator[0] = (thinkingAccumulator[0] == null)
+                    ? result.thinkingContent() : thinkingAccumulator[0] + result.thinkingContent();
+            events = events.concatWith(Flux.just(StreamEvent.thinking(result.thinkingContent(), sessionId)));
+        }
+        if (!result.textContent().isEmpty()) {
+            textAccumulator[0] += result.textContent();
+            events = events.concatWith(Flux.just(StreamEvent.textDelta(result.textContent(), sessionId)));
+        }
+        return events;
+    }
+
+    /**
+     * 解析节点的 system prompt（复用 executeNodeLogic 的逻辑）
+     */
+    protected String resolveSystemPrompt(WorkflowNode node) {
+        if (node.getInstruction() != null && !node.getInstruction().isBlank()) {
+            return node.getInstruction();
+        }
+        if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
+            AgentDefinition subAgentDef = agentRegistry.get(node.getAgentId());
+            if (subAgentDef != null && subAgentDef.getInstruction() != null) {
+                return subAgentDef.getInstruction();
+            }
+        }
+        return "你是一个有用的助手。";
+    }
+
+    /**
+     * 构建节点 Prompt（复用 executeNodeLogic 的逻辑）
+     */
+    protected Prompt buildNodePrompt(String systemPrompt, String input, boolean enableThinking) {
+        if (enableThinking) {
+            DashScopeChatOptions options = DashScopeChatOptions.builder()
+                    .enableThinking(true).build();
+            return new Prompt(List.of(
+                    new SystemMessage(systemPrompt),
+                    new UserMessage(input)
+            ), options);
+        }
+        return new Prompt(List.of(
+                new SystemMessage(systemPrompt),
+                new UserMessage(input)
+        ));
     }
 
     // ═══════════════════════════════════════════════════════
@@ -212,13 +461,23 @@ public class GraphEngineAdapter implements EngineAdapter {
     // ═══════════════════════════════════════════════════════
 
     private StateGraph buildGraph(GraphAgentDefinition def, boolean enableThinking) throws GraphStateException {
+        return buildGraph(def, enableThinking, Collections.emptyMap());
+    }
+
+    /**
+     * 构建 StateGraph，支持指定节点使用自定义 Action（用于流式场景下叶子节点透传）
+     */
+    private StateGraph buildGraph(GraphAgentDefinition def, boolean enableThinking,
+                                  Map<String, NodeAction> actionOverrides) throws GraphStateException {
         StateGraph graph = new StateGraph(defaultKeyStrategyFactory(
                 Map.of("decision", KeyStrategy.REPLACE)
         ));
 
-        // 1. 添加节点
+        // 1. 添加节点 — 有覆盖的用覆盖，否则用默认 Action
         for (WorkflowNode node : def.getGraphNodes()) {
-            graph.addNode(node.getId(), node_async(buildNodeAction(node, enableThinking)));
+            NodeAction action = actionOverrides.getOrDefault(node.getId(),
+                    buildNodeAction(node, enableThinking));
+            graph.addNode(node.getId(), node_async(action));
         }
 
         // 2. 添加起始边（支持多起始节点）
@@ -378,15 +637,21 @@ public class GraphEngineAdapter implements EngineAdapter {
             ));
         }
 
-        // 3. 执行：MCP 工具调用或普通 LLM 调用
+        // 3. 执行：MCP 工具调用或普通 LLM 调用（MCP失败时降级为普通调用）
         org.springframework.ai.chat.model.ChatResponse aiResponse;
         if (node.getMcpServers() != null && !node.getMcpServers().isEmpty()) {
-            List<ToolCallback> tools = mcpToolProvider.buildGraphTools(node.getMcpServers());
-            aiResponse = ChatClient.create(chatModel)
-                    .prompt(prompt)
-                    .toolCallbacks(tools)
-                    .call()
-                    .chatResponse();
+            try {
+                List<ToolCallback> tools = mcpToolProvider.buildGraphTools(node.getMcpServers());
+                aiResponse = ChatClient.create(chatModel)
+                        .prompt(prompt)
+                        .toolCallbacks(tools)
+                        .call()
+                        .chatResponse();
+            } catch (Exception e) {
+                log.warn("MCP工具初始化失败，降级为普通LLM调用: nodeId={}, error={}",
+                        node.getId(), e.getMessage());
+                aiResponse = chatModel.call(prompt);
+            }
         } else {
             aiResponse = chatModel.call(prompt);
         }

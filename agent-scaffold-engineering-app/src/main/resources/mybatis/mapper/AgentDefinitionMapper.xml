@@ -4,7 +4,7 @@
 
     <insert id="insert" parameterType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO agent_definition (agent_id, name, engine, instruction, model_config, mcp_servers, graph_start, agentscope_pipeline_type, sub_engines, created_at, updated_at)
-        VALUES (#{agentId}, #{name}, #{engine}, #{instruction}, #{modelConfig}, #{mcpServers}, #{graphStart}, #{agentscopePipelineType}, #{subEngines}, #{createdAt}, #{updatedAt})
+        VALUES (#{agentId}, #{name}, #{engine}, #{instruction}, #{modelConfig}::jsonb, #{mcpServers}::jsonb, #{graphStart}, #{agentscopePipelineType}, #{subEngines}::jsonb, #{createdAt}, #{updatedAt})
     </insert>
 
     <select id="selectByAgentId" resultType="com.ai.agent.infrastructure.persistent.po.AgentDefinitionPO">
@@ -22,11 +22,11 @@
         SET name = #{name},
             engine = #{engine},
             instruction = #{instruction},
-            model_config = #{modelConfig},
-            mcp_servers = #{mcpServers},
+            model_config = #{modelConfig}::jsonb,
+            mcp_servers = #{mcpServers}::jsonb,
             graph_start = #{graphStart},
             agentscope_pipeline_type = #{agentscopePipelineType},
-            sub_engines = #{subEngines},
+            sub_engines = #{subEngines}::jsonb,
             updated_at = #{updatedAt}
         WHERE agent_id = #{agentId}
     </update>

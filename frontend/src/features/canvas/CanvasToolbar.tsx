@@ -33,7 +33,6 @@ function CanvasToolbar() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [draftName, setDraftName] = useState('');
-  const [draftAgentId, setDraftAgentId] = useState('');
 
   /** 生成唯一 ID */
   const genId = () =>
@@ -64,18 +63,17 @@ function CanvasToolbar() {
   /** 打开保存弹窗 */
   const handleSave = useCallback(() => {
     setDraftName(currentAgentName || '');
-    setDraftAgentId(currentAgentId || '');
     setSaveDialogOpen(true);
-  }, [currentAgentName, currentAgentId]);
+  }, [currentAgentName]);
 
   /** 确认保存 */
   const handleConfirmSave = useCallback(async () => {
     if (!draftName.trim()) return;
     setSaveLoading(true);
     try {
-      setCurrentAgent(draftAgentId || null, draftName);
+      setCurrentAgent(currentAgentId || null, draftName);
       const payload = exportToAgentDefinition();
-      const saved = await saveOrUpdateAgent(draftAgentId || null, {
+      const saved = await saveOrUpdateAgent(currentAgentId || null, {
         ...payload,
         name: draftName,
       });
@@ -89,7 +87,7 @@ function CanvasToolbar() {
     }
   }, [
     draftName,
-    draftAgentId,
+    currentAgentId,
     setCurrentAgent,
     exportToAgentDefinition,
   ]);
@@ -179,14 +177,6 @@ function CanvasToolbar() {
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
                 placeholder="输入 Agent 名称"
-              />
-            </div>
-            <div className="mb-3 flex flex-col gap-1">
-              <label className="text-xs text-gray-500">Agent ID（留空则自动生成）</label>
-              <Input
-                value={draftAgentId}
-                onChange={(e) => setDraftAgentId(e.target.value)}
-                placeholder="可选，自定义唯一标识"
               />
             </div>
             <div className="flex justify-end gap-2">

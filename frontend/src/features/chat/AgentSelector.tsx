@@ -1,14 +1,13 @@
 /**
  * Agent 选择器（顶部横栏）
  * 显示所有可用 Agent 为胶囊按钮，点击切换当前 Agent
- * 切换时更新 chatStore.selectedAgentId 并加载对应会话列表
+ * 切换时更新 chatStore.selectedAgentId，会话列表由 SessionSidebar 统一加载
  */
 import { memo, useCallback, useEffect } from 'react';
 import { Bot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useChatStore } from '@/stores/chat';
 import { useCanvasStore } from '@/stores/canvas';
-import { listSessions } from '@/api/chat';
 import { cn } from '@/lib/utils';
 
 /** 引擎类型显示名 */
@@ -23,39 +22,19 @@ function AgentSelector() {
   const agents = useCanvasStore((s) => s.agents);
   const selectedAgentId = useChatStore((s) => s.selectedAgentId);
   const setSelectedAgentId = useChatStore((s) => s.setSelectedAgentId);
-  const setSessions = useChatStore((s) => s.setSessions);
   const clearMessages = useChatStore((s) => s.clearMessages);
   const setActiveSessionId = useChatStore((s) => s.setActiveSessionId);
 
-  /** 切换 Agent：更新选中 ID，加载会话列表，清空消息 */
+  /** 切换 Agent：更新选中 ID，清空消息 */
   const handleSelectAgent = useCallback(
-    async (agentId: string) => {
+    (agentId: string) => {
       if (agentId === selectedAgentId) return;
 
-      // 1. 更新选中的 Agent
       setSelectedAgentId(agentId);
-      // 2. 清空当前消息
       clearMessages();
-      // 3. 重置活跃会话
       setActiveSessionId(null);
-
-      // 4. 加载该 Agent 的会话列表
-      try {
-        const sessions = await listSessions(agentId);
-        setSessions(
-          agentId,
-          sessions.map((s) => ({
-            sessionId: s.sessionId,
-            title: s.sessionId.slice(0, 8),
-            lastActiveAt: s.lastActiveAt,
-            messageCount: 0,
-          })),
-        );
-      } catch {
-        setSessions(agentId, []);
-      }
     },
-    [selectedAgentId, setSelectedAgentId, clearMessages, setActiveSessionId, setSessions],
+    [selectedAgentId, setSelectedAgentId, clearMessages, setActiveSessionId],
   );
 
   /** 首次加载时自动选中第一个 Agent */

@@ -267,7 +267,27 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     // Auto-infer engine type
     const engine = inferEngineType(agentNodes);
 
-    // subEngines: only for HYBRID
+    // AGENTSCOPE: 输出 agentscopeAgents 而非 graphNodes/graphEdges
+    if (engine === 'AGENTSCOPE') {
+      const agentscopeAgents = agentNodes.map((n) => {
+        const d = n.data as any;
+        return {
+          agentId: d.agentId || undefined,
+          instruction: d.instruction || undefined,
+          mcpServers: d.mcpServers || undefined,
+          enableTools: d.enableTools || undefined,
+        };
+      });
+      return {
+        agentId: currentAgentId || '',
+        name: currentAgentName,
+        engine,
+        agentscopePipelineType: 'sequential',
+        agentscopeAgents,
+      };
+    }
+
+    // HYBRID: subEngines mapping
     let subEngines: Record<string, string> | undefined;
     if (engine === 'HYBRID') {
       subEngines = {};
@@ -279,6 +299,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       });
     }
 
+    // GRAPH / HYBRID: 输出 graphNodes / graphEdges / graphStart
     return {
       agentId: currentAgentId || '',
       name: currentAgentName,

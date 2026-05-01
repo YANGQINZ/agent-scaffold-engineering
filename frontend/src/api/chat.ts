@@ -148,8 +148,13 @@ export async function listSessions(
 }
 
 /** 创建新会话 */
-export async function createSession(name?: string): Promise<string> {
-  const { data } = await apiClient.post('/chat/session', { name });
+export async function createSession(params?: {
+  name?: string;
+  agentId?: string;
+  mode?: string;
+  engine?: string;
+}): Promise<string> {
+  const { data } = await apiClient.post('/chat/session', params ?? {});
   return data.data;
 }
 

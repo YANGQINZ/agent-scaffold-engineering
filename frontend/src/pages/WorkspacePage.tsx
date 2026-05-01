@@ -2,15 +2,22 @@
  * 工作台页面
  * 画布区域（左）+ 节点编辑面板（左侧浮层）+ 聊天面板（右）
  */
+import { useEffect } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import AgentCanvas from '@/features/canvas/AgentCanvas';
 import CanvasToolbar from '@/features/canvas/CanvasToolbar';
 import NodeEditPanel from '@/features/canvas/NodeEditPanel';
 import ChatPanel from '@/features/chat/ChatPanel';
 import { useCanvasStore } from '@/stores/canvas';
+import { useChatStore } from '@/stores/chat';
 
 function WorkspacePage() {
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+
+  // 进入工作台时清空 ChatPage 留下的消息，避免跨页面消息残留
+  useEffect(() => {
+    useChatStore.getState().clearMessages();
+  }, []);
 
   return (
     <div className="flex h-full relative">
@@ -33,7 +40,7 @@ function WorkspacePage() {
 
       {/* 聊天面板 */}
       <div className="w-[25%] min-w-[280px] border-l border-border">
-        <ChatPanel />
+        <ChatPanel context="workspace" />
       </div>
     </div>
   );

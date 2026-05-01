@@ -16,6 +16,11 @@ spring:
   application:
     name: agent-scaffold-engineering-app
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:15432}/${POSTGRES_DB:agent_db}
     username: ${POSTGRES_USER:postgres}
@@ -28,7 +33,7 @@ spring:
       api-key: ${AI_DASHSCOPE_API_KEY}
       chat:
         options:
-          model: ${AI_MODEL:qwen-plus}
+          model: ${AI_MODEL:qwen3.5-plus}
           temperature: 0.2
       # Embedding模型配置 - 使用text-embedding-v3
       embedding:

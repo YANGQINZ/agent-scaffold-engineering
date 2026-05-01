@@ -29,6 +29,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
   // 从 chatStore 获取 actions
   const appendToLastMessage = useChatStore((s) => s.appendToLastMessage);
   const setThinkingContent = useChatStore((s) => s.setThinkingContent);
+  const appendToThinkingContent = useChatStore((s) => s.appendToThinkingContent);
   const setActiveSessionId = useChatStore((s) => s.setActiveSessionId);
   const addNodeStatus = useChatStore((s) => s.addNodeStatus);
   const updateNodeStatus = useChatStore((s) => s.updateNodeStatus);
@@ -53,8 +54,19 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
 
       // 处理 SSE 事件
       const controller = streamChat(params, (event: StreamEvent) => {
-        // 如果收到错误事件，提前结束
-        if (event.type === 'ERROR' || (event.data && (event.data as Record<string, unknown>).errorCode)) {
+        // 如果收到错误事件，显示统一提示并结束
+        if (event.type === 'ERROR') {
+          const detail = (event.data?.error as string) || (event.data?.errorMessage as string) || '';
+          console.warn('[SSE] 请求错误:', detail);
+          appendToLastMessage('对话请求失败，请检查配置后重试');
+          setIsStreaming(false);
+          abortRef.current = null;
+          return;
+        }
+        if (event.data && (event.data as Record<string, unknown>).errorCode) {
+          const detail = ((event.data as Record<string, unknown>).errorMessage as string) || '';
+          console.warn('[SSE] 业务错误:', detail);
+          appendToLastMessage('对话请求失败，请检查配置后重试');
           setIsStreaming(false);
           abortRef.current = null;
           return;
@@ -74,7 +86,8 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
               typeof event.data === 'string'
                 ? event.data
                 : (event.data?.thought as string) ?? (event.data?.text as string) ?? '';
-            setThinkingContent(text);
+            // 流式逐 token 追加思考内容
+            appendToThinkingContent(text);
             break;
           }
           case 'NODE_START': {
@@ -84,7 +97,6 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
                 : (event.data?.nodeName as string) ?? (event.data?.nodeId as string) ?? '';
             if (nodeId) {
               addNodeStatus({ nodeId, status: 'running' });
-              // 同步画布节点状态
               useCanvasStore.getState().setNodeState(nodeId, { status: 'running' });
             }
             break;
@@ -96,18 +108,33 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
                 : (event.data?.nodeName as string) ?? (event.data?.nodeId as string) ?? '';
             if (nodeId) {
               updateNodeStatus(nodeId, 'done');
-              // 同步画布节点状态
               useCanvasStore.getState().setNodeState(nodeId, { status: 'done' });
             }
             break;
           }
+          case 'RAG_RETRIEVE': {
+            // 处理 RAG 检索来源
+            const sources = event.data?.sources as Array<{
+              docName: string;
+              chunkContent: string;
+              score: number;
+            }> | undefined;
+            if (sources && sources.length > 0) {
+              useChatStore.getState().setSources(sources);
+            }
+            break;
+          }
           case 'DONE': {
+            // 检查 DONE 事件中是否携带错误信息
+            const errorMsg = event.data?.error as string | undefined;
+            if (errorMsg) {
+              console.warn('[SSE] 流式响应异常结束:', errorMsg);
+            }
             // 清除画布节点运行状态
             useCanvasStore.getState().clearNodeStates();
             if (event.sessionId) {
               setActiveSessionId(event.sessionId);
             }
-            // 流结束
             setIsStreaming(false);
             abortRef.current = null;
             break;
@@ -127,6 +154,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
       clearNodeStatuses,
       appendToLastMessage,
       setThinkingContent,
+      appendToThinkingContent,
       setActiveSessionId,
       addNodeStatus,
       updateNodeStatus,

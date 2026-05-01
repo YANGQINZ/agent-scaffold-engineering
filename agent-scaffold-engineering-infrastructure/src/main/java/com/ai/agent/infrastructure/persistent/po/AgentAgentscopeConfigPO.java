@@ -17,6 +17,9 @@ public class AgentAgentscopeConfigPO {
     /** 配置智能体ID */
     private String configAgentId;
 
+    /** 内联指令（不依赖 AgentRegistry 查找） */
+    private String instruction;
+
     /** MCP服务器配置（JSONB） */
     private String mcpServers;
 

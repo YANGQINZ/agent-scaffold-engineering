@@ -3,7 +3,8 @@
  * 管理 ChatPage 的会话列表、当前选中会话
  */
 import { create } from 'zustand';
-import { createSession, listAllSessions, type ChatSessionVO } from '../api/chat';
+import { createSession, getSessionMessages, listAllSessions, type ChatSessionVO } from '../api/chat';
+import { useChatStore } from './chat';
 
 interface ChatSessionState {
   sessions: ChatSessionVO[];
@@ -12,7 +13,7 @@ interface ChatSessionState {
 
   loadSessions: () => Promise<void>;
   createNewSession: (name?: string) => Promise<string>;
-  selectSession: (sessionId: string) => void;
+  selectSession: (sessionId: string) => Promise<void>;
   clearCurrentSession: () => void;
 }
 
@@ -32,7 +33,11 @@ export const useChatSessionStore = create<ChatSessionState>((set) => ({
   },
 
   createNewSession: async (name?: string) => {
-    const sessionId = await createSession(name);
+    const sessionId = await createSession({
+      name,
+      mode: 'MULTI_TURN',
+      engine: 'CHAT',
+    });
     set((state) => ({
       currentSessionId: sessionId,
       sessions: [
@@ -43,8 +48,24 @@ export const useChatSessionStore = create<ChatSessionState>((set) => ({
     return sessionId;
   },
 
-  selectSession: (sessionId: string) => {
+  selectSession: async (sessionId: string) => {
     set({ currentSessionId: sessionId });
+    // 切换会话时加载历史消息
+    const { clearMessages, addMessage } = useChatStore.getState();
+    clearMessages();
+    try {
+      const msgs = await getSessionMessages(sessionId);
+      for (const msg of msgs) {
+        addMessage({
+          id: msg.messageId,
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content,
+          timestamp: new Date(msg.createdAt).getTime(),
+        });
+      }
+    } catch {
+      // 加载失败则保持空消息
+    }
   },
 
   clearCurrentSession: () => {

@@ -76,6 +76,8 @@ interface ChatState {
   appendToLastMessage: (content: string) => void;
   /** 设置最后一条助手消息的思考内容 */
   setThinkingContent: (content: string) => void;
+  /** 追加思考内容到最后一条助手消息（用于流式逐token接收） */
+  appendToThinkingContent: (content: string) => void;
   /** 设置最后一条助手消息的 RAG 来源 */
   setSources: (sources: Source[]) => void;
   /** 添加节点执行状态 */
@@ -133,6 +135,19 @@ export const useChatStore = create<ChatState>((set) => ({
       const last = messages[messages.length - 1];
       if (last && last.role === 'assistant') {
         messages[messages.length - 1] = { ...last, thinkingContent: content };
+      }
+      return { messages };
+    }),
+
+  appendToThinkingContent: (content) =>
+    set((state) => {
+      const messages = [...state.messages];
+      const last = messages[messages.length - 1];
+      if (last && last.role === 'assistant') {
+        messages[messages.length - 1] = {
+          ...last,
+          thinkingContent: (last.thinkingContent ?? '') + content,
+        };
       }
       return { messages };
     }),

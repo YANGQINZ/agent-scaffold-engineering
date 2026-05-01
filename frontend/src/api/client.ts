@@ -27,10 +27,19 @@ export const apiClient = axios.create({
 });
 
 /**
- * 响应拦截器 — 自动解包 ApiResponse<T>，失败时抛出错误
+ * 响应拦截器 — 自动解包 ApiResponse<T>，业务失败和HTTP错误统一处理
  */
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 处理 HTTP 200 但 success=false 的业务错误
+    const body = response.data as ApiResponse<unknown> | undefined;
+    if (body && body.success === false) {
+      const msg = body.errorMessage || '请求失败';
+      console.error('[API 业务错误]', body.errorCode, msg);
+      return Promise.reject(new Error(msg));
+    }
+    return response;
+  },
   (error) => {
     const msg =
       error.response?.data?.errorMessage || error.message || '请求失败';
@@ -63,7 +72,35 @@ export function fetchSSE<T = Record<string, unknown>>(
   })
     .then(async (response) => {
       if (!response.ok) {
-        throw new Error(`SSE 请求失败: ${response.status}`);
+        // HTTP 非 200
+        let errorMsg = `请求失败 (${response.status})`;
+        try {
+          const text = await response.text();
+          const json = JSON.parse(text);
+          errorMsg = json.errorMessage || json.message || json.error || errorMsg;
+        } catch {
+          // 非 JSON 响应
+        }
+        onEvent({ type: 'ERROR', data: { error: errorMsg } } as T);
+        return;
+      }
+
+      // HTTP 200 但 Content-Type 非 SSE（后端异常直接返回 JSON）
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('text/event-stream')) {
+        let errorMsg = '对话请求失败，请检查配置后重试';
+        try {
+          const text = await response.text();
+          const json = JSON.parse(text);
+          if (json.success === false) {
+            errorMsg = '对话请求失败，请检查配置后重试';
+            console.warn('[SSE] 业务错误:', json.errorCode, json.errorMessage);
+          }
+        } catch {
+          // 非 JSON
+        }
+        onEvent({ type: 'ERROR', data: { error: errorMsg } } as T);
+        return;
       }
       const reader = response.body?.getReader();
       if (!reader) {
@@ -105,6 +142,10 @@ export function fetchSSE<T = Record<string, unknown>>(
     .catch((err) => {
       if (err.name !== 'AbortError') {
         console.error('[SSE] 流错误:', err);
+        onEvent({
+          type: 'ERROR',
+          data: { error: '连接失败' },
+        } as T);
       }
     });
 

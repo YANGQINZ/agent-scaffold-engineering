@@ -18,7 +18,7 @@ import java.util.List;
 @SuperBuilder
 public class AgentscopeAgentDefinition extends AgentDefinition {
 
-    /** AgentScope Pipeline 类型：sequential / fanout */
+    /** AgentScope Pipeline 类型：sequential */
     private String agentscopePipelineType = "sequential";
 
     /** AgentScope Agent 配置列表 */

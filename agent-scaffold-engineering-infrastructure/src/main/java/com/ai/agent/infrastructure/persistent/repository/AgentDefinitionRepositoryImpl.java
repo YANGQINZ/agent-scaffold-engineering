@@ -160,8 +160,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         List<WorkflowNode> nodes = queryWorkflowNodes(po.getId());
         List<GraphEdge> edges = queryGraphEdges(po.getId());
 
-        List<String> graphStartList = parseJson(po.getGraphStart(),
-                new TypeReference<List<String>>() {}, List.of());
+        List<String> graphStartList = parseGraphStart(po.getGraphStart());
 
         return GraphAgentDefinition.builder()
                 .agentId(po.getAgentId())
@@ -200,8 +199,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         List<GraphEdge> edges = queryGraphEdges(po.getId());
         Map<String, EngineType> subEngines = parseJson(po.getSubEngines(),
                 new TypeReference<>() {}, Map.of());
-        List<String> graphStartList = parseJson(po.getGraphStart(),
-                new TypeReference<List<String>>() {}, List.of());
+        List<String> graphStartList = parseGraphStart(po.getGraphStart());
 
         return HybridAgentDefinition.builder()
                 .agentId(po.getAgentId())
@@ -289,6 +287,9 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                     po.setNextNodeId(node.getNext());
                     po.setRagEnabled(node.getRagEnabled());
                     po.setKnowledgeBaseId(node.getKnowledgeBaseId());
+                    po.setInstruction(node.getInstruction());
+                    po.setSubEngine(node.getSubEngine());
+                    po.setMcpServers(node.getMcpServers() != null ? toJson(node.getMcpServers()) : null);
                     po.setSortOrder(i);
                     return po;
                 })
@@ -332,6 +333,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                     AgentAgentscopeConfigPO po = new AgentAgentscopeConfigPO();
                     po.setAgentDefinitionId(definitionId);
                     po.setConfigAgentId(config.getAgentId());
+                    po.setInstruction(config.getInstruction());
                     po.setMcpServers(toJson(config.getMcpServers()));
                     po.setEnableTools(toJson(config.getEnableTools()));
                     po.setSortOrder(i);
@@ -355,6 +357,9 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                         .next(po.getNextNodeId())
                         .ragEnabled(po.getRagEnabled())
                         .knowledgeBaseId(po.getKnowledgeBaseId())
+                        .instruction(po.getInstruction())
+                        .subEngine(po.getSubEngine())
+                        .mcpServers(parseJsonList(po.getMcpServers(), new TypeReference<>() {}, List.of()))
                         .build())
                 .toList();
     }
@@ -375,6 +380,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         return pos.stream()
                 .map(po -> AgentscopeAgentConfig.builder()
                         .agentId(po.getConfigAgentId())
+                        .instruction(po.getInstruction())
                         .mcpServers(parseJsonList(po.getMcpServers(), new TypeReference<>() {}, List.of()))
                         .enableTools(parseJsonList(po.getEnableTools(), new TypeReference<>() {}, List.of()))
                         .build())
@@ -434,8 +440,27 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         try {
             return objectMapper.readValue(json, typeRef);
         } catch (JsonProcessingException e) {
-            log.error("JSON反序列化失败: {}", e.getMessage());
+            // 兼容裸字符串（如 graph_start 存了 "research" 而非 ["research"]）
+            if (json.startsWith("[") || json.startsWith("{")) {
+                log.error("JSON反序列化失败: {}", e.getMessage());
+            }
             return defaultValue;
+        }
+    }
+
+    /**
+     * 解析 graphStart 字段，兼容 JSON 数组和裸字符串
+     * 旧数据可能存了 "research" 而非 ["research"]
+     */
+    private List<String> parseGraphStart(String graphStart) {
+        if (graphStart == null || graphStart.isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(graphStart, new TypeReference<List<String>>() {});
+        } catch (JsonProcessingException e) {
+            // 裸字符串，包装为单元素列表
+            return List.of(graphStart.trim());
         }
     }
 

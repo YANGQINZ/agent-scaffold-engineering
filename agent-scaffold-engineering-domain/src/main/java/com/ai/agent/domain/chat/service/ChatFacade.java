@@ -82,21 +82,30 @@ public class ChatFacade {
     /**
      * 创建新会话
      */
-    public String createSession(String name) {
+    public String createSession(String name, String agentId, ChatMode mode, EngineType engine) {
         String sessionId = UUID.randomUUID().toString();
         ChatSession session = ChatSession.builder()
                 .sessionId(sessionId)
                 .name(name)
-                .userId("default")
-                .mode(ChatMode.MULTI_TURN)
-                .engine(EngineType.CHAT)
+                .userId("web-user")
+                .agentId(agentId)
+                .mode(mode != null ? mode : ChatMode.MULTI_TURN)
+                .engine(engine != null ? engine : EngineType.CHAT)
                 .ragEnabled(false)
                 .createdAt(LocalDateTime.now())
                 .lastActiveAt(LocalDateTime.now())
                 .build();
         chatSessionRepository.save(session);
-        log.info("创建会话: sessionId={}, name={}", sessionId, name);
+        log.info("创建会话: sessionId={}, name={}, agentId={}, mode={}, engine={}",
+                sessionId, name, agentId, mode, engine);
         return sessionId;
+    }
+
+    /**
+     * 查询指定会话的消息历史
+     */
+    public List<ChatMessage> getSessionMessages(String sessionId) {
+        return chatSessionRepository.findMessagesBySessionId(sessionId);
     }
 
     /**

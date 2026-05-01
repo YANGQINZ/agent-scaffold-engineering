@@ -8,6 +8,7 @@ import com.ai.agent.domain.common.valobj.ChatResponse;
 import com.ai.agent.domain.common.valobj.StreamEvent;
 import com.ai.agent.domain.chat.service.ChatFacade;
 import com.ai.agent.trigger.converter.AgentDefinitionConverter;
+import com.ai.agent.types.enums.StreamEventType;
 import com.ai.agent.types.model.Response;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,7 +42,15 @@ public class ChatController implements IChatService {
     @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<StreamEventDTO> chatStream(@Valid @RequestBody ChatRequestDTO requestDTO) {
         ChatRequest request = convertRequest(requestDTO);
-        return chatFacade.chatStream(request).map(this::convertStreamEvent);
+        return chatFacade.chatStream(request)
+                .map(this::convertStreamEvent)
+                .onErrorResume(java.util.concurrent.TimeoutException.class, e -> {
+                    log.warn("流式响应超时: {}", e.getMessage());
+                    return Flux.just(StreamEventDTO.builder()
+                            .type(StreamEventType.DONE)
+                            .data(Map.of("error", "timeout"))
+                            .build());
+                });
     }
 
     /**
@@ -56,9 +66,10 @@ public class ChatController implements IChatService {
      * 创建新会话
      */
     @PostMapping("/session")
-    public Response<String> createSession(@RequestBody(required = false) Map<String, String> body) {
-        String name = body != null ? body.get("name") : null;
-        return Response.buildSuccess(chatFacade.createSession(name));
+    public Response<String> createSession(@RequestBody(required = false) CreateSessionRequestDTO request) {
+        if (request == null) request = new CreateSessionRequestDTO();
+        return Response.buildSuccess(chatFacade.createSession(
+                request.getName(), request.getAgentId(), request.getMode(), request.getEngine()));
     }
 
     /**
