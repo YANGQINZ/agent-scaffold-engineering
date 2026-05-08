@@ -31,4 +31,12 @@ public class AgentscopeAgentConfig {
     /** 启用的工具名称列表（为空时启用全部工具） */
     private List<String> enableTools = List.of();
 
+    /**
+     * 输出键名 — 当前 Agent 的执行结果存入 OverAllState 的 key
+     * 后续 Agent 的 instruction 中可通过 {outputKey} 模板变量引用
+     * 示例：agentA 配置 outputKey="research_result"，agentB 的 instruction 写 "基于以下内容摘要：{research_result}"
+     * 为空时自动生成 "agent_{index}"
+     */
+    private String outputKey;
+
 }

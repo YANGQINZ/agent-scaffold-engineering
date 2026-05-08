@@ -276,6 +276,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           instruction: d.instruction || undefined,
           mcpServers: d.mcpServers || undefined,
           enableTools: d.enableTools || undefined,
+          outputKey: d.outputKey || undefined,
         };
       });
       return {

@@ -52,7 +52,7 @@ ChatFacade → ModeRouter → ChatStrategy (strategy pattern). Three modes via `
 AgentRegistry (`ConcurrentHashMap`) holds AgentDefinition aggregates loaded from YAML at startup by `AgentYamlLoader`. TaskRuntime routes to `EngineAdapter` implementations via `EngineType` enum:
 - `CHAT` → direct ChatModel calls
 - `GRAPH` → GraphEngineAdapter (Spring AI Alibaba StateGraph, DAG with conditional edges)
-- `AGENTSCOPE` → AgentScopeAdapter (agentscope-java multi-agent pipelines: sequential/fanout)
+- `AGENTSCOPE` → AgentScopeAdapter (spring-ai-alibaba SequentialAgent, multi-agent sequential pipelines)
 - `HYBRID` → HybridEngineAdapter (outer StateGraph + per-node engine dispatch)
 
 YAML agent definitions live in `agent-scaffold-engineering-app/src/main/resources/agents/` (chat/, graph/, agentscope/, hybrid/). AgentDefinition has four subclasses: `ChatAgentDefinition`, `GraphAgentDefinition`, `AgentscopeAgentDefinition`, `HybridAgentDefinition`.

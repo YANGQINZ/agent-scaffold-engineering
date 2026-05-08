@@ -10,42 +10,31 @@ import com.ai.agent.domain.common.interface_.ContextStore;
 import com.ai.agent.domain.agent.service.AgentRegistry;
 import com.ai.agent.domain.agent.service.tool.McpToolProvider;
 import com.ai.agent.domain.common.valobj.StreamEvent;
-import com.ai.agent.domain.common.valobj.ThinkingExtractor;
 import com.ai.agent.domain.knowledge.service.rag.NodeRagService;
 import com.ai.agent.types.enums.EngineType;
 import com.ai.agent.types.exception.AgentException;
 import com.ai.agent.types.exception.enums.ErrorCodeEnum;
-import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
-import io.agentscope.core.ReActAgent;
-import io.agentscope.core.agent.AgentBase;
-import io.agentscope.core.message.Msg;
-import io.agentscope.core.message.MsgRole;
-import io.agentscope.core.model.DashScopeChatModel;
-import io.agentscope.core.model.GenerateOptions;
-import io.agentscope.core.model.Model;
-import io.agentscope.core.pipeline.Pipelines;
-import io.agentscope.core.tool.Toolkit;
+import com.alibaba.cloud.ai.graph.NodeOutput;
+import com.alibaba.cloud.ai.graph.OverAllState;
+import com.alibaba.cloud.ai.graph.agent.Agent;
+import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent;
+import com.alibaba.cloud.ai.graph.streaming.OutputType;
+import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 
 /**
- * AgentScope引擎适配器 — 集成 agentscope-java 实现 Pipeline 编排
- * 职责：处理多个Agent之间的动态协作，支持Pipeline编排（Sequential）、
- * MCP工具注入、MsgHub广播模式。
- * 流式执行：最后一个 Agent 使用 Spring AI chatModel.stream() 实现 token 级流式
+ * AgentScope引擎适配器 — 集成 spring-ai-alibaba SequentialAgent 实现 Pipeline 编排
+ * 职责：处理多个Agent之间的动态协作，通过 SequentialAgent 编排子 Agent 顺序执行，
+ * MCP 工具注入，统一流式输出。
  */
 @Slf4j
 @Service
@@ -55,16 +44,7 @@ public class AgentScopeAdapter implements EngineAdapter {
     private final AgentRegistry agentRegistry;
     private final McpToolProvider mcpToolProvider;
     private final NodeRagService nodeRagService;
-    private final ChatModel chatModel;  // Spring AI ChatModel（用于流式输出）
-
-    @Value("${spring.ai.dashscope.api-key:}")
-    private String dashscopeApiKey;
-
-    @Value("${spring.ai.dashscope.chat.options.model:qwq-plus}")
-    private String defaultModelName;
-
-    /** 缓存的 agentscope Model 实例（延迟初始化） */
-    private volatile io.agentscope.core.model.Model agentscopeModel;
+    private final ChatModel chatModel;
 
     @Override
     public EngineType getType() {
@@ -77,42 +57,41 @@ public class AgentScopeAdapter implements EngineAdapter {
         log.info("AgentScopeAdapter执行: agentId={}", asDef.getAgentId());
 
         try {
-            // 1. 构建输入 Msg（内部调用 assembleMemoryContext 注入记忆）
-            Msg inputMsg = toInputMsg(input, ctx);
-
+            // 1. 构建输入内容（注入记忆 + RAG 增强）
+            String content = buildInputContent(input, ctx, asDef);
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
-            // 节点级 RAG 增强
-            WorkflowNode ragNode = WorkflowNode.builder()
-                    .id(asDef.getAgentId())
-                    .ragEnabled((Boolean) input.getMetadataValue("ragEnabled"))
-                    .knowledgeBaseId((String) input.getMetadataValue("knowledgeBaseId"))
-                    .build();
-            String enhancedContent = nodeRagService.enhancePrompt(inputMsg.getTextContent(), ragNode);
-            if (!enhancedContent.equals(inputMsg.getTextContent())) {
-                inputMsg = Msg.builder()
-                        .role(inputMsg.getRole())
-                        .name(inputMsg.getName())
-                        .textContent(enhancedContent)
-                        .build();
-            }
-
-            // 2. 构建 ReActAgent 列表
-            List<AgentBase> agents = buildAgents(asDef, enableThinking);
-
-            // 3. 注入输入到 ContextStore
+            // 2. 注入输入到 ContextStore
             ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
-            // 4. Sequential Pipeline 执行
-            Msg lastMsg = executeSequentialRaw(agents, inputMsg, asDef.getAgentId());
+            // 3. 构建 ReactAgent 子 Agent 列表
+            List<Agent> agents = buildAgents(asDef);
 
-            String outputContent = lastMsg != null ? lastMsg.getTextContent() : "";
+            // 4. 构建 SequentialAgent 并同步执行
+            SequentialAgent pipeline = SequentialAgent.builder()
+                    .name(asDef.getAgentId())
+                    .subAgents(agents)
+                    .build();
 
-            // 提取思考内容
+            String outputContent;
             String thinkingContent = null;
-            if (enableThinking && lastMsg != null) {
-                ThinkingExtractor.ThinkingResult thinkResult = ThinkingExtractor.extractFromAgentScope(lastMsg);
-                thinkingContent = thinkResult.hasThinking() ? thinkResult.thinkingContent() : null;
+
+            try {
+                Optional<OverAllState> result = pipeline.invoke(content);
+                // 从最后一个子 Agent 的 outputKey 提取输出
+                String lastOutputKey = resolveLastOutputKey(asDef);
+                if (result.isPresent()) {
+                    Optional<Object> outputOpt = result.get().value(lastOutputKey);
+                    outputContent = outputOpt
+                            .filter(o -> o instanceof org.springframework.ai.chat.messages.AssistantMessage)
+                            .map(o -> ((org.springframework.ai.chat.messages.AssistantMessage) o).getText())
+                            .orElse("");
+                } else {
+                    outputContent = "";
+                }
+            } catch (Exception e) {
+                log.warn("SequentialAgent.invoke() 执行失败: {}", e.getMessage());
+                outputContent = "执行失败: " + e.getMessage();
             }
 
             // 5. 构建最终响应
@@ -140,27 +119,33 @@ public class AgentScopeAdapter implements EngineAdapter {
 
             try {
                 // 入口处注入记忆上下文 + RAG 增强
-                String content = input.getContent() != null ? input.getContent() : "";
-                String memoryContext = ctx.assembleMemoryContext(content);
-                if (!memoryContext.isBlank()) {
-                    content = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + content;
-                }
-
-                // RAG 增强
-                WorkflowNode ragNode = WorkflowNode.builder()
-                        .id(asDef.getAgentId())
-                        .ragEnabled((Boolean) input.getMetadataValue("ragEnabled"))
-                        .knowledgeBaseId((String) input.getMetadataValue("knowledgeBaseId"))
-                        .build();
-                content = nodeRagService.enhancePrompt(content, ragNode);
+                String content = buildInputContent(input, ctx, asDef);
 
                 // 输入历史追加
                 ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
-                boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
+                // 构建 ReactAgent 子 Agent 列表
+                List<Agent> agents = buildAgents(asDef);
 
-                // Sequential Pipeline：前 N-1 个同步 + 最后一个流式（单个 agent 时中间阶段为空，直接流式）
-                return executeSequentialStream(asDef, content, ctx, enableThinking);
+                // 构建 SequentialAgent 并流式执行
+                SequentialAgent pipeline = SequentialAgent.builder()
+                        .name(asDef.getAgentId())
+                        .subAgents(agents)
+                        .build();
+
+                String sessionId = ctx.getSessionId();
+                String[] textAccumulator = {""};
+
+                return pipeline.stream(content)
+                        .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId, textAccumulator))
+                        .concatWith(Flux.defer(() -> {
+                            // 完成阶段：历史追加 + done
+                            AgentMessage response = toAgentMessage(
+                                    textAccumulator[0].isEmpty() ? "（无输出）" : textAccumulator[0],
+                                    null, asDef.getAgentId(), sessionId);
+                            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+                            return Flux.just(StreamEvent.done(false, null, sessionId));
+                        }));
             } catch (Exception e) {
                 log.error("AgentScopeAdapter流式执行失败: {}", e.getMessage(), e);
                 return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
@@ -185,224 +170,54 @@ public class AgentScopeAdapter implements EngineAdapter {
     }
 
     // ═══════════════════════════════════════════════════════
-    // 流式执行策略
+    // NodeOutput → StreamEvent 转换
     // ═══════════════════════════════════════════════════════
 
     /**
-     * Sequential 流式：前 N-1 个通过 Pipelines.sequential() 同步执行 + 最后一个 Agent 流式
+     * 将 SequentialAgent 流式输出的 NodeOutput 转换为前端 StreamEvent
+     *
+     * @param nodeOutput SequentialAgent 发射的节点输出
+     * @param sessionId 会话ID
+     * @param textAccumulator 文本累积器（用于收集流式文本）
      */
-    private Flux<StreamEvent> executeSequentialStream(
-            AgentscopeAgentDefinition asDef, String content, ContextStore ctx,
-            boolean enableThinking) {
+    private Flux<StreamEvent> convertNodeOutput(NodeOutput nodeOutput, String sessionId,
+                                                 String[] textAccumulator) {
+        String nodeName = nodeOutput.node();
 
-        String sessionId = ctx.getSessionId();
-        List<AgentscopeAgentConfig> configs = asDef.getAgentscopeAgents();
-        int lastIdx = configs.size() - 1;
+        // StreamingOutput：包含流式内容（模型 token 或工具结果）
+        if (nodeOutput instanceof StreamingOutput<?> streaming) {
+            OutputType outputType = streaming.getOutputType();
 
-        String[] textAccumulator = {""};
-        String[] thinkingAccumulator = {null};
-        String[] finalContent = {content}; // 中间输出累积器
-
-        // Phase 1: 用 Pipelines.sequential() 执行前 N-1 个 Agent
-        Flux<StreamEvent> intermediateFlux = Flux.defer(() -> {
-            // 构建前 N-1 个 Agent
-            List<AgentBase> intermediateAgents = new ArrayList<>();
-            for (int i = 0; i < lastIdx; i++) {
-                AgentscopeAgentConfig config = configs.get(i);
-                AgentDefinition subDef = config.getAgentId() != null && !config.getAgentId().isBlank()
-                        ? agentRegistry.get(config.getAgentId()) : null;
-                String instruction = resolveAgentInstruction(asDef, config);
-                String agentName = resolveAgentName(asDef, config);
-                Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(config, asDef);
-                Model model = getOrCreateModel(subDef != null ? subDef : asDef, enableThinking);
-
-                intermediateAgents.add(ReActAgent.builder()
-                        .name(agentName)
-                        .sysPrompt(instruction != null ? instruction : "")
-                        .model(model)
-                        .toolkit(toolkit)
-                        .maxIters(10)
-                        .build());
+            if (outputType == OutputType.AGENT_MODEL_STREAMING) {
+                // 模型 token 级流式
+                String chunk = streaming.chunk();
+                if (chunk != null && !chunk.isEmpty()) {
+                    textAccumulator[0] += chunk;
+                    return Flux.just(StreamEvent.textDelta(chunk, sessionId));
+                }
+                return Flux.empty();
             }
 
-            // 发 nodeStart 进度事件
-            Flux<StreamEvent> startEvents = Flux.fromStream(intermediateAgents.stream()
-                    .map(agent -> StreamEvent.nodeStart(agent.getName(), sessionId)));
-
-            // 构建输入 Msg
-            Msg inputMsg = Msg.builder()
-                    .role(MsgRole.USER)
-                    .textContent(content)
-                    .build();
-
-            // 使用 Pipelines.sequential() 编排执行
-            String pipelineOutput;
-            try {
-                Mono<Msg> pipeline = Pipelines.sequential(intermediateAgents, inputMsg);
-                Msg result = pipeline.block();
-                pipelineOutput = (result != null && result.getTextContent() != null)
-                        ? result.getTextContent() : content;
-            } catch (Exception e) {
-                log.warn("AgentScope Sequential Pipeline执行失败: {}", e.getMessage());
-                pipelineOutput = content;
+            if (outputType == OutputType.AGENT_MODEL_FINISHED) {
+                // 模型输出完成，发 nodeEnd
+                return Flux.just(StreamEvent.nodeEnd(nodeName, sessionId));
             }
 
-            // 发 nodeEnd 进度事件
-            Flux<StreamEvent> endEvents = Flux.fromStream(intermediateAgents.stream()
-                    .map(agent -> StreamEvent.nodeEnd(agent.getName(), sessionId)));
-
-            // 传递中间输出到 Phase 2
-            finalContent[0] = pipelineOutput;
-
-            return Flux.concat(startEvents, endEvents);
-        });
-
-        // Phase 2: 最后一个 Agent 流式输出
-        AgentscopeAgentConfig lastConfig = configs.get(lastIdx);
-        String lastSystemPrompt = resolveAgentInstruction(asDef, lastConfig);
-        List<McpServerConfig> lastMcpServers = resolveAgentMcpServers(lastConfig, asDef);
-
-        Flux<StreamEvent> leafFlux = Flux.defer(() ->
-                streamAgentTokens(lastSystemPrompt, finalContent[0], enableThinking,
-                        lastMcpServers, sessionId, textAccumulator, thinkingAccumulator)
-        );
-
-        Flux<StreamEvent> doneFlux = buildDoneFlux(asDef, ctx, textAccumulator, thinkingAccumulator);
-
-        return Flux.concat(intermediateFlux, leafFlux, doneFlux);
-    }
-
-    // ═══════════════════════════════════════════════════════
-    // 流式输出核心方法
-    // ═══════════════════════════════════════════════════════
-
-    /**
-     * Agent token 级流式输出 — 使用 Spring AI chatModel.stream()
-     * 支持 MCP 工具调用，流式失败自动降级为同步
-     */
-    private Flux<StreamEvent> streamAgentTokens(
-            String systemPrompt, String input, boolean enableThinking,
-            List<McpServerConfig> mcpServers, String sessionId,
-            String[] textAccumulator, String[] thinkingAccumulator) {
-
-        Prompt prompt = buildSpringAiPrompt(systemPrompt, input, enableThinking);
-
-        Flux<org.springframework.ai.chat.model.ChatResponse> streamFlux;
-        try {
-            if (mcpServers != null && !mcpServers.isEmpty()) {
-                List<ToolCallback> tools = mcpToolProvider.buildGraphTools(mcpServers);
-                streamFlux = ChatClient.create(chatModel)
-                        .prompt(prompt).toolCallbacks(tools).stream().chatResponse();
-            } else {
-                streamFlux = chatModel.stream(prompt);
+            if (outputType == OutputType.AGENT_TOOL_FINISHED
+                    || outputType == OutputType.AGENT_TOOL_STREAMING) {
+                // 工具调用事件，发 nodeStart/nodeEnd 进度
+                return Flux.just(StreamEvent.nodeStart(nodeName, sessionId));
             }
-        } catch (Exception e) {
-            log.warn("AgentScope流式初始化失败，降级为同步调用: {}", e.getMessage());
-            return syncAgentFallback(prompt, sessionId, textAccumulator, thinkingAccumulator);
-        }
 
-        return streamFlux
-                .flatMap(cr -> extractStreamingToken(cr, sessionId, textAccumulator, thinkingAccumulator))
-                .onErrorResume(e -> {
-                    log.warn("AgentScope流式输出失败，降级为同步调用: {}", e.getMessage());
-                    return syncAgentFallback(prompt, sessionId, textAccumulator, thinkingAccumulator);
-                });
-    }
-
-    /**
-     * 同步降级 — 模型不支持流式或流式失败时调用
-     */
-    private Flux<StreamEvent> syncAgentFallback(
-            Prompt prompt, String sessionId,
-            String[] textAccumulator, String[] thinkingAccumulator) {
-        try {
-            org.springframework.ai.chat.model.ChatResponse syncResponse = chatModel.call(prompt);
-            ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(syncResponse);
-            textAccumulator[0] = result.textContent();
-            if (result.hasThinking()) {
-                thinkingAccumulator[0] = result.thinkingContent();
-            }
-            Flux<StreamEvent> events = Flux.empty();
-            if (result.hasThinking()) {
-                events = events.concatWith(Flux.just(
-                        StreamEvent.thinking(result.thinkingContent(), sessionId)));
-            }
-            return events.concatWith(Flux.just(
-                    StreamEvent.textDelta(result.textContent(), sessionId)));
-        } catch (Exception fallbackEx) {
-            log.error("AgentScope同步降级也失败: {}", fallbackEx.getMessage(), fallbackEx);
-            return Flux.error(fallbackEx);
-        }
-    }
-
-    /**
-     * 从流式 ChatResponse 中提取 token 级事件
-     */
-    private Flux<StreamEvent> extractStreamingToken(
-            org.springframework.ai.chat.model.ChatResponse cr, String sessionId,
-            String[] textAccumulator, String[] thinkingAccumulator) {
-
-        if (cr.getResult() == null || cr.getResult().getOutput() == null) {
+            // 其他类型（HOOK 等），忽略
             return Flux.empty();
         }
 
-        ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(cr);
-        Flux<StreamEvent> events = Flux.empty();
-
-        if (result.hasThinking()) {
-            thinkingAccumulator[0] = (thinkingAccumulator[0] == null)
-                    ? result.thinkingContent() : thinkingAccumulator[0] + result.thinkingContent();
-            events = events.concatWith(Flux.just(StreamEvent.thinking(result.thinkingContent(), sessionId)));
+        // 普通 NodeOutput：节点开始/结束进度事件
+        if (!nodeOutput.isEND()) {
+            return Flux.just(StreamEvent.nodeStart(nodeName, sessionId));
         }
-        if (!result.textContent().isEmpty()) {
-            textAccumulator[0] += result.textContent();
-            events = events.concatWith(Flux.just(StreamEvent.textDelta(result.textContent(), sessionId)));
-        }
-        return events;
-    }
-
-    /**
-     * 构建完成阶段 Flux — 历史追加 + thinking + done
-     */
-    private Flux<StreamEvent> buildDoneFlux(
-            AgentscopeAgentDefinition asDef, ContextStore ctx,
-            String[] textAccumulator, String[] thinkingAccumulator) {
-
-        return Flux.defer(() -> {
-            String sessionId = ctx.getSessionId();
-            AgentMessage response = toAgentMessage(
-                    textAccumulator[0].isEmpty() ? "（无输出）" : textAccumulator[0],
-                    thinkingAccumulator[0], asDef.getAgentId(), sessionId);
-            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
-
-            Flux<StreamEvent> thinkingFlux = Flux.empty();
-            if (thinkingAccumulator[0] != null && !thinkingAccumulator[0].isBlank()) {
-                thinkingFlux = Flux.just(StreamEvent.thinking(thinkingAccumulator[0], sessionId));
-            }
-            return thinkingFlux.concatWith(Flux.just(StreamEvent.done(false, null, sessionId)));
-        });
-    }
-
-    // ═══════════════════════════════════════════════════════
-    // Prompt 构建
-    // ═══════════════════════════════════════════════════════
-
-    /**
-     * 构建 Spring AI Prompt
-     */
-    private Prompt buildSpringAiPrompt(String systemPrompt, String input, boolean enableThinking) {
-        if (enableThinking) {
-            DashScopeChatOptions options = DashScopeChatOptions.builder()
-                    .enableThinking(true).build();
-            return new Prompt(List.of(
-                    new SystemMessage(systemPrompt),
-                    new UserMessage(input)
-            ), options);
-        }
-        return new Prompt(List.of(
-                new SystemMessage(systemPrompt),
-                new UserMessage(input)
-        ));
+        return Flux.empty();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -410,68 +225,98 @@ public class AgentScopeAdapter implements EngineAdapter {
     // ═══════════════════════════════════════════════════════
 
     /**
-     * 根据 AgentDefinition 构建 ReActAgent 列表
+     * 根据 AgentDefinition 构建 spring-ai-alibaba ReactAgent 列表
+     * 每个子 Agent 通过 outputKey 将输出存入 OverAllState，后续 Agent 通过模板变量引用
      */
-    private List<AgentBase> buildAgents(AgentscopeAgentDefinition asDef, boolean enableThinking) {
-        List<AgentBase> agents = new ArrayList<>();
+    private List<Agent> buildAgents(AgentscopeAgentDefinition asDef) {
+        List<Agent> agents = new ArrayList<>();
 
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
-            for (var agentConfig : asDef.getAgentscopeAgents()) {
-                AgentDefinition subDef = agentConfig.getAgentId() != null && !agentConfig.getAgentId().isBlank()
-                        ? agentRegistry.get(agentConfig.getAgentId()) : null;
-                String instruction = resolveAgentInstruction(asDef, agentConfig);
-                String agentName = subDef != null ? subDef.getName() : agentConfig.getAgentId();
+            List<AgentscopeAgentConfig> configs = asDef.getAgentscopeAgents();
+            for (int i = 0; i < configs.size(); i++) {
+                AgentscopeAgentConfig config = configs.get(i);
+                String instruction = resolveAgentInstruction(asDef, config);
+                String agentName = resolveAgentName(asDef, config);
+                String outputKey = (config.getOutputKey() != null && !config.getOutputKey().isBlank())
+                        ? config.getOutputKey() : "agent_" + i;
 
-                Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(agentConfig, asDef);
+                // MCP 工具通过 McpToolProvider.buildGraphTools() 获取 ToolCallback
+                List<ToolCallback> tools = resolveTools(config, asDef);
 
-                ReActAgent agent = ReActAgent.builder()
+                ReactAgent agent = ReactAgent.builder()
                         .name(agentName)
-                        .sysPrompt(instruction != null ? instruction : "")
-                        .model(getOrCreateModel(subDef != null ? subDef : asDef, enableThinking))
-                        .toolkit(toolkit)
-                        .maxIters(10)
+                        .model(chatModel)
+                        .instruction(instruction != null ? instruction : "你是一个有用的助手。")
+                        .tools(tools)
+                        .outputKey(outputKey)
                         .build();
 
                 agents.add(agent);
-                log.info("构建ReActAgent: agentId={}, name={}, hasToolkit={}",
-                        agentConfig.getAgentId(), agentName, toolkit != null);
+                log.info("构建ReactAgent: index={}, agentName={}, hasTools={}, outputKey={}",
+                        i, agentName, !tools.isEmpty(), outputKey);
             }
         } else {
-            Toolkit toolkit = mcpToolProvider.buildAgentScopeToolkit(null, asDef);
+            // 无子 Agent 配置时构建单个 Agent
+            List<ToolCallback> tools = mcpToolProvider.buildGraphTools(asDef.getMcpServers());
 
-            ReActAgent agent = ReActAgent.builder()
+            ReactAgent agent = ReactAgent.builder()
                     .name(asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
-                    .sysPrompt(asDef.getInstruction() != null ? asDef.getInstruction() : "")
-                    .model(getOrCreateModel(asDef, enableThinking))
-                    .toolkit(toolkit)
-                    .maxIters(10)
+                    .model(chatModel)
+                    .instruction(asDef.getInstruction() != null ? asDef.getInstruction() : "你是一个有用的助手。")
+                    .tools(tools)
+                    .outputKey("agent_0")
                     .build();
 
             agents.add(agent);
-            log.info("构建单ReActAgent: agentId={}, name={}", asDef.getAgentId(), asDef.getName());
+            log.info("构建单ReactAgent: agentId={}, name={}", asDef.getAgentId(), asDef.getName());
         }
 
         return agents;
     }
 
     // ═══════════════════════════════════════════════════════
-    // Pipeline 执行（同步，供 execute() 使用）
+    // 输入构建
     // ═══════════════════════════════════════════════════════
 
-    private Msg executeSequentialRaw(List<AgentBase> agents, Msg inputMsg, String agentId) {
-        log.info("Sequential Pipeline执行: agentId={}, agentCount={}", agentId, agents.size());
+    /**
+     * 构建输入内容：注入记忆上下文 + RAG 增强
+     */
+    private String buildInputContent(AgentMessage input, ContextStore ctx, AgentscopeAgentDefinition asDef) {
+        String content = input.getContent() != null ? input.getContent() : "";
 
-        if (agents.size() == 1) {
-            return agents.get(0).call(List.of(inputMsg)).block();
+        // 注入记忆上下文
+        String memoryContext = ctx.assembleMemoryContext(content);
+        if (!memoryContext.isBlank()) {
+            content = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + content;
         }
 
-        Mono<Msg> pipeline = Pipelines.sequential(agents, inputMsg);
-        return pipeline.block();
+        // RAG 增强
+        WorkflowNode ragNode = WorkflowNode.builder()
+                .id(asDef.getAgentId())
+                .ragEnabled((Boolean) input.getMetadataValue("ragEnabled"))
+                .knowledgeBaseId((String) input.getMetadataValue("knowledgeBaseId"))
+                .build();
+        content = nodeRagService.enhancePrompt(content, ragNode);
+
+        return content;
     }
 
     // ═══════════════════════════════════════════════════════
     // 辅助方法
     // ═══════════════════════════════════════════════════════
+
+    /**
+     * 解析最后一个子 Agent 的 outputKey
+     */
+    private String resolveLastOutputKey(AgentscopeAgentDefinition asDef) {
+        if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
+            int lastIdx = asDef.getAgentscopeAgents().size() - 1;
+            AgentscopeAgentConfig lastConfig = asDef.getAgentscopeAgents().get(lastIdx);
+            return (lastConfig.getOutputKey() != null && !lastConfig.getOutputKey().isBlank())
+                    ? lastConfig.getOutputKey() : "agent_" + lastIdx;
+        }
+        return "agent_0";
+    }
 
     /**
      * 解析子 Agent 名称
@@ -505,6 +350,17 @@ public class AgentScopeAdapter implements EngineAdapter {
     }
 
     /**
+     * 解析子 Agent 的 MCP 工具（转为 ToolCallback 列表）
+     */
+    private List<ToolCallback> resolveTools(AgentscopeAgentConfig config, AgentscopeAgentDefinition asDef) {
+        List<McpServerConfig> mcpServers = resolveAgentMcpServers(config, asDef);
+        if (mcpServers == null || mcpServers.isEmpty()) {
+            return List.of();
+        }
+        return mcpToolProvider.buildGraphTools(mcpServers);
+    }
+
+    /**
      * 解析子 Agent 的 MCP 服务器配置
      */
     private List<McpServerConfig> resolveAgentMcpServers(AgentscopeAgentConfig config, AgentscopeAgentDefinition asDef) {
@@ -515,77 +371,8 @@ public class AgentScopeAdapter implements EngineAdapter {
     }
 
     // ═══════════════════════════════════════════════════════
-    // Model 管理
-    // ═══════════════════════════════════════════════════════
-
-    private Model getOrCreateModel(AgentDefinition def, boolean enableThinking) {
-        if (def.getModelConfig() == null || "qwq-plus".equals(def.getModelConfig().getName())) {
-            return getOrCreateDefaultModel(enableThinking);
-        }
-        return buildDashScopeModel(def.getModelConfig().getName(), def.getModelConfig(), enableThinking);
-    }
-
-    private Model getOrCreateDefaultModel(boolean enableThinking) {
-        if (!enableThinking && agentscopeModel != null) {
-            return agentscopeModel;
-        }
-        if (!enableThinking) {
-            synchronized (this) {
-                if (agentscopeModel == null) {
-                    agentscopeModel = buildDashScopeModel(defaultModelName, null, false);
-                    log.info("初始化默认agentscope Model: modelName={}", defaultModelName);
-                }
-            }
-            return agentscopeModel;
-        }
-        return buildDashScopeModel(defaultModelName, null, true);
-    }
-
-    private Model buildDashScopeModel(String modelName,
-                                      com.ai.agent.domain.agent.model.valobj.ModelConfig config,
-                                      boolean enableThinking) {
-        GenerateOptions.Builder optionsBuilder = GenerateOptions.builder()
-                .modelName(modelName);
-
-        if (config != null) {
-            if (config.getTemperature() != null) {
-                optionsBuilder.temperature(config.getTemperature());
-            }
-            if (config.getMaxTokens() != null) {
-                optionsBuilder.maxTokens(config.getMaxTokens());
-            }
-        }
-
-        DashScopeChatModel.Builder modelBuilder = DashScopeChatModel.builder()
-                .apiKey(dashscopeApiKey)
-                .modelName(modelName)
-                .defaultOptions(optionsBuilder.build());
-
-        if (enableThinking) {
-            modelBuilder.enableThinking(true);
-        }
-
-        return modelBuilder.build();
-    }
-
-    // ═══════════════════════════════════════════════════════
     // 消息转换
     // ═══════════════════════════════════════════════════════
-
-    private Msg toInputMsg(AgentMessage input, ContextStore ctx) {
-        String content = input.getContent() != null ? input.getContent() : "";
-
-        String memoryContext = ctx.assembleMemoryContext(content);
-        if (!memoryContext.isBlank()) {
-            content = "记忆上下文:\n" + memoryContext + "\n\n当前输入: " + content;
-        }
-
-        return Msg.builder()
-                .role(MsgRole.USER)
-                .name(input.getSenderId() != null ? input.getSenderId() : "user")
-                .textContent(content)
-                .build();
-    }
 
     private AgentMessage toAgentMessage(String output, String thinkingContent, String agentId, String sessionId) {
         return AgentMessage.builder()
