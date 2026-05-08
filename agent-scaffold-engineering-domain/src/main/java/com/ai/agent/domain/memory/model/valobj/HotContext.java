@@ -59,6 +59,7 @@ public class HotContext implements Serializable {
         private static final long serialVersionUID = 1L;
         private String role;
         private String content;
+        private float[] embedding;  // 消息写入时预计算，用于相似度过滤
     }
 
     @Data
