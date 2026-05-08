@@ -3,6 +3,7 @@ package com.ai.agent.domain.memory.service;
 import com.ai.agent.domain.chat.model.entity.ChatMessage;
 import com.ai.agent.domain.chat.repository.IChatSessionRepository;
 import com.ai.agent.domain.common.interface_.MemoryPort;
+import com.ai.agent.domain.knowledge.service.EmbeddingService;
 import com.ai.agent.domain.memory.model.aggregate.MemoryContext;
 import com.ai.agent.domain.memory.model.valobj.HotContext;
 import com.ai.agent.domain.memory.repository.IHotContextRepository;
@@ -10,6 +11,7 @@ import com.ai.agent.types.enums.MessageRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,13 @@ public class MemoryFacade implements MemoryPort {
     private final MemoryExtractor memoryExtractor;
     private final ContextCompressor contextCompressor;
     private final ContextAssembler contextAssembler;
+    private final EmbeddingService embeddingService;
+
+    @Value("${memory.hot.max-recent-messages:10}")
+    private int maxRecentMessages;
+
+    @Value("${memory.compression.keep-recent:3}")
+    private int keepRecentN;
 
     @Override
     public void onMessageCreated(String sessionId, String content, String role) {
@@ -39,7 +48,8 @@ public class MemoryFacade implements MemoryPort {
         if (role == null || role.isBlank()) {
             role = "assistant";
         }
-        int estimatedTokens = content.length() / 4;
+        int estimatedTokens = HotContext.estimateTokens(content);
+        float[] embedding = embeddingService.embed(content);
 
         // 1. 冷层写入 chat_message
         ChatMessage msg = ChatMessage.builder()
@@ -54,9 +64,9 @@ public class MemoryFacade implements MemoryPort {
         // 2. 热层操作
         HotContext hotCtx = hotContextRepo.load(sessionId);
         MemoryContext memoryContext = hotCtx != null
-                ? MemoryContext.from(sessionId, hotCtx)
-                : MemoryContext.create(sessionId);
-        memoryContext.appendMessage(role, content, estimatedTokens);
+                ? MemoryContext.from(sessionId, hotCtx, maxRecentMessages, keepRecentN)
+                : MemoryContext.create(sessionId, maxRecentMessages, keepRecentN);
+        memoryContext.appendMessage(role, content, estimatedTokens, embedding);
         hotContextRepo.save(memoryContext.getHotContext());
 
         // 3. 异步处理

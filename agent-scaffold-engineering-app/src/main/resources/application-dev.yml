@@ -92,8 +92,10 @@ memory:
   compression:
     threshold: 0.8
     context-window: 32768
-    keep-recent: 10
+    keep-recent: 3
   assembly:
     max-memory-tokens: 2000
   hot:
     ttl-hours: 2
+    max-recent-messages: 10
+    similarity-threshold: 0.5
