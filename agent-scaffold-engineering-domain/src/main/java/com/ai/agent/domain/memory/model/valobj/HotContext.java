@@ -38,6 +38,19 @@ public class HotContext implements Serializable {
     /** 最后更新时间 */
     private LocalDateTime lastUpdated;
 
+    /**
+     * 中英文混合 token 估算
+     * 中文约 2 tokens/字，英文约 0.25 tokens/char
+     */
+    public static int estimateTokens(String text) {
+        if (text == null || text.isEmpty()) return 0;
+        long chineseCount = text.chars()
+                .filter(c -> c >= 0x4E00 && c <= 0x9FFF)
+                .count();
+        long otherCount = text.length() - chineseCount;
+        return (int) (chineseCount * 2 + otherCount / 4);
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
