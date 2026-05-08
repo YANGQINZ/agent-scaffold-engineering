@@ -4585,3 +4585,9 @@ java.lang.IllegalArgumentException: API key is required
 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-01.17:28:45.060 [scheduling-1    ] INFO  ContextStoreFactory    - 测试会话TTL淘汰，将清理数据库: sessionId=test-b9823673-b5c0-43ad-8284-6bbf33654708, 空闲时长=1960730ms
+26-05-01.17:28:45.122 [scheduling-1    ] INFO  ContextStoreFactory    - 测试会话数据库清理完成: 数量=1
+26-05-01.17:39:10.425 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-01.17:39:12.440 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete
+26-05-01.17:39:12.460 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown initiated...
+26-05-01.17:39:12.462 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown completed.

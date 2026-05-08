@@ -158,17 +158,9 @@ public class AgentScopeAdapter implements EngineAdapter {
                 ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
                 boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
-                String sessionId = ctx.getSessionId();
 
-                boolean hasSubAgents = asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty();
-
-                if (hasSubAgents && asDef.getAgentscopeAgents().size() > 1) {
-                    // 多 Agent Sequential：前 N-1 个同步 + 最后一个流式
-                    return executeSequentialStream(asDef, content, ctx, enableThinking);
-                } else {
-                    // 单 Agent：直接流式
-                    return executeSingleAgentStream(asDef, content, ctx, enableThinking);
-                }
+                // Sequential Pipeline：前 N-1 个同步 + 最后一个流式（单个 agent 时中间阶段为空，直接流式）
+                return executeSequentialStream(asDef, content, ctx, enableThinking);
             } catch (Exception e) {
                 log.error("AgentScopeAdapter流式执行失败: {}", e.getMessage(), e);
                 return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
@@ -197,40 +189,7 @@ public class AgentScopeAdapter implements EngineAdapter {
     // ═══════════════════════════════════════════════════════
 
     /**
-     * 单 Agent 流式：直接使用 Spring AI chatModel.stream() token 级输出
-     */
-    private Flux<StreamEvent> executeSingleAgentStream(
-            AgentscopeAgentDefinition asDef, String content, ContextStore ctx,
-            boolean enableThinking) {
-
-        String sessionId = ctx.getSessionId();
-        String systemPrompt = resolveAgentInstruction(asDef, null);
-
-        // 收集 MCP 工具
-        List<McpServerConfig> mcpServers = asDef.getMcpServers();
-        AgentscopeAgentConfig lastConfig = null;
-        if (asDef.getAgentscopeAgents() != null && asDef.getAgentscopeAgents().size() == 1) {
-            lastConfig = asDef.getAgentscopeAgents().get(0);
-            // 子 Agent 覆盖指令
-            systemPrompt = resolveAgentInstruction(asDef, lastConfig);
-            // 子 Agent 级别的 MCP 服务器
-            if (lastConfig.getMcpServers() != null && !lastConfig.getMcpServers().isEmpty()) {
-                mcpServers = lastConfig.getMcpServers();
-            }
-        }
-
-        String[] textAccumulator = {""};
-        String[] thinkingAccumulator = {null};
-        String finalSystemPrompt = systemPrompt;
-        List<McpServerConfig> finalMcpServers = mcpServers;
-
-        return streamAgentTokens(finalSystemPrompt, content, enableThinking,
-                finalMcpServers, sessionId, textAccumulator, thinkingAccumulator)
-                .concatWith(buildDoneFlux(asDef, ctx, textAccumulator, thinkingAccumulator));
-    }
-
-    /**
-     * 多 Agent Sequential 流式：前 N-1 个通过 Pipelines.sequential() 同步执行 + 最后一个 Agent 流式
+     * Sequential 流式：前 N-1 个通过 Pipelines.sequential() 同步执行 + 最后一个 Agent 流式
      */
     private Flux<StreamEvent> executeSequentialStream(
             AgentscopeAgentDefinition asDef, String content, ContextStore ctx,
