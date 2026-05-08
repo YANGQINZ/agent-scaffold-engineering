@@ -71,8 +71,10 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             List<Agent> agents = buildAgents(asDef, enableThinking);
 
             // 4. 构建 SequentialAgent 并同步执行
+            String pipelineName = (asDef.getAgentId() != null && !asDef.getAgentId().isBlank())
+                    ? asDef.getAgentId() : "pipeline_" + System.currentTimeMillis();
             SequentialAgent pipeline = SequentialAgent.builder()
-                    .name(asDef.getAgentId())
+                    .name(pipelineName)
                     .subAgents(agents)
                     .build();
 
@@ -134,8 +136,10 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 List<Agent> agents = buildAgents(asDef, enableThinking);
 
                 // 构建 SequentialAgent 并流式执行
+                String pipelineName = (asDef.getAgentId() != null && !asDef.getAgentId().isBlank())
+                        ? asDef.getAgentId() : "pipeline_" + System.currentTimeMillis();
                 SequentialAgent pipeline = SequentialAgent.builder()
-                        .name(asDef.getAgentId())
+                        .name(pipelineName)
                         .subAgents(agents)
                         .build();
 
@@ -269,7 +273,7 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             for (int i = 0; i < configs.size(); i++) {
                 AgentscopeAgentConfig config = configs.get(i);
                 String instruction = resolveAgentInstruction(asDef, config);
-                String agentName = resolveAgentName(asDef, config);
+                String agentName = resolveAgentName(asDef, config, i);
                 String outputKey = (config.getOutputKey() != null && !config.getOutputKey().isBlank())
                         ? config.getOutputKey() : "agent_" + i;
 
@@ -360,15 +364,21 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
         return "agent_0";
     }
 
-    private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config) {
+    private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config, int index) {
+        // 优先使用 config.agentId → registry 查找 name
         if (config.getAgentId() != null && !config.getAgentId().isBlank()) {
             AgentDefinition subDef = agentRegistry.get(config.getAgentId());
-            if (subDef != null && subDef.getName() != null) {
+            if (subDef != null && subDef.getName() != null && !subDef.getName().isBlank()) {
                 return subDef.getName();
             }
             return config.getAgentId();
         }
-        return asDef.getName() != null ? asDef.getName() : asDef.getAgentId();
+        // 回退到 definition name，若也为空则用 agent_N
+        String fallback = asDef.getName();
+        if (fallback != null && !fallback.isBlank()) {
+            return fallback;
+        }
+        return "agent_" + index;
     }
 
     private String resolveAgentInstruction(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config) {
