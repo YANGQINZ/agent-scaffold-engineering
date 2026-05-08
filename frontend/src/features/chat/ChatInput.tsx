@@ -1,10 +1,10 @@
 /**
  * 聊天输入区域组件
- * 自动扩展文本框（最多4行后滚动）、发送按钮
+ * 自动扩展文本框（最多4行后滚动）、发送按钮、深度思考开关
  * Shift+Enter 换行、Enter 发送、流式输出时禁用
  */
 import { memo, useState, useCallback, useRef, type KeyboardEvent } from 'react';
-import { SendHorizontal } from 'lucide-react';
+import { SendHorizontal, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/stores/chat';
 import { cn } from '@/lib/utils';
@@ -12,9 +12,13 @@ import { cn } from '@/lib/utils';
 interface ChatInputProps {
   /** 发送消息回调 */
   onSend: (text: string) => void;
+  /** 是否启用深度思考 */
+  enableThinking?: boolean;
+  /** 切换深度思考 */
+  onToggleThinking?: () => void;
 }
 
-function ChatInput({ onSend }: ChatInputProps) {
+function ChatInput({ onSend, enableThinking = false, onToggleThinking }: ChatInputProps) {
   const [value, setValue] = useState('');
   const isStreaming = useChatStore((s) => s.isStreaming);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -83,6 +87,24 @@ function ChatInput({ onSend }: ChatInputProps) {
           'max-h-[96px] overflow-y-hidden',
         )}
       />
+      {/* 深度思考开关 */}
+      {onToggleThinking && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'shrink-0 rounded-lg transition-colors',
+            enableThinking
+              ? 'text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50'
+              : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50',
+          )}
+          onClick={onToggleThinking}
+          title={enableThinking ? '深度思考已开启' : '开启深度思考'}
+        >
+          <Brain className="size-4" />
+        </Button>
+      )}
       <Button
         size="icon"
         className={cn(

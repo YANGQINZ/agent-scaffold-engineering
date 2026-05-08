@@ -21,13 +21,11 @@ import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent;
 import com.alibaba.cloud.ai.graph.streaming.OutputType;
 import com.alibaba.cloud.ai.graph.streaming.StreamingOutput;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 
@@ -38,17 +36,22 @@ import java.util.*;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class AgentScopeAdapter implements EngineAdapter {
+public class AgentScopeAdapter extends AbstractEngineAdapter {
 
     private final AgentRegistry agentRegistry;
     private final McpToolProvider mcpToolProvider;
     private final NodeRagService nodeRagService;
     private final ChatModel chatModel;
 
-    @Override
-    public EngineType getType() {
-        return EngineType.AGENTSCOPE;
+    public AgentScopeAdapter(AgentRegistry agentRegistry,
+                              McpToolProvider mcpToolProvider,
+                              NodeRagService nodeRagService,
+                              ChatModel chatModel) {
+        super(EngineType.AGENTSCOPE);
+        this.agentRegistry = agentRegistry;
+        this.mcpToolProvider = mcpToolProvider;
+        this.nodeRagService = nodeRagService;
+        this.chatModel = chatModel;
     }
 
     @Override
@@ -61,11 +64,11 @@ public class AgentScopeAdapter implements EngineAdapter {
             String content = buildInputContent(input, ctx, asDef);
             boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
-            // 2. 注入输入到 ContextStore
+            // 2. 输入历史追加
             ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
             // 3. 构建 ReactAgent 子 Agent 列表
-            List<Agent> agents = buildAgents(asDef);
+            List<Agent> agents = buildAgents(asDef, enableThinking);
 
             // 4. 构建 SequentialAgent 并同步执行
             SequentialAgent pipeline = SequentialAgent.builder()
@@ -78,7 +81,6 @@ public class AgentScopeAdapter implements EngineAdapter {
 
             try {
                 Optional<OverAllState> result = pipeline.invoke(content);
-                // 从最后一个子 Agent 的 outputKey 提取输出
                 String lastOutputKey = resolveLastOutputKey(asDef);
                 if (result.isPresent()) {
                     Optional<Object> outputOpt = result.get().value(lastOutputKey);
@@ -114,8 +116,10 @@ public class AgentScopeAdapter implements EngineAdapter {
     @Override
     public Flux<StreamEvent> executeStream(AgentDefinition def, AgentMessage input, ContextStore ctx) {
         AgentscopeAgentDefinition asDef = (AgentscopeAgentDefinition) def;
-        return Flux.defer(() -> {
-            log.info("AgentScopeAdapter流式执行: agentId={}", asDef.getAgentId());
+        String agentId = asDef.getAgentId();
+
+        return wrapFluxLifecycle(() -> {
+            log.info("AgentScopeAdapter流式执行: agentId={}", agentId);
 
             try {
                 // 入口处注入记忆上下文 + RAG 增强
@@ -124,8 +128,10 @@ public class AgentScopeAdapter implements EngineAdapter {
                 // 输入历史追加
                 ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
+                boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
+
                 // 构建 ReactAgent 子 Agent 列表
-                List<Agent> agents = buildAgents(asDef);
+                List<Agent> agents = buildAgents(asDef, enableThinking);
 
                 // 构建 SequentialAgent 并流式执行
                 SequentialAgent pipeline = SequentialAgent.builder()
@@ -135,53 +141,36 @@ public class AgentScopeAdapter implements EngineAdapter {
 
                 String sessionId = ctx.getSessionId();
                 String[] textAccumulator = {""};
+                String[] thinkingAccumulator = {null};
 
                 return pipeline.stream(content)
-                        .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId, textAccumulator))
-                        .concatWith(Flux.defer(() -> {
-                            // 完成阶段：历史追加 + done
-                            AgentMessage response = toAgentMessage(
-                                    textAccumulator[0].isEmpty() ? "（无输出）" : textAccumulator[0],
-                                    null, asDef.getAgentId(), sessionId);
-                            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
-                            return Flux.just(StreamEvent.done(false, null, sessionId));
-                        }));
+                        .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId, textAccumulator, thinkingAccumulator))
+                        .concatWith(buildDoneFlux(
+                                textAccumulator[0].isEmpty() ? "（无输出）" : textAccumulator[0],
+                                thinkingAccumulator[0], agentId, sessionId, ctx));
             } catch (Exception e) {
                 log.error("AgentScopeAdapter流式执行失败: {}", e.getMessage(), e);
-                return Flux.error(new AgentException(ErrorCodeEnum.AGENT_FAILED,
-                        "AgentScope流式执行失败: " + e.getMessage(), e));
+                throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+                        "AgentScope流式执行失败: " + e.getMessage(), e);
             }
-        })
-        .subscribeOn(Schedulers.boundedElastic())
-        .doOnError(e -> {
-            if (e instanceof java.io.IOException || (e.getMessage() != null
-                    && e.getMessage().contains("Broken pipe"))) {
-                log.warn("AgentScopeAdapter流式输出: 客户端已断开连接, agentId={}", def.getAgentId());
-            }
-        })
-        .onErrorResume(java.io.IOException.class, e -> {
-            log.warn("AgentScopeAdapter流式输出: 管道断裂，静默结束流, agentId={}", def.getAgentId());
-            return Flux.empty();
-        })
-        .onErrorResume(java.util.concurrent.TimeoutException.class, e -> {
-            log.warn("AgentScopeAdapter流式输出: 执行超时, agentId={}", def.getAgentId());
-            return Flux.just(StreamEvent.done(false, Map.of("error", "timeout"), ctx.getSessionId()));
-        });
+        }, agentId, ctx.getSessionId());
     }
 
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     // NodeOutput → StreamEvent 转换
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
 
     /**
      * 将 SequentialAgent 流式输出的 NodeOutput 转换为前端 StreamEvent
      *
-     * @param nodeOutput SequentialAgent 发射的节点输出
-     * @param sessionId 会话ID
-     * @param textAccumulator 文本累积器（用于收集流式文本）
+     * @param nodeOutput       SequentialAgent 发射的节点输出
+     * @param sessionId        会话ID
+     * @param textAccumulator  文本累积器
+     * @param thinkingAccumulator 思考内容累积器
      */
     private Flux<StreamEvent> convertNodeOutput(NodeOutput nodeOutput, String sessionId,
-                                                 String[] textAccumulator) {
+                                                 String[] textAccumulator,
+                                                 String[] thinkingAccumulator) {
         String nodeName = nodeOutput.node();
 
         // StreamingOutput：包含流式内容（模型 token 或工具结果）
@@ -189,27 +178,42 @@ public class AgentScopeAdapter implements EngineAdapter {
             OutputType outputType = streaming.getOutputType();
 
             if (outputType == OutputType.AGENT_MODEL_STREAMING) {
-                // 模型 token 级流式
+                // 模型 token 级流式 — 同时提取思考内容
                 String chunk = streaming.chunk();
+                extractThinkingFromStreaming(streaming, sessionId, thinkingAccumulator);
+
+                // 思考内容也作为 THINKING 事件逐 token 发射
+                Flux<StreamEvent> thinkingFlux = Flux.empty();
+                if (thinkingAccumulator[0] != null && !thinkingAccumulator[0].isEmpty()) {
+                    // 仅发射增量思考内容（chunk 级别）
+                    var msg = streaming.message();
+                    if (msg != null && msg.getMetadata() != null) {
+                        Object reasoning = msg.getMetadata().get("reasoningContent");
+                        if (reasoning instanceof String reasoningText && !reasoningText.isEmpty()) {
+                            thinkingFlux = Flux.just(StreamEvent.thinking(reasoningText, sessionId));
+                        }
+                    }
+                }
+
                 if (chunk != null && !chunk.isEmpty()) {
                     textAccumulator[0] += chunk;
-                    return Flux.just(StreamEvent.textDelta(chunk, sessionId));
+                    return thinkingFlux.concatWith(Flux.just(StreamEvent.textDelta(chunk, sessionId)));
                 }
-                return Flux.empty();
+                return thinkingFlux;
             }
 
             if (outputType == OutputType.AGENT_MODEL_FINISHED) {
-                // 模型输出完成，发 nodeEnd
+                // 模型输出完成，尝试提取思考内容
+                // SequentialAgent 完成事件中可能携带 reasoningContent
+                extractThinkingFromStreaming(streaming, sessionId, thinkingAccumulator);
                 return Flux.just(StreamEvent.nodeEnd(nodeName, sessionId));
             }
 
             if (outputType == OutputType.AGENT_TOOL_FINISHED
                     || outputType == OutputType.AGENT_TOOL_STREAMING) {
-                // 工具调用事件，发 nodeStart/nodeEnd 进度
                 return Flux.just(StreamEvent.nodeStart(nodeName, sessionId));
             }
 
-            // 其他类型（HOOK 等），忽略
             return Flux.empty();
         }
 
@@ -220,15 +224,44 @@ public class AgentScopeAdapter implements EngineAdapter {
         return Flux.empty();
     }
 
-    // ═══════════════════════════════════════════════════════
+    /**
+     * 从 StreamingOutput 中提取思考内容
+     *
+     * <p>spring-ai-alibaba 的 StreamingOutput 通过 {@code message()} 暴露 AssistantMessage，
+     * 其中 metadata 包含 "reasoningContent" 字段（当 DashScopeChatOptions.enableThinking=true 时）。</p>
+     *
+     * @param streaming           流式输出事件
+     * @param sessionId           会话ID
+     * @param thinkingAccumulator 思考内容累积器
+     */
+    private void extractThinkingFromStreaming(StreamingOutput<?> streaming, String sessionId,
+                                               String[] thinkingAccumulator) {
+        try {
+            var msg = streaming.message();
+            if (msg != null) {
+                Map<String, Object> metadata = msg.getMetadata();
+                if (metadata != null) {
+                    Object reasoning = metadata.get("reasoningContent");
+                    if (reasoning instanceof String reasoningText && !reasoningText.isBlank()) {
+                        thinkingAccumulator[0] = (thinkingAccumulator[0] == null)
+                                ? reasoningText : thinkingAccumulator[0] + reasoningText;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("从StreamingOutput提取思考内容失败: {}", e.getMessage());
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // Agent 构建
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
 
     /**
      * 根据 AgentDefinition 构建 spring-ai-alibaba ReactAgent 列表
      * 每个子 Agent 通过 outputKey 将输出存入 OverAllState，后续 Agent 通过模板变量引用
      */
-    private List<Agent> buildAgents(AgentscopeAgentDefinition asDef) {
+    private List<Agent> buildAgents(AgentscopeAgentDefinition asDef, boolean enableThinking) {
         List<Agent> agents = new ArrayList<>();
 
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
@@ -240,43 +273,55 @@ public class AgentScopeAdapter implements EngineAdapter {
                 String outputKey = (config.getOutputKey() != null && !config.getOutputKey().isBlank())
                         ? config.getOutputKey() : "agent_" + i;
 
-                // MCP 工具通过 McpToolProvider.buildGraphTools() 获取 ToolCallback
                 List<ToolCallback> tools = resolveTools(config, asDef);
 
-                ReactAgent agent = ReactAgent.builder()
+                var agentBuilder = ReactAgent.builder()
                         .name(agentName)
                         .model(chatModel)
                         .instruction(instruction != null ? instruction : "你是一个有用的助手。")
                         .tools(tools)
-                        .outputKey(outputKey)
-                        .build();
+                        .outputKey(outputKey);
 
-                agents.add(agent);
-                log.info("构建ReactAgent: index={}, agentName={}, hasTools={}, outputKey={}",
-                        i, agentName, !tools.isEmpty(), outputKey);
+                // 注入 enableThinking（通过 chatOptions）
+                if (enableThinking) {
+                    agentBuilder.chatOptions(
+                            com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions.builder()
+                                    .enableThinking(true)
+                                    .build());
+                }
+
+                agents.add(agentBuilder.build());
+                log.info("构建ReactAgent: index={}, agentName={}, hasTools={}, outputKey={}, enableThinking={}",
+                        i, agentName, !tools.isEmpty(), outputKey, enableThinking);
             }
         } else {
-            // 无子 Agent 配置时构建单个 Agent
             List<ToolCallback> tools = mcpToolProvider.buildGraphTools(asDef.getMcpServers());
 
-            ReactAgent agent = ReactAgent.builder()
+            var agentBuilder = ReactAgent.builder()
                     .name(asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
                     .model(chatModel)
                     .instruction(asDef.getInstruction() != null ? asDef.getInstruction() : "你是一个有用的助手。")
                     .tools(tools)
-                    .outputKey("agent_0")
-                    .build();
+                    .outputKey("agent_0");
 
-            agents.add(agent);
-            log.info("构建单ReactAgent: agentId={}, name={}", asDef.getAgentId(), asDef.getName());
+            if (enableThinking) {
+                agentBuilder.chatOptions(
+                        com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions.builder()
+                                .enableThinking(true)
+                                .build());
+            }
+
+            agents.add(agentBuilder.build());
+            log.info("构建单ReactAgent: agentId={}, name={}, enableThinking={}",
+                    asDef.getAgentId(), asDef.getName(), enableThinking);
         }
 
         return agents;
     }
 
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     // 输入构建
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
 
     /**
      * 构建输入内容：注入记忆上下文 + RAG 增强
@@ -301,13 +346,10 @@ public class AgentScopeAdapter implements EngineAdapter {
         return content;
     }
 
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     // 辅助方法
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
 
-    /**
-     * 解析最后一个子 Agent 的 outputKey
-     */
     private String resolveLastOutputKey(AgentscopeAgentDefinition asDef) {
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
             int lastIdx = asDef.getAgentscopeAgents().size() - 1;
@@ -318,9 +360,6 @@ public class AgentScopeAdapter implements EngineAdapter {
         return "agent_0";
     }
 
-    /**
-     * 解析子 Agent 名称
-     */
     private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config) {
         if (config.getAgentId() != null && !config.getAgentId().isBlank()) {
             AgentDefinition subDef = agentRegistry.get(config.getAgentId());
@@ -332,11 +371,7 @@ public class AgentScopeAdapter implements EngineAdapter {
         return asDef.getName() != null ? asDef.getName() : asDef.getAgentId();
     }
 
-    /**
-     * 解析子 Agent 指令
-     */
     private String resolveAgentInstruction(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config) {
-        // 优先使用内联 instruction（画布 testRun 等场景直接传入）
         if (config.getInstruction() != null && !config.getInstruction().isBlank()) {
             return config.getInstruction();
         }
@@ -349,9 +384,6 @@ public class AgentScopeAdapter implements EngineAdapter {
         return asDef.getInstruction() != null ? asDef.getInstruction() : "你是一个有用的助手。";
     }
 
-    /**
-     * 解析子 Agent 的 MCP 工具（转为 ToolCallback 列表）
-     */
     private List<ToolCallback> resolveTools(AgentscopeAgentConfig config, AgentscopeAgentDefinition asDef) {
         List<McpServerConfig> mcpServers = resolveAgentMcpServers(config, asDef);
         if (mcpServers == null || mcpServers.isEmpty()) {
@@ -360,32 +392,10 @@ public class AgentScopeAdapter implements EngineAdapter {
         return mcpToolProvider.buildGraphTools(mcpServers);
     }
 
-    /**
-     * 解析子 Agent 的 MCP 服务器配置
-     */
     private List<McpServerConfig> resolveAgentMcpServers(AgentscopeAgentConfig config, AgentscopeAgentDefinition asDef) {
         if (config.getMcpServers() != null && !config.getMcpServers().isEmpty()) {
             return config.getMcpServers();
         }
         return asDef.getMcpServers();
     }
-
-    // ═══════════════════════════════════════════════════════
-    // 消息转换
-    // ═══════════════════════════════════════════════════════
-
-    private AgentMessage toAgentMessage(String output, String thinkingContent, String agentId, String sessionId) {
-        return AgentMessage.builder()
-                .senderId(agentId)
-                .content(output)
-                .thinkingContent(thinkingContent)
-                .timestamp(System.currentTimeMillis())
-                .metadata(Map.of(
-                        "role", "assistant",
-                        "engine", EngineType.AGENTSCOPE.name(),
-                        "sessionId", sessionId != null ? sessionId : ""
-                ))
-                .build();
-    }
-
 }

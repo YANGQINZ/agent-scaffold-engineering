@@ -28,7 +28,6 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
 
   // 从 chatStore 获取 actions
   const appendToLastMessage = useChatStore((s) => s.appendToLastMessage);
-  const setThinkingContent = useChatStore((s) => s.setThinkingContent);
   const appendToThinkingContent = useChatStore((s) => s.appendToThinkingContent);
   const setActiveSessionId = useChatStore((s) => s.setActiveSessionId);
   const addNodeStatus = useChatStore((s) => s.addNodeStatus);
@@ -153,7 +152,6 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
       stopStream,
       clearNodeStatuses,
       appendToLastMessage,
-      setThinkingContent,
       appendToThinkingContent,
       setActiveSessionId,
       addNodeStatus,

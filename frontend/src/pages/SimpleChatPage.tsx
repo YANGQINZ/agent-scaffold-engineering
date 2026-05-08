@@ -4,7 +4,7 @@
  * 使用 useChatSessionStore 管理会话、useChatStore 管理消息
  */
 import { memo, useCallback, useRef, useEffect, useState } from 'react';
-import { Bot, User, Plus, Database } from 'lucide-react';
+import { Bot, User, Plus, Database, Brain } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/stores/chat';
@@ -36,6 +36,9 @@ function SimpleChatPage() {
   // 知识库选择
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [selectedKB, setSelectedKB] = useState<string>('');
+
+  // 深度思考开关
+  const [enableThinking, setEnableThinking] = useState(false);
 
   const { startStream } = useSSE();
 
@@ -82,9 +85,10 @@ function SimpleChatPage() {
         mode: 'MULTI_TURN',
         ragEnabled: !!selectedKB,
         knowledgeBaseId: selectedKB || undefined,
+        enableThinking,
       });
     },
-    [input, addMessage, startStream, currentSessionId, selectedKB],
+    [input, addMessage, startStream, currentSessionId, selectedKB, enableThinking],
   );
 
   return (
@@ -217,6 +221,21 @@ function SimpleChatPage() {
               }}
               placeholder="输入消息... (Enter 发送，Shift+Enter 换行)"
             />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'shrink-0 rounded-lg transition-colors',
+                enableThinking
+                  ? 'text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50'
+                  : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50',
+              )}
+              onClick={() => setEnableThinking((v) => !v)}
+              title={enableThinking ? '深度思考已开启' : '开启深度思考'}
+            >
+              <Brain className="size-4" />
+            </Button>
             <Button onClick={() => handleSend()} disabled={!input.trim() || isStreaming}>
               发送
             </Button>

@@ -3,7 +3,7 @@
  * 布局：顶部（Agent 名称 + 模式标签）→ 中间（可滚动消息列表）→ 底部（输入区）
  * 使用 useSSE hook 管理流式对话，自动滚动到最新消息
  */
-import { memo, useCallback, useRef, useEffect } from 'react';
+import { memo, useCallback, useRef, useEffect, useState } from 'react';
 import { Bot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useChatStore } from '@/stores/chat';
@@ -32,6 +32,7 @@ function ChatPanel({ context }: { context?: 'chat' | 'workspace' }) {
 
   const { startStream } = useSSE();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [enableThinking, setEnableThinking] = useState(false);
 
   /** 当前选中的 Agent 定义 */
   const activeAgent = agents.find((a) => a.agentId === effectiveAgentId);
@@ -91,9 +92,10 @@ function ChatPanel({ context }: { context?: 'chat' | 'workspace' }) {
             }
           : undefined,
         testRun: isUnsavedCanvas,
+        enableThinking,
       });
     },
-    [addMessage, startStream, activeSessionId, effectiveAgentId, agents],
+    [addMessage, startStream, activeSessionId, effectiveAgentId, agents, enableThinking],
   );
 
   return (
@@ -156,7 +158,11 @@ function ChatPanel({ context }: { context?: 'chat' | 'workspace' }) {
       </div>
 
       {/* ── 底部：输入区 ── */}
-      <ChatInput onSend={handleSend} />
+      <ChatInput
+        onSend={handleSend}
+        enableThinking={enableThinking}
+        onToggleThinking={() => setEnableThinking((v) => !v)}
+      />
     </div>
   );
 }
