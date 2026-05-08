@@ -12,6 +12,7 @@ import { useAppStore } from '@/stores/app';
 const NAV_TABS = [
   { path: '/', labelKey: 'nav.workspace' },
   { path: '/chat', labelKey: 'nav.chat' },
+  { path: '/mcp', labelKey: 'nav.mcp' },
   { path: '/knowledge', labelKey: 'nav.knowledge' },
 ] as const;
 

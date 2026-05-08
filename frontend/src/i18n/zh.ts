@@ -6,6 +6,7 @@ const zh = {
   nav: {
     workspace: '工作台',
     chat: '对话',
+    mcp: 'MCP',
     knowledge: '知识库',
   },
   // 模式

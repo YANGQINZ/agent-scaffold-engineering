@@ -6,6 +6,7 @@ const en = {
   nav: {
     workspace: 'Workspace',
     chat: 'Chat',
+    mcp: 'MCP',
     knowledge: 'Knowledge',
   },
   // 模式

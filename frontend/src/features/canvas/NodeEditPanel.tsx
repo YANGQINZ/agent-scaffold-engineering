@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import McpServerForm from './McpServerForm';
+import McpSelectDialog from '@/features/mcp/McpSelectDialog';
 import type { McpServerConfig } from '@/api/agent';
 import { listKnowledgeBases, type KnowledgeBase } from '@/api/knowledge';
 
@@ -117,6 +118,7 @@ function NodeEditPanel() {
 
   // ─── MCP Server 弹窗状态 ───
   const [mcpDialogOpen, setMcpDialogOpen] = useState(false);
+  const [mcpSelectOpen, setMcpSelectOpen] = useState(false);
   const [editingMcp, setEditingMcp] = useState<McpServerConfig | undefined>();
 
   // ─── 同步选中节点数据到本地 ───
@@ -201,6 +203,15 @@ function NodeEditPanel() {
     setEditingMcp(undefined);
     setMcpDialogOpen(true);
   }, []);
+
+  const handleMcpSelect = useCallback(
+    (config: McpServerConfig) => {
+      const updated = [...mcpServers, config];
+      setMcpServers(updated);
+      updateNodeData({ mcpServers: updated });
+    },
+    [mcpServers, updateNodeData],
+  );
 
   // ─── 出边条件编辑 ───
   const outgoingEdges = useMemo(
@@ -403,6 +414,16 @@ function NodeEditPanel() {
               <Plus className="size-3.5" />
               添加 MCP Server
             </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1"
+              onClick={() => setMcpSelectOpen(true)}
+            >
+              <Server className="size-3.5" />
+              从配置库选择
+            </Button>
           </Section>
 
           <Separator />
@@ -451,6 +472,13 @@ function NodeEditPanel() {
         onOpenChange={setMcpDialogOpen}
         initialData={editingMcp}
         onSubmit={handleMcpSubmit}
+      />
+
+      {/* MCP 配置库选择弹窗 */}
+      <McpSelectDialog
+        open={mcpSelectOpen}
+        onOpenChange={setMcpSelectOpen}
+        onSelect={handleMcpSelect}
       />
     </div>
   );

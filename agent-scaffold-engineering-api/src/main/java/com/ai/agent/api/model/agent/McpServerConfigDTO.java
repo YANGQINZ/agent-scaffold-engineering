@@ -14,6 +14,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class McpServerConfigDTO {
 
+    /** 主键ID（持久化后返回） */
+    private Long id;
+
     /** MCP Server 名称（唯一标识） */
     private String name;
 
@@ -31,5 +34,8 @@ public class McpServerConfigDTO {
 
     /** HTTP 请求头（用于认证等） */
     private Map<String, String> headers;
+
+    /** 配置描述 */
+    private String description;
 
 }

@@ -12,6 +12,7 @@ const WorkspacePage = lazy(() => import('@/pages/WorkspacePage'));
 const ChatPage = lazy(() => import('@/pages/ChatPage'));
 const SimpleChatPage = lazy(() => import('@/pages/SimpleChatPage'));
 const KnowledgePage = lazy(() => import('@/pages/KnowledgePage'));
+const McpPage = lazy(() => import('@/pages/McpPage'));
 
 /** 页面加载占位 */
 function PageLoading() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<WorkspacePage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/simple" element={<SimpleChatPage />} />
+            <Route path="/mcp" element={<McpPage />} />
             <Route path="/knowledge" element={<KnowledgePage />} />
           </Route>
         </Routes>
