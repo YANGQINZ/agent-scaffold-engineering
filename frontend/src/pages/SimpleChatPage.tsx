@@ -4,12 +4,13 @@
  * 使用 useChatSessionStore 管理会话、useChatStore 管理消息
  */
 import { memo, useCallback, useRef, useEffect, useState } from 'react';
-import { Bot, User, Plus } from 'lucide-react';
+import { Bot, User, Plus, Database } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/stores/chat';
 import { useChatSessionStore } from '@/stores/chatSession';
 import { useSSE } from '@/hooks/useSSE';
+import { listKnowledgeBases, type KnowledgeBase } from '@/api/knowledge';
 import { cn } from '@/lib/utils';
 
 /** 生成唯一消息 ID */
@@ -32,6 +33,10 @@ function SimpleChatPage() {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // 知识库选择
+  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
+  const [selectedKB, setSelectedKB] = useState<string>('');
+
   const { startStream } = useSSE();
 
   // 当前会话名称
@@ -40,9 +45,10 @@ function SimpleChatPage() {
     : undefined;
   const currentSessionName = currentSession?.name ?? '多轮对话';
 
-  /** 挂载时加载会话列表 */
+  /** 挂载时加载会话列表和知识库列表 */
   useEffect(() => {
     loadSessions();
+    listKnowledgeBases().then(setKnowledgeBases).catch(() => {});
   }, [loadSessions]);
 
   /** 自动滚动 */
@@ -74,9 +80,11 @@ function SimpleChatPage() {
         userId: 'web-user',
         sessionId: currentSessionId ?? undefined,
         mode: 'MULTI_TURN',
+        ragEnabled: !!selectedKB,
+        knowledgeBaseId: selectedKB || undefined,
       });
     },
-    [input, addMessage, startStream, currentSessionId],
+    [input, addMessage, startStream, currentSessionId, selectedKB],
   );
 
   return (
@@ -129,6 +137,22 @@ function SimpleChatPage() {
             <Badge variant="outline" className="text-xs text-indigo-600 border-indigo-300">
               多轮对话
             </Badge>
+          </div>
+          {/* 知识库选择 */}
+          <div className="flex items-center gap-2">
+            <Database className="size-4 text-gray-400" />
+            <select
+              className="h-7 rounded-md border border-gray-200 px-2 text-xs text-gray-600 outline-none focus:border-indigo-300"
+              value={selectedKB}
+              onChange={(e) => setSelectedKB(e.target.value)}
+            >
+              <option value="">不使用知识库</option>
+              {knowledgeBases.map((kb) => (
+                <option key={kb.baseId} value={kb.baseId}>
+                  {kb.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
