@@ -507,6 +507,9 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
 
     /**
      * 从流式 ChatResponse 中提取 token 级事件
+     *
+     * <p>DashScope 思考模式严格分两阶段：先 reasoningContent（思考）→ 后 chunk（文本）。
+     * 当同一个 chunk 同时携带思考内容和文本时，只发射 TEXT_DELTA，避免思考和文本交替输出。</p>
      */
     protected Flux<StreamEvent> extractStreamingToken(
             org.springframework.ai.chat.model.ChatResponse cr, String sessionId,
@@ -517,18 +520,20 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
         }
 
         ThinkingExtractor.ThinkingResult result = ThinkingExtractor.extractFromSpringAi(cr);
-        Flux<StreamEvent> events = Flux.empty();
 
+        // 文本输出阶段：只发射文本 delta，不再发射思考事件
+        if (!result.textContent().isEmpty()) {
+            textAccumulator[0] += result.textContent();
+            return Flux.just(StreamEvent.textDelta(result.textContent(), sessionId));
+        }
+
+        // 思考阶段：发射增量思考内容，静默累积到 accumulator
         if (result.hasThinking()) {
             thinkingAccumulator[0] = (thinkingAccumulator[0] == null)
                     ? result.thinkingContent() : thinkingAccumulator[0] + result.thinkingContent();
-            events = events.concatWith(Flux.just(StreamEvent.thinking(result.thinkingContent(), sessionId)));
+            return Flux.just(StreamEvent.thinking(result.thinkingContent(), sessionId));
         }
-        if (!result.textContent().isEmpty()) {
-            textAccumulator[0] += result.textContent();
-            events = events.concatWith(Flux.just(StreamEvent.textDelta(result.textContent(), sessionId)));
-        }
-        return events;
+        return Flux.empty();
     }
 
     // ═══════════════════════════════════════════════════════════

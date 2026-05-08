@@ -617,3 +617,453 @@ Please, configure an AsyncTaskExecutor through the WebMvc config.
 26-05-09.00:33:54.845 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=generated_code, enableThinking=true
 26-05-09.00:33:54.846 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=agent_1, hasTools=false, outputKey=review_comments, enableThinking=true
 26-05-09.00:33:54.846 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=agent_2, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:37:59.692 [boundedElastic-5] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=
+26-05-09.00:38:00.205 [boundedElastic-5] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:38:00.205 [boundedElastic-5] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:38:00.205 [boundedElastic-5] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:38:00.206 [boundedElastic-5] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:38:00.206 [boundedElastic-5] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=agent_1, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:38:00.206 [boundedElastic-5] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=agent_2, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:41:00.991 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.00:41:03.003 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete
+26-05-09.00:41:03.022 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown initiated...
+26-05-09.00:41:03.024 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown completed.
+26-05-09.00:41:07.063 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.00:41:07.152 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 27479 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.00:41:07.154 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.00:41:07.924 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.00:41:07.926 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.00:41:07.992 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 55 ms. Found 0 Redis repository interfaces.
+26-05-09.00:41:08.722 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.00:41:08.729 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.00:41:08.730 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.00:41:08.730 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.00:41:08.767 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.00:41:08.767 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1589 ms
+26-05-09.00:41:09.058 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.00:41:09.071 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.00:41:09.201 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@558575fe
+26-05-09.00:41:09.202 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.00:41:09.318 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.00:41:09.319 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载14个Agent定义
+26-05-09.00:41:09.451 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.00:41:09.516 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.00:41:09.671 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.00:41:09.683 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.00:41:10.114 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.00:41:10.115 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.00:41:10.115 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.00:41:10.547 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.00:41:10.568 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.00:41:10.568 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.00:41:10.594 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.00:41:10.599 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.00:41:10.696 [main            ] INFO  Application            - Started Application in 4.021 seconds (process running for 4.561)
+26-05-09.00:41:10.701 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.00:41:11.018 [RMI TCP Connection(4)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.00:41:11.019 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.00:41:11.020 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms
+26-05-09.00:44:12.497 [http-nio-8091-exec-10] INFO  TaskRuntime            - TaskRuntime引擎适配器注册完成: [GRAPH, AGENTSCOPE, HYBRID]
+26-05-09.00:44:12.522 [http-nio-8091-exec-10] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-396f184f-6db9-4ea2-b66f-62ed845affda
+26-05-09.00:44:12.529 [boundedElastic-2] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=
+26-05-09.00:44:13.301 [boundedElastic-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:44:13.301 [boundedElastic-2] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:44:13.301 [boundedElastic-2] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:44:13.324 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=generated_code, enableThinking=false
+26-05-09.00:44:13.324 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=agent_1, hasTools=false, outputKey=review_comments, enableThinking=false
+26-05-09.00:44:13.325 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=agent_2, hasTools=false, outputKey=refactored_code, enableThinking=false
+26-05-09.00:44:13.358 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.00:45:05.085 [boundedElastic-3] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=
+26-05-09.00:45:05.553 [boundedElastic-3] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:45:05.553 [boundedElastic-3] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:45:05.553 [boundedElastic-3] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:45:05.553 [boundedElastic-3] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:45:05.554 [boundedElastic-3] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=agent_1, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:45:05.554 [boundedElastic-3] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=agent_2, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:52:39.018 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.00:52:44.785 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.00:52:44.847 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 27943 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.00:52:44.848 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.00:52:45.577 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.00:52:45.579 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.00:52:45.634 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 45 ms. Found 0 Redis repository interfaces.
+26-05-09.00:52:46.393 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.00:52:46.401 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.00:52:46.401 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.00:52:46.402 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.00:52:46.441 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.00:52:46.441 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1568 ms
+26-05-09.00:52:46.739 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.00:52:46.753 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.00:52:46.885 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@25fcdcc6
+26-05-09.00:52:46.886 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.00:52:46.999 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.00:52:47.000 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.00:52:47.000 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.00:52:47.000 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.00:52:47.000 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.00:52:47.000 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载14个Agent定义
+26-05-09.00:52:47.132 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.00:52:47.200 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.00:52:47.359 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.00:52:47.369 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.00:52:47.795 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.00:52:47.796 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.00:52:47.796 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.00:52:48.238 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.00:52:48.259 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.00:52:48.260 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.00:52:48.288 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.00:52:48.293 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.00:52:48.405 [main            ] INFO  Application            - Started Application in 3.977 seconds (process running for 4.462)
+26-05-09.00:52:48.413 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.00:52:48.768 [RMI TCP Connection(4)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.00:52:48.768 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.00:52:48.773 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 5 ms
+26-05-09.00:52:54.831 [http-nio-8091-exec-1] INFO  TaskRuntime            - TaskRuntime引擎适配器注册完成: [HYBRID, AGENTSCOPE, GRAPH]
+26-05-09.00:52:54.846 [boundedElastic-1] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=
+26-05-09.00:52:55.641 [boundedElastic-1] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:52:55.641 [boundedElastic-1] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:52:55.641 [boundedElastic-1] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:52:55.665 [boundedElastic-1] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:52:55.666 [boundedElastic-1] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=agent_1, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:52:55.666 [boundedElastic-1] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=agent_2, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:52:55.708 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.00:53:08.424 [boundedElastic-3] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=
+26-05-09.00:53:08.829 [boundedElastic-3] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:53:08.829 [boundedElastic-3] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:53:08.829 [boundedElastic-3] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:53:08.829 [boundedElastic-3] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:53:08.830 [boundedElastic-3] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=agent_1, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:53:08.830 [boundedElastic-3] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=agent_2, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:53:59.739 [http-nio-8091-exec-4] ERROR GlobalExceptionHandler - 系统异常
+org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to flush: java.io.IOException: Broken pipe
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleHttpServletResponse.handleIOException(StandardServletAsyncWebRequest.java:346)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:418)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:486)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:310)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:297)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:228)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:219)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:135)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler$SseEmitterSubscriber.send(ReactiveTypeHandler.java:440)
+	at org.springframework.web.servlet.mvc.method.annotation.ReactiveTypeHandler$AbstractEmitterSubscriber.run(ReactiveTypeHandler.java:359)
+	at io.micrometer.context.ContextSnapshot.lambda$wrap$0(ContextSnapshot.java:91)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: org.apache.catalina.connector.ClientAbortException: java.io.IOException: Broken pipe
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:308)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:270)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	... 16 common frames omitted
+Caused by: java.io.IOException: Broken pipe
+	at java.base/sun.nio.ch.FileDispatcherImpl.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:62)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:122)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1380)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:764)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:728)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:712)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1274)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:304)
+	... 19 common frames omitted
+26-05-09.00:53:59.743 [http-nio-8091-exec-4] WARN  ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.ai.agent.trigger.http.GlobalExceptionHandler#handleException(Exception)
+org.springframework.http.converter.HttpMessageNotWritableException: No converter for [class com.ai.agent.types.model.Response] with preset Content-Type 'text/event-stream'
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor.writeWithMessageConverters(AbstractMessageConverterMethodProcessor.java:365)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.handleReturnValue(RequestResponseBodyMethodProcessor.java:208)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:136)
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:471)
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:73)
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:182)
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:80)
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1357)
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1160)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1105)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:633)
+	at org.apache.catalina.core.ApplicationDispatcher.doDispatch(ApplicationDispatcher.java:561)
+	at org.apache.catalina.core.ApplicationDispatcher.dispatch(ApplicationDispatcher.java:532)
+	at org.apache.catalina.core.AsyncContextImpl$AsyncRunnable.run(AsyncContextImpl.java:601)
+	at org.apache.catalina.core.AsyncContextImpl.doInternalDispatch(AsyncContextImpl.java:344)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.asyncDispatch(CoyoteAdapter.java:239)
+	at org.apache.coyote.AbstractProcessor.dispatch(AbstractProcessor.java:243)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:57)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.00:56:30.622 [http-nio-8091-exec-2] INFO  AgentDefinitionRepositoryImpl - 保存Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, engine=AGENTSCOPE
+26-05-09.00:56:30.626 [http-nio-8091-exec-2] INFO  AgentRegistry          - 注册Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.00:56:30.626 [http-nio-8091-exec-2] INFO  AgentController        - 创建Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, engine=AGENTSCOPE
+26-05-09.00:56:32.270 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.00:56:35.734 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话列表: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.00:56:49.717 [http-nio-8091-exec-6] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-4398947b-25d0-4a8e-a7b4-0f0d0af47322
+26-05-09.00:56:49.718 [boundedElastic-6] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.00:56:50.248 [boundedElastic-6] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:56:50.248 [boundedElastic-6] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:56:50.248 [boundedElastic-6] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:56:50.249 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:56:50.249 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:56:50.249 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:56:50.250 [boundedElastic-6] ERROR AgentScopeAdapter      - AgentScopeAdapter流式执行失败: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+java.lang.RuntimeException: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:110)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getAndCompileGraph(Agent.java:121)
+	at com.alibaba.cloud.ai.graph.agent.Agent.doStream(Agent.java:508)
+	at com.alibaba.cloud.ai.graph.agent.Agent.stream(Agent.java:432)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.lambda$executeStream$3(AgentScopeAdapter.java:153)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.exception.Errors.exception(Errors.java:53)
+	at com.alibaba.cloud.ai.graph.StateGraph.addNode(StateGraph.java:264)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.FlowGraphBuildingStrategy.addSubAgentNode(FlowGraphBuildingStrategy.java:147)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.SequentialGraphBuildingStrategy.buildCoreGraph(SequentialGraphBuildingStrategy.java:55)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.AbstractFlowGraphBuildingStrategy.buildGraph(AbstractFlowGraphBuildingStrategy.java:129)
+	at com.alibaba.cloud.ai.graph.agent.flow.builder.FlowGraphBuilder.buildGraph(FlowGraphBuilder.java:49)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent.buildSpecificGraph(SequentialAgent.java:36)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.FlowAgent.initGraph(FlowAgent.java:94)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:107)
+	... 14 common frames omitted
+26-05-09.00:56:50.252 [http-nio-8091-exec-7] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=Agent编排执行失败
+26-05-09.00:57:06.208 [http-nio-8091-exec-8] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-f094c884-425a-46f4-a2b9-9ac0b7429771
+26-05-09.00:57:06.208 [boundedElastic-6] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.00:57:06.527 [boundedElastic-6] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:57:06.528 [boundedElastic-6] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:57:06.528 [boundedElastic-6] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:57:06.528 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:57:06.528 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:57:06.528 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:57:06.528 [boundedElastic-6] ERROR AgentScopeAdapter      - AgentScopeAdapter流式执行失败: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+java.lang.RuntimeException: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:110)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getAndCompileGraph(Agent.java:121)
+	at com.alibaba.cloud.ai.graph.agent.Agent.doStream(Agent.java:508)
+	at com.alibaba.cloud.ai.graph.agent.Agent.stream(Agent.java:432)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.lambda$executeStream$3(AgentScopeAdapter.java:153)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.exception.Errors.exception(Errors.java:53)
+	at com.alibaba.cloud.ai.graph.StateGraph.addNode(StateGraph.java:264)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.FlowGraphBuildingStrategy.addSubAgentNode(FlowGraphBuildingStrategy.java:147)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.SequentialGraphBuildingStrategy.buildCoreGraph(SequentialGraphBuildingStrategy.java:55)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.AbstractFlowGraphBuildingStrategy.buildGraph(AbstractFlowGraphBuildingStrategy.java:129)
+	at com.alibaba.cloud.ai.graph.agent.flow.builder.FlowGraphBuilder.buildGraph(FlowGraphBuilder.java:49)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent.buildSpecificGraph(SequentialAgent.java:36)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.FlowAgent.initGraph(FlowAgent.java:94)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:107)
+	... 14 common frames omitted
+26-05-09.00:57:06.530 [http-nio-8091-exec-9] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=Agent编排执行失败
+26-05-09.00:57:55.159 [http-nio-8091-exec-10] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-be173526-6496-4800-9779-2b6c78594627
+26-05-09.00:57:55.161 [boundedElastic-6] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.00:57:55.687 [boundedElastic-6] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:57:55.687 [boundedElastic-6] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:57:55.687 [boundedElastic-6] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:57:55.688 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization, hasTools=false, outputKey=generated_code, enableThinking=true
+26-05-09.00:57:55.688 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization, hasTools=false, outputKey=review_comments, enableThinking=true
+26-05-09.00:57:55.688 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization, hasTools=false, outputKey=refactored_code, enableThinking=true
+26-05-09.00:57:55.689 [boundedElastic-6] ERROR AgentScopeAdapter      - AgentScopeAdapter流式执行失败: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+java.lang.RuntimeException: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:110)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getAndCompileGraph(Agent.java:121)
+	at com.alibaba.cloud.ai.graph.agent.Agent.doStream(Agent.java:508)
+	at com.alibaba.cloud.ai.graph.agent.Agent.stream(Agent.java:432)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.lambda$executeStream$3(AgentScopeAdapter.java:153)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.exception.Errors.exception(Errors.java:53)
+	at com.alibaba.cloud.ai.graph.StateGraph.addNode(StateGraph.java:264)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.FlowGraphBuildingStrategy.addSubAgentNode(FlowGraphBuildingStrategy.java:147)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.SequentialGraphBuildingStrategy.buildCoreGraph(SequentialGraphBuildingStrategy.java:55)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.AbstractFlowGraphBuildingStrategy.buildGraph(AbstractFlowGraphBuildingStrategy.java:129)
+	at com.alibaba.cloud.ai.graph.agent.flow.builder.FlowGraphBuilder.buildGraph(FlowGraphBuilder.java:49)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent.buildSpecificGraph(SequentialAgent.java:36)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.FlowAgent.initGraph(FlowAgent.java:94)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:107)
+	... 14 common frames omitted
+26-05-09.00:57:55.690 [http-nio-8091-exec-1] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=Agent编排执行失败
+26-05-09.00:58:42.197 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.00:58:44.543 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话列表: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.00:58:48.045 [http-nio-8091-exec-5] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-63a39d1a-877c-4f98-840c-dc1f49126754
+26-05-09.00:58:48.046 [boundedElastic-6] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.00:58:48.435 [boundedElastic-6] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.00:58:48.435 [boundedElastic-6] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.00:58:48.435 [boundedElastic-6] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.00:58:48.435 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization, hasTools=false, outputKey=generated_code, enableThinking=false
+26-05-09.00:58:48.436 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization, hasTools=false, outputKey=review_comments, enableThinking=false
+26-05-09.00:58:48.436 [boundedElastic-6] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization, hasTools=false, outputKey=refactored_code, enableThinking=false
+26-05-09.00:58:48.436 [boundedElastic-6] ERROR AgentScopeAdapter      - AgentScopeAdapter流式执行失败: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+java.lang.RuntimeException: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:110)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getAndCompileGraph(Agent.java:121)
+	at com.alibaba.cloud.ai.graph.agent.Agent.doStream(Agent.java:508)
+	at com.alibaba.cloud.ai.graph.agent.Agent.stream(Agent.java:432)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.lambda$executeStream$3(AgentScopeAdapter.java:153)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.exception.Errors.exception(Errors.java:53)
+	at com.alibaba.cloud.ai.graph.StateGraph.addNode(StateGraph.java:264)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.FlowGraphBuildingStrategy.addSubAgentNode(FlowGraphBuildingStrategy.java:147)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.SequentialGraphBuildingStrategy.buildCoreGraph(SequentialGraphBuildingStrategy.java:55)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.AbstractFlowGraphBuildingStrategy.buildGraph(AbstractFlowGraphBuildingStrategy.java:129)
+	at com.alibaba.cloud.ai.graph.agent.flow.builder.FlowGraphBuilder.buildGraph(FlowGraphBuilder.java:49)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent.buildSpecificGraph(SequentialAgent.java:36)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.FlowAgent.initGraph(FlowAgent.java:94)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:107)
+	... 14 common frames omitted
+26-05-09.00:58:48.437 [http-nio-8091-exec-6] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=Agent编排执行失败
+26-05-09.00:59:47.339 [http-nio-8091-exec-7] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-b7fad3f5-1dc9-4bb6-8065-0f906bc2c30a
+26-05-09.01:00:13.406 [boundedElastic-7] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.01:00:13.855 [boundedElastic-7] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.01:00:13.855 [boundedElastic-7] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.01:00:13.855 [boundedElastic-7] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.01:00:13.856 [boundedElastic-7] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization, hasTools=false, outputKey=generated_code, enableThinking=false
+26-05-09.01:00:13.856 [boundedElastic-7] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization, hasTools=false, outputKey=review_comments, enableThinking=false
+26-05-09.01:00:13.856 [boundedElastic-7] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization, hasTools=false, outputKey=refactored_code, enableThinking=false
+26-05-09.01:02:43.526 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m26s495ms).
+26-05-09.01:02:43.537 [boundedElastic-7] ERROR AgentScopeAdapter      - AgentScopeAdapter流式执行失败: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+java.lang.RuntimeException: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:110)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getAndCompileGraph(Agent.java:121)
+	at com.alibaba.cloud.ai.graph.agent.Agent.doStream(Agent.java:508)
+	at com.alibaba.cloud.ai.graph.agent.Agent.stream(Agent.java:432)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.lambda$executeStream$3(AgentScopeAdapter.java:153)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with id: Authorization already exist!
+	at com.alibaba.cloud.ai.graph.exception.Errors.exception(Errors.java:53)
+	at com.alibaba.cloud.ai.graph.StateGraph.addNode(StateGraph.java:264)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.FlowGraphBuildingStrategy.addSubAgentNode(FlowGraphBuildingStrategy.java:147)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.SequentialGraphBuildingStrategy.buildCoreGraph(SequentialGraphBuildingStrategy.java:55)
+	at com.alibaba.cloud.ai.graph.agent.flow.strategy.AbstractFlowGraphBuildingStrategy.buildGraph(AbstractFlowGraphBuildingStrategy.java:129)
+	at com.alibaba.cloud.ai.graph.agent.flow.builder.FlowGraphBuilder.buildGraph(FlowGraphBuilder.java:49)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent.buildSpecificGraph(SequentialAgent.java:36)
+	at com.alibaba.cloud.ai.graph.agent.flow.agent.FlowAgent.initGraph(FlowAgent.java:94)
+	at com.alibaba.cloud.ai.graph.agent.Agent.getGraph(Agent.java:107)
+	... 14 common frames omitted
+26-05-09.01:02:43.545 [http-nio-8091-exec-8] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=Agent编排执行失败
+26-05-09.01:07:31.973 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete

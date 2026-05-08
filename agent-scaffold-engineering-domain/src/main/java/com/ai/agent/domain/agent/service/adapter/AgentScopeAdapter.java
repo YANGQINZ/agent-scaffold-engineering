@@ -147,8 +147,12 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 String[] textAccumulator = {""};
                 String[] thinkingAccumulator = {null};
 
+                // 只有最后一个 Agent 发射 THINKING/TEXT_DELTA，中间 Agent 只发进度
+                String lastAgentName = resolveLastAgentName(asDef);
+
                 return pipeline.stream(content)
-                        .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId, textAccumulator, thinkingAccumulator))
+                        .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId,
+                                textAccumulator, thinkingAccumulator, lastAgentName))
                         .concatWith(buildDoneFlux(
                                 textAccumulator[0].isEmpty() ? "（无输出）" : textAccumulator[0],
                                 thinkingAccumulator[0], agentId, sessionId, ctx));
@@ -167,49 +171,57 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
     /**
      * 将 SequentialAgent 流式输出的 NodeOutput 转换为前端 StreamEvent
      *
+     * <p>多 Agent 场景下，只有最后一个 Agent 发射 THINKING/TEXT_DELTA，
+     * 中间 Agent 只发射 NODE_START/NODE_END 进度事件，避免思考与文本交替输出。</p>
+     *
      * @param nodeOutput       SequentialAgent 发射的节点输出
      * @param sessionId        会话ID
      * @param textAccumulator  文本累积器
      * @param thinkingAccumulator 思考内容累积器
+     * @param lastAgentName    最后一个 Agent 的名称
      */
     private Flux<StreamEvent> convertNodeOutput(NodeOutput nodeOutput, String sessionId,
                                                  String[] textAccumulator,
-                                                 String[] thinkingAccumulator) {
+                                                 String[] thinkingAccumulator,
+                                                 String lastAgentName) {
         String nodeName = nodeOutput.node();
+        boolean isLastAgent = nodeName.equals(lastAgentName);
 
         // StreamingOutput：包含流式内容（模型 token 或工具结果）
         if (nodeOutput instanceof StreamingOutput<?> streaming) {
             OutputType outputType = streaming.getOutputType();
 
             if (outputType == OutputType.AGENT_MODEL_STREAMING) {
-                // 模型 token 级流式 — 同时提取思考内容
+                // 中间 Agent：跳过 token 级事件，不发射 THINKING/TEXT_DELTA
+                if (!isLastAgent) {
+                    return Flux.empty();
+                }
+
                 String chunk = streaming.chunk();
                 extractThinkingFromStreaming(streaming, sessionId, thinkingAccumulator);
 
-                // 思考内容也作为 THINKING 事件逐 token 发射
-                Flux<StreamEvent> thinkingFlux = Flux.empty();
-                if (thinkingAccumulator[0] != null && !thinkingAccumulator[0].isEmpty()) {
-                    // 仅发射增量思考内容（chunk 级别）
-                    var msg = streaming.message();
-                    if (msg != null && msg.getMetadata() != null) {
-                        Object reasoning = msg.getMetadata().get("reasoningContent");
-                        if (reasoning instanceof String reasoningText && !reasoningText.isEmpty()) {
-                            thinkingFlux = Flux.just(StreamEvent.thinking(reasoningText, sessionId));
-                        }
-                    }
-                }
-
+                // 文本输出阶段：只发射文本 delta
                 if (chunk != null && !chunk.isEmpty()) {
                     textAccumulator[0] += chunk;
-                    return thinkingFlux.concatWith(Flux.just(StreamEvent.textDelta(chunk, sessionId)));
+                    return Flux.just(StreamEvent.textDelta(chunk, sessionId));
                 }
-                return thinkingFlux;
+
+                // 思考阶段：发射增量思考内容
+                var msg = streaming.message();
+                if (msg != null && msg.getMetadata() != null) {
+                    Object reasoning = msg.getMetadata().get("reasoningContent");
+                    if (reasoning instanceof String reasoningText && !reasoningText.isEmpty()) {
+                        return Flux.just(StreamEvent.thinking(reasoningText, sessionId));
+                    }
+                }
+                return Flux.empty();
             }
 
             if (outputType == OutputType.AGENT_MODEL_FINISHED) {
-                // 模型输出完成，尝试提取思考内容
-                // SequentialAgent 完成事件中可能携带 reasoningContent
-                extractThinkingFromStreaming(streaming, sessionId, thinkingAccumulator);
+                // 只有最后一个 Agent 累积思考内容
+                if (isLastAgent) {
+                    extractThinkingFromStreaming(streaming, sessionId, thinkingAccumulator);
+                }
                 return Flux.just(StreamEvent.nodeEnd(nodeName, sessionId));
             }
 
@@ -362,6 +374,24 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                     ? lastConfig.getOutputKey() : "agent_" + lastIdx;
         }
         return "agent_0";
+    }
+
+    /**
+     * 解析最后一个 Agent 的名称 — 与 buildAgents() 中最后一个 Agent 的 .name() 保持一致
+     */
+    private String resolveLastAgentName(AgentscopeAgentDefinition asDef) {
+        if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
+            int lastIdx = asDef.getAgentscopeAgents().size() - 1;
+            AgentscopeAgentConfig lastConfig = asDef.getAgentscopeAgents().get(lastIdx);
+            return resolveAgentName(asDef, lastConfig, lastIdx);
+        }
+        // 单 Agent 场景：与 buildAgents() 中单 Agent 的 .name() 逻辑一致
+        String name = asDef.getName();
+        if (name != null && !name.isBlank()) {
+            return name;
+        }
+        String agentId = asDef.getAgentId();
+        return (agentId != null && !agentId.isBlank()) ? agentId : "agent_0";
     }
 
     private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config, int index) {

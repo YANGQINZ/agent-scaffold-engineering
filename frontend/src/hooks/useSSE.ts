@@ -129,8 +129,9 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
             if (errorMsg) {
               console.warn('[SSE] 流式响应异常结束:', errorMsg);
             }
-            // 清除画布节点运行状态
+            // 清除画布节点运行状态 + 聊天节点执行状态
             useCanvasStore.getState().clearNodeStates();
+            clearNodeStatuses();
             if (event.sessionId) {
               setActiveSessionId(event.sessionId);
             }

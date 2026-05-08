@@ -192,47 +192,38 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
 
             AgentDefinition subDef = findSubAgentDef(hyDef, leafNode);
 
-            // 使用 executeStream 获取 token 级流式输出
-            return agentscopeAdapter.executeStream(subDef, subInput, ctx)
-                    .collectList()
-                    .flatMapMany(events -> {
-                        // 从事件流中收集最终文本和思考内容
-                        StringBuilder textBuilder = new StringBuilder();
-                        for (StreamEvent event : events) {
-                            if ("TEXT_DELTA".equals(event.getType().name()) && event.getData() != null) {
-                                Object text = event.getData().get("text");
-                                if (text instanceof String t) {
-                                    textBuilder.append(t);
-                                }
-                            }
-                            if ("THINKING".equals(event.getType().name()) && event.getData() != null) {
-                                Object thought = event.getData().get("thought");
-                                if (thought instanceof String t && !t.isEmpty()) {
-                                    thinkingContent[0] = (thinkingContent[0] == null) ? t : thinkingContent[0] + t;
-                                }
-                            }
-                        }
-
-                        textAccumulator[0] = textBuilder.toString();
-
-                        // 叶子节点事件包装
-                        Flux<StreamEvent> wrappedEvents = Flux.just(
-                                StreamEvent.nodeStart(leafNodeId, sessionId)
-                        ).concatWith(Flux.fromIterable(events))
-                        .concatWith(Flux.just(
-                                StreamEvent.nodeEnd(leafNodeId, sessionId)
-                        ));
-
-                        // 完成阶段
-                        String finalContent = textAccumulator[0].isEmpty()
-                                ? intermediateOutput[0] : textAccumulator[0];
-                        return wrappedEvents.concatWith(
-                                buildDoneFlux(finalContent, thinkingContent[0],
-                                        hyDef.getAgentId(), sessionId, ctx));
-                    });
+            // 直接透传流式事件，通过 doOnNext 副作用累积文本/思考内容
+            return Flux.just(StreamEvent.nodeStart(leafNodeId, sessionId))
+                    .concatWith(
+                            agentscopeAdapter.executeStream(subDef, subInput, ctx)
+                                    .doOnNext(event -> {
+                                        if ("TEXT_DELTA".equals(event.getType().name()) && event.getData() != null) {
+                                            Object text = event.getData().get("text");
+                                            if (text instanceof String t) {
+                                                textAccumulator[0] += t;
+                                            }
+                                        }
+                                        if ("THINKING".equals(event.getType().name()) && event.getData() != null) {
+                                            Object thought = event.getData().get("thought");
+                                            if (thought instanceof String t && !t.isEmpty()) {
+                                                thinkingContent[0] = (thinkingContent[0] == null)
+                                                        ? t : thinkingContent[0] + t;
+                                            }
+                                        }
+                                    })
+                    )
+                    .concatWith(Flux.just(StreamEvent.nodeEnd(leafNodeId, sessionId)));
         });
 
-        return Flux.concat(intermediateFlux, leafFlux);
+        // Phase 3: 完成阶段（所有事件流结束后发射）
+        Flux<StreamEvent> doneFlux = Flux.defer(() -> {
+            String finalContent = textAccumulator[0].isEmpty()
+                    ? intermediateOutput[0] : textAccumulator[0];
+            return buildDoneFlux(finalContent, thinkingContent[0],
+                    hyDef.getAgentId(), sessionId, ctx);
+        });
+
+        return Flux.concat(intermediateFlux, leafFlux, doneFlux);
     }
 
     // ═══════════════════════════════════════════════════════════
