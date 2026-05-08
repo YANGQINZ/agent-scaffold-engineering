@@ -1,9 +1,7 @@
 package com.ai.agent.domain.agent.service.tool;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
-import com.ai.agent.domain.agent.model.entity.AgentscopeAgentConfig;
 import com.ai.agent.domain.agent.model.entity.McpServerConfig;
-import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.mcp.McpClientBuilder;
 import io.agentscope.core.tool.mcp.McpClientWrapper;
 import io.agentscope.core.tool.mcp.McpSyncClientWrapper;
@@ -17,15 +15,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 统一MCP工具提供者 — 双引擎工具转换入口
+ * 统一MCP工具提供者 — MCP 客户端管理和工具转换入口
  *
- * 管理所有 MCP Server 客户端连接，为 Graph 引擎转换为 FunctionToolCallback，
- * 为 AgentScope 引擎构建 Toolkit。支持运行时动态注册/注销 MCP Server。
- *
- * AgentScope 集成路径：
- * - McpClientBuilder.create(name).stdioTransport()/sseTransport() → McpClientWrapper
- * - Toolkit.registerMcpClient(wrapper) → 将 MCP 工具注册到 Toolkit
- * - ReActAgent.builder().toolkit(toolkit).build() → Agent 可调用 MCP 工具
+ * 管理所有 MCP Server 客户端连接，转换为 Spring AI ToolCallback。
+ * 支持运行时动态注册/注销 MCP Server。
  */
 @Slf4j
 @Service
@@ -139,54 +132,6 @@ public class McpToolProvider {
             log.error("反射提取McpSyncClient失败: {}", e.getMessage());
             return null;
         }
-    }
-
-    /**
-     * 为 AgentScope 引擎构建 Toolkit — 集成 agentscope-java McpClientBuilder
-     *
-     * 根据配置构建 McpClientWrapper 并注册到 Toolkit 中，
-     * 支持 stdio 和 sse 两种传输方式。
-     *
-     * @param agentConfig 子Agent配置（可为null，表示使用主Agent配置）
-     * @param mainDef     主Agent定义
-     * @return Toolkit 实例（包含已注册的 MCP 工具）
-     */
-    public Toolkit buildAgentScopeToolkit(AgentscopeAgentConfig agentConfig, AgentDefinition mainDef) {
-        Toolkit toolkit = new Toolkit();
-
-        // 收集需要注册的 MCP Server
-        List<McpServerConfig> serversToRegister = new ArrayList<>();
-
-        // 1. 子 Agent 自身的 MCP Server 配置
-        if (agentConfig != null && agentConfig.getMcpServers() != null) {
-            serversToRegister.addAll(agentConfig.getMcpServers());
-        }
-
-        // 2. 主 Agent 的 MCP Server 配置（兜底）
-        if (serversToRegister.isEmpty() && mainDef.getMcpServers() != null) {
-            serversToRegister.addAll(mainDef.getMcpServers());
-        }
-
-        // 3. 构建并注册 McpClientWrapper
-        for (McpServerConfig serverConfig : serversToRegister) {
-            try {
-                McpClientWrapper wrapper = getOrCreateClient(serverConfig);
-                if (wrapper != null) {
-                    toolkit.registerMcpClient(wrapper).block();
-                    log.info("Toolkit注册MCP Server成功: name={}", serverConfig.getName());
-                }
-            } catch (Exception e) {
-                log.warn("Toolkit注册MCP Server失败: name={}, error={}", serverConfig.getName(), e.getMessage());
-            }
-        }
-
-        // 4. 过滤 enableTools（如果配置了只启用部分工具）
-        if (agentConfig != null && agentConfig.getEnableTools() != null && !agentConfig.getEnableTools().isEmpty()) {
-            toolkit.setActiveGroups(agentConfig.getEnableTools());
-            log.debug("Toolkit设置工具过滤: enableTools={}", agentConfig.getEnableTools());
-        }
-
-        return toolkit;
     }
 
     /**

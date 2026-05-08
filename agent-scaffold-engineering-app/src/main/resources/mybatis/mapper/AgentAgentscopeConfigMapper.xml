@@ -3,15 +3,15 @@
 <mapper namespace="com.ai.agent.infrastructure.persistent.dao.IAgentAgentscopeConfigDao">
 
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO agent_agentscope_config (agent_definition_id, config_agent_id, instruction, mcp_servers, enable_tools, sort_order)
+        INSERT INTO agent_agentscope_config (agent_definition_id, config_agent_id, instruction, mcp_servers, enable_tools, output_key, sort_order)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.agentDefinitionId}, #{item.configAgentId}, #{item.instruction}, #{item.mcpServers}::jsonb, #{item.enableTools}::jsonb, #{item.sortOrder})
+            (#{item.agentDefinitionId}, #{item.configAgentId}, #{item.instruction}, #{item.mcpServers}::jsonb, #{item.enableTools}::jsonb, #{item.outputKey}, #{item.sortOrder})
         </foreach>
     </insert>
 
     <select id="selectByAgentDefinitionId" resultType="com.ai.agent.infrastructure.persistent.po.AgentAgentscopeConfigPO">
-        SELECT id, agent_definition_id, config_agent_id, instruction, mcp_servers, enable_tools, sort_order
+        SELECT id, agent_definition_id, config_agent_id, instruction, mcp_servers, enable_tools, output_key, sort_order
         FROM agent_agentscope_config WHERE agent_definition_id = #{agentDefinitionId} ORDER BY sort_order ASC
     </select>
 

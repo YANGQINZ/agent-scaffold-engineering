@@ -26,6 +26,9 @@ public class AgentAgentscopeConfigPO {
     /** 启用工具配置（JSONB） */
     private String enableTools;
 
+    /** 输出键名 — 后续 Agent instruction 中通过 {outputKey} 模板变量引用 */
+    private String outputKey;
+
     /** 排序序号 */
     private Integer sortOrder;
 

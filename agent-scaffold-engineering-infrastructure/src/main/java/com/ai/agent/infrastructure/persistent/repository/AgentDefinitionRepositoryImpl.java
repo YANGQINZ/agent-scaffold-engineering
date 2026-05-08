@@ -336,6 +336,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                     po.setInstruction(config.getInstruction());
                     po.setMcpServers(toJson(config.getMcpServers()));
                     po.setEnableTools(toJson(config.getEnableTools()));
+                    po.setOutputKey(config.getOutputKey());
                     po.setSortOrder(i);
                     return po;
                 })
@@ -383,6 +384,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                         .instruction(po.getInstruction())
                         .mcpServers(parseJsonList(po.getMcpServers(), new TypeReference<>() {}, List.of()))
                         .enableTools(parseJsonList(po.getEnableTools(), new TypeReference<>() {}, List.of()))
+                        .outputKey(po.getOutputKey())
                         .build())
                 .toList();
     }

@@ -9,9 +9,9 @@ import lombok.experimental.SuperBuilder;
 import java.util.List;
 
 /**
- * AGENTSCOPE 引擎 Agent 定义 — agentscope-java Pipeline 编排
+ * AGENTSCOPE 引擎 Agent 定义 — spring-ai-alibaba SequentialAgent 编排
  *
- * 持有 AgentScope 特有字段：Pipeline 类型、子 Agent 配置列表。
+ * 持有 AgentScope 特有字段：子 Agent 配置列表。
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

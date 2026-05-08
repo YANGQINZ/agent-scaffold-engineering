@@ -150,6 +150,7 @@ public class AgentDefinitionConverter {
                         .instruction(d.getInstruction())
                         .mcpServers(convertMcpServersToDomain(d.getMcpServers()))
                         .enableTools(d.getEnableTools())
+                        .outputKey(d.getOutputKey())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -232,8 +233,10 @@ public class AgentDefinitionConverter {
         return agents.stream()
                 .map(a -> AgentscopeAgentConfigDTO.builder()
                         .agentId(a.getAgentId())
+                        .instruction(a.getInstruction())
                         .mcpServers(convertMcpServersToDTO(a.getMcpServers()))
                         .enableTools(a.getEnableTools())
+                        .outputKey(a.getOutputKey())
                         .build())
                 .collect(Collectors.toList());
     }

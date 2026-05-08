@@ -25,4 +25,7 @@ public class AgentscopeAgentConfigDTO {
     /** 启用的工具列表 */
     private List<String> enableTools;
 
+    /** 输出键名 — 后续 Agent instruction 中通过 {outputKey} 模板变量引用 */
+    private String outputKey;
+
 }

@@ -2,6 +2,7 @@ package com.ai.agent.infrastructure.persistent.dao;
 
 import com.ai.agent.infrastructure.persistent.po.AgentAgentscopeConfigPO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface IAgentAgentscopeConfigDao {
     /**
      * 批量插入AgentScope配置
      */
-    void batchInsert(List<AgentAgentscopeConfigPO> pos);
+    void batchInsert(@Param("list") List<AgentAgentscopeConfigPO> pos);
 
     /**
      * 根据智能体定义ID查询AgentScope配置

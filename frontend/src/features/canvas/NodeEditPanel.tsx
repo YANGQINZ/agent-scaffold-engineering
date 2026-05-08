@@ -38,6 +38,7 @@ interface NodeEditData {
   ragEnabled?: boolean;
   knowledgeBaseId?: string;
   mcpServers?: McpServerConfig[];
+  outputKey?: string;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -103,6 +104,7 @@ function NodeEditPanel() {
   const [mcpServers, setMcpServers] = useState<McpServerConfig[]>(
     nodeData.mcpServers ?? [],
   );
+  const [outputKey, setOutputKey] = useState(nodeData.outputKey ?? '');
 
   // ─── 知识库列表（延迟加载） ───
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
@@ -127,6 +129,7 @@ function NodeEditPanel() {
     setRagEnabled(d.ragEnabled ?? false);
     setKnowledgeBaseId(d.knowledgeBaseId ?? '');
     setMcpServers(d.mcpServers ?? []);
+    setOutputKey(d.outputKey ?? '');
   }, [selectedNode]);
 
   // ─── 更新节点 data ───
@@ -285,6 +288,20 @@ function NodeEditPanel() {
               <option value="AGENTSCOPE">AGENTSCOPE</option>
             </select>
           </div>
+          {subEngine === 'AGENTSCOPE' && (
+            <div>
+              <label className="text-xs text-slate-500">
+                输出键名 <span className="text-gray-400">(outputKey)</span>
+              </label>
+              <input
+                className="w-full border rounded px-2 py-1 text-sm"
+                value={outputKey}
+                onChange={(e) => setOutputKey(e.target.value)}
+                onBlur={() => updateNodeData({ outputKey: outputKey || undefined })}
+                placeholder="如 research_result，供后续 Agent 引用"
+              />
+            </div>
+          )}
         </div>
       </Section>
 
