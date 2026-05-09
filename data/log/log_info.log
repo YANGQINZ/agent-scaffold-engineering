@@ -2511,3 +2511,7 @@ Please, configure an AsyncTaskExecutor through the WebMvc config.
 26-05-09.18:22:44.911 [RMI TCP Connection(2)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
 26-05-09.18:22:44.912 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
 26-05-09.18:22:44.913 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms
+26-05-09.18:22:54.224 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.18:22:54.226 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete
+26-05-09.18:22:54.245 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown initiated...
+26-05-09.18:22:54.247 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown completed.
