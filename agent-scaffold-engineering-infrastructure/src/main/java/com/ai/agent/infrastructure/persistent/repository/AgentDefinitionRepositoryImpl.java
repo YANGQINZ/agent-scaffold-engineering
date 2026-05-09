@@ -333,6 +333,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                     AgentAgentscopeConfigPO po = new AgentAgentscopeConfigPO();
                     po.setAgentDefinitionId(definitionId);
                     po.setConfigAgentId(config.getAgentId());
+                    po.setName(config.getName());
                     po.setInstruction(config.getInstruction());
                     po.setMcpServers(toJson(config.getMcpServers()));
                     po.setEnableTools(toJson(config.getEnableTools()));
@@ -381,6 +382,7 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
         return pos.stream()
                 .map(po -> AgentscopeAgentConfig.builder()
                         .agentId(po.getConfigAgentId())
+                        .name(po.getName())
                         .instruction(po.getInstruction())
                         .mcpServers(parseJsonList(po.getMcpServers(), new TypeReference<>() {}, List.of()))
                         .enableTools(parseJsonList(po.getEnableTools(), new TypeReference<>() {}, List.of()))

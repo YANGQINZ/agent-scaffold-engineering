@@ -22,6 +22,9 @@ public class AgentscopeAgentConfig {
     /** 关联的 AgentDefinition ID */
     private String agentId;
 
+    /** Agent 名称（前端节点标签） */
+    private String name;
+
     /** Agent 指令（内联定义时直接传入，避免依赖 AgentRegistry 查找） */
     private String instruction;
 

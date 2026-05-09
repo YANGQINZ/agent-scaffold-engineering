@@ -1067,3 +1067,1326 @@ Caused by: com.alibaba.cloud.ai.graph.exception.GraphStateException: node with i
 	... 14 common frames omitted
 26-05-09.01:02:43.545 [http-nio-8091-exec-8] WARN  GlobalExceptionHandler - Agent异常: code=1003, info=Agent编排执行失败
 26-05-09.01:07:31.973 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:21:44.190 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:21:44.425 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 29455 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:21:44.426 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:21:45.342 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:21:45.344 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:21:45.413 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 55 ms. Found 0 Redis repository interfaces.
+26-05-09.01:21:46.231 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:21:46.240 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:21:46.241 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:21:46.241 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:21:46.280 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:21:46.280 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1823 ms
+26-05-09.01:21:46.585 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:21:46.598 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:21:46.731 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@322eb1a
+26-05-09.01:21:46.732 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.01:21:46.864 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.01:21:47.020 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:21:47.102 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:21:47.273 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:21:47.287 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:21:47.731 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:21:47.731 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:21:47.731 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:21:48.206 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:21:48.227 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:21:48.228 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:21:48.256 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:21:48.261 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:21:48.396 [main            ] INFO  Application            - Started Application in 4.975 seconds (process running for 5.649)
+26-05-09.01:21:48.404 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:21:48.560 [RMI TCP Connection(3)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:21:48.560 [RMI TCP Connection(3)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:21:48.561 [RMI TCP Connection(3)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms
+26-05-09.01:24:07.206 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:24:09.259 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话列表: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.01:24:10.201 [http-nio-8091-exec-5] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:24:10.628 [http-nio-8091-exec-6] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:24:11.015 [http-nio-8091-exec-7] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:24:11.363 [http-nio-8091-exec-8] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:24:11.683 [http-nio-8091-exec-9] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:24:21.107 [http-nio-8091-exec-10] INFO  TaskRuntime            - TaskRuntime引擎适配器注册完成: [HYBRID, AGENTSCOPE, GRAPH]
+26-05-09.01:24:21.121 [boundedElastic-2] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=
+26-05-09.01:24:32.786 [boundedElastic-2] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=agent_0, hasTools=false, outputKey=agent_0, enableThinking=false
+26-05-09.01:24:34.042 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.01:25:38.729 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:25:40.741 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete
+26-05-09.01:25:40.764 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown initiated...
+26-05-09.01:25:40.767 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown completed.
+26-05-09.01:25:44.163 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:25:44.228 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 29760 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:25:44.229 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:25:44.990 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:25:44.992 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:25:45.051 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 46 ms. Found 0 Redis repository interfaces.
+26-05-09.01:25:45.836 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:25:45.845 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:25:45.846 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:25:45.846 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:25:45.890 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:25:45.890 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1635 ms
+26-05-09.01:25:46.198 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:25:46.212 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:25:46.348 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3c5bb37d
+26-05-09.01:25:46.349 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:25:46.475 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.01:25:46.475 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.01:25:46.475 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.01:25:46.475 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.01:25:46.475 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.01:25:46.476 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.01:25:46.614 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:25:46.684 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:25:46.848 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:25:46.858 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:25:47.309 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:25:47.310 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:25:47.311 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:25:47.957 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:25:47.979 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:25:47.979 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:25:48.009 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:25:48.014 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:25:48.242 [main            ] INFO  Application            - Started Application in 4.423 seconds (process running for 4.941)
+26-05-09.01:25:48.251 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:25:48.424 [RMI TCP Connection(3)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:25:48.425 [RMI TCP Connection(3)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:25:48.428 [RMI TCP Connection(3)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 2 ms
+26-05-09.01:26:18.542 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:26:20.507 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.01:26:27.007 [http-nio-8091-exec-4] INFO  TaskRuntime            - TaskRuntime引擎适配器注册完成: [AGENTSCOPE, HYBRID, GRAPH]
+26-05-09.01:26:27.023 [http-nio-8091-exec-4] INFO  ContextStoreFactory    - 会话已持久化: sessionId=test-e5bcab77-eb1a-411c-b2db-b0cb3fd2cf51
+26-05-09.01:26:27.030 [boundedElastic-1] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.01:26:30.322 [boundedElastic-1] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.01:26:30.323 [boundedElastic-1] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.01:26:30.323 [boundedElastic-1] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.01:26:30.355 [boundedElastic-1] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization-1, hasTools=false, outputKey=generated_code, enableThinking=false
+26-05-09.01:26:30.356 [boundedElastic-1] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization-2, hasTools=false, outputKey=review_comments, enableThinking=false
+26-05-09.01:26:30.356 [boundedElastic-1] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization-3, hasTools=false, outputKey=refactored_code, enableThinking=false
+26-05-09.01:26:30.396 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.01:29:28.949 [boundedElastic-4] INFO  AgentScopeAdapter      - AgentScopeAdapter流式执行: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.01:30:05.799 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=49s325ms).
+26-05-09.01:30:05.805 [boundedElastic-4] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.01:30:05.805 [boundedElastic-4] INFO  McpToolProvider        - MCP Server已注册: name=baidu, transport=streamableHttp
+26-05-09.01:30:05.806 [boundedElastic-4] INFO  McpToolProvider        - 构建Graph工具完成: 共1个MCP Server, 工具数=0
+26-05-09.01:30:05.807 [boundedElastic-4] INFO  AgentScopeAdapter      - 构建ReactAgent: index=0, agentName=Authorization-1, hasTools=false, outputKey=generated_code, enableThinking=false
+26-05-09.01:30:10.639 [boundedElastic-4] INFO  AgentScopeAdapter      - 构建ReactAgent: index=1, agentName=Authorization-2, hasTools=false, outputKey=review_comments, enableThinking=false
+26-05-09.01:30:10.639 [boundedElastic-4] INFO  AgentScopeAdapter      - 构建ReactAgent: index=2, agentName=Authorization-3, hasTools=false, outputKey=refactored_code, enableThinking=false
+26-05-09.01:30:10.719 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:32:38.933 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:32:38.991 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 30178 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:32:38.991 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:32:39.784 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:32:39.786 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:32:39.840 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 43 ms. Found 0 Redis repository interfaces.
+26-05-09.01:32:40.616 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:32:40.624 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:32:40.625 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:32:40.625 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:32:40.663 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:32:40.664 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1645 ms
+26-05-09.01:32:40.953 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:32:40.966 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:32:41.092 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3fc051ce
+26-05-09.01:32:41.093 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:32:41.442 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:32:41.503 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:32:41.676 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:32:41.689 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:32:41.710 [main            ] ERROR AgentRegistry          - AgentRegistry初始化失败: 
+### Error querying database.  Cause: org.postgresql.util.PSQLException: ERROR: column "name" does not exist
+  位置：50
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/AgentAgentscopeConfigMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### SQL: SELECT id, agent_definition_id, config_agent_id, name, instruction, mcp_servers, enable_tools, output_key, sort_order         FROM agent_agentscope_config WHERE agent_definition_id = ? ORDER BY sort_order ASC
+### Cause: org.postgresql.util.PSQLException: ERROR: column "name" does not exist
+  位置：50
+; bad SQL grammar []
+org.springframework.jdbc.BadSqlGrammarException: 
+### Error querying database.  Cause: org.postgresql.util.PSQLException: ERROR: column "name" does not exist
+  位置：50
+### The error may exist in file [/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes/mybatis/mapper/AgentAgentscopeConfigMapper.xml]
+### The error may involve defaultParameterMap
+### The error occurred while setting parameters
+### SQL: SELECT id, agent_definition_id, config_agent_id, name, instruction, mcp_servers, enable_tools, output_key, sort_order         FROM agent_agentscope_config WHERE agent_definition_id = ? ORDER BY sort_order ASC
+### Cause: org.postgresql.util.PSQLException: ERROR: column "name" does not exist
+  位置：50
+; bad SQL grammar []
+	at org.springframework.jdbc.support.SQLStateSQLExceptionTranslator.doTranslate(SQLStateSQLExceptionTranslator.java:112)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:116)
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:93)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:347)
+	at jdk.proxy2/jdk.proxy2.$Proxy113.selectList(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.selectList(SqlSessionTemplate.java:194)
+	at org.apache.ibatis.binding.MapperMethod.executeForMany(MapperMethod.java:147)
+	at org.apache.ibatis.binding.MapperMethod.execute(MapperMethod.java:80)
+	at org.apache.ibatis.binding.MapperProxy$PlainMethodInvoker.invoke(MapperProxy.java:141)
+	at org.apache.ibatis.binding.MapperProxy.invoke(MapperProxy.java:86)
+	at jdk.proxy2/jdk.proxy2.$Proxy117.selectByAgentDefinitionId(Unknown Source)
+	at com.ai.agent.infrastructure.persistent.repository.AgentDefinitionRepositoryImpl.queryAgentscopeConfigs(AgentDefinitionRepositoryImpl.java:381)
+	at com.ai.agent.infrastructure.persistent.repository.AgentDefinitionRepositoryImpl.assembleAgentscopeDefinition(AgentDefinitionRepositoryImpl.java:181)
+	at com.ai.agent.infrastructure.persistent.repository.AgentDefinitionRepositoryImpl.assembleDefinition(AgentDefinitionRepositoryImpl.java:139)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1625)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:575)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:616)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:622)
+	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:627)
+	at com.ai.agent.infrastructure.persistent.repository.AgentDefinitionRepositoryImpl.findAll(AgentDefinitionRepositoryImpl.java:106)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:727)
+	at com.ai.agent.infrastructure.persistent.repository.AgentDefinitionRepositoryImpl$$SpringCGLIB$$0.findAll(<generated>)
+	at com.ai.agent.domain.agent.service.AgentRegistry.init(AgentRegistry.java:36)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:423)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1804)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:346)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1664)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1552)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1381)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1218)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:563)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:346)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1155)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1121)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1056)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
+	at com.ai.agent.Application.main(Application.java:14)
+Caused by: org.postgresql.util.PSQLException: ERROR: column "name" does not exist
+  位置：50
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434)
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:194)
+	at org.postgresql.jdbc.PgPreparedStatement.execute(PgPreparedStatement.java:180)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.query(PreparedStatementHandler.java:65)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.query(RoutingStatementHandler.java:80)
+	at org.apache.ibatis.executor.SimpleExecutor.doQuery(SimpleExecutor.java:65)
+	at org.apache.ibatis.executor.BaseExecutor.queryFromDatabase(BaseExecutor.java:336)
+	at org.apache.ibatis.executor.BaseExecutor.query(BaseExecutor.java:158)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:110)
+	at org.apache.ibatis.executor.CachingExecutor.query(CachingExecutor.java:90)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:154)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:147)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.selectList(DefaultSqlSession.java:142)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:333)
+	... 73 common frames omitted
+26-05-09.01:32:42.165 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:32:42.167 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:32:42.168 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:32:42.672 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:32:42.692 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:32:42.692 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:32:42.722 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:32:42.727 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:32:42.822 [main            ] INFO  Application            - Started Application in 4.244 seconds (process running for 4.785)
+26-05-09.01:32:42.829 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:32:43.272 [RMI TCP Connection(2)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:32:43.272 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:32:43.275 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 3 ms
+26-05-09.01:38:08.894 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:38:12.251 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:38:12.304 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 30394 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:38:12.304 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:38:13.078 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:38:13.080 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:38:13.136 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 45 ms. Found 0 Redis repository interfaces.
+26-05-09.01:38:13.903 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:38:13.911 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:38:13.912 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:38:13.912 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:38:13.948 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:38:13.948 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1619 ms
+26-05-09.01:38:14.237 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:38:14.250 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:38:14.374 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3c5bb37d
+26-05-09.01:38:14.375 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:38:14.491 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.01:38:14.492 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.01:38:14.629 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:38:14.697 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:38:14.855 [redisson-netty-1-5] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:38:14.865 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:38:15.303 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:38:15.303 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:38:15.303 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:38:15.742 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:38:15.762 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:38:15.763 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:38:15.790 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:38:15.795 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:38:15.891 [main            ] INFO  Application            - Started Application in 3.99 seconds (process running for 4.503)
+26-05-09.01:38:15.897 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:38:16.112 [RMI TCP Connection(2)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:38:16.112 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:38:16.113 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms
+26-05-09.01:38:24.292 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:38:25.866 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f
+26-05-09.01:38:26.857 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话列表: agentId=human-agent
+26-05-09.01:38:27.696 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话列表: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:38:29.027 [http-nio-8091-exec-6] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:38:29.632 [http-nio-8091-exec-7] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:39:17.545 [http-nio-8091-exec-8] INFO  TaskRuntime            - TaskRuntime引擎适配器注册完成: [GRAPH, HYBRID, AGENTSCOPE]
+26-05-09.01:39:17.565 [boundedElastic-2] INFO  GraphEngineAdapter     - GraphEngineAdapter流式执行: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:39:18.636 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.01:39:19.680 [boundedElastic-2] INFO  RagService             - 查询改写: '记忆上下文:
+system: 相关历史记忆：
+- EMPTY
+- EMPTY
+- EMPTY
+- EMPTY
+
+assistant: 你好！😊
+
+“nihao”是中文“你好”的拼音，意思是“你好”，常用于打招呼。
+
+如果你有其他具体问题或需要进一步帮助，请随时告诉我！
+user: 你好
+assistant: 你好！😊
+
+“你好”是中文中最常用的打招呼用语，表示问候，相当于英文中的 “Hello” 或 “Hi”。
+
+如果你有任何问题、需要学习中文、翻译、写作帮助，或者只是想聊聊天，我都很乐意帮忙！
+
+
+当前输入: 你好' -> '你好'
+26-05-09.01:39:19.997 [boundedElastic-2] INFO  NodeRagService         - 节点 node_1777617549441_lb4qh0 RAG增强完成，知识库: 2050102098263064578
+26-05-09.01:41:01.368 [http-nio-8091-exec-2] INFO  RagService             - 查询改写: '介绍一下netty' -> 'Netty 框架介绍'
+26-05-09.01:41:01.527 [http-nio-8091-exec-2] INFO  ContextStoreFactory    - 会话已持久化: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:41:36.180 [http-nio-8091-exec-4] INFO  RagService             - 查询改写: '什么是netty' -> 'Netty 框架介绍'
+26-05-09.01:41:36.479 [http-nio-8091-exec-4] INFO  ContextStoreFactory    - 会话已持久化: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:42:03.648 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:42:12.373 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:42:12.487 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 30580 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:42:12.487 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:42:13.361 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:42:13.363 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:42:13.416 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 41 ms. Found 0 Redis repository interfaces.
+26-05-09.01:42:14.242 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:42:14.251 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:42:14.252 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:42:14.252 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:42:14.299 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:42:14.299 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1784 ms
+26-05-09.01:42:14.673 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:42:14.690 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:42:14.826 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3c5bb37d
+26-05-09.01:42:14.827 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.01:42:14.947 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.01:42:14.948 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.01:42:15.087 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:42:15.164 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:42:15.361 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:42:15.376 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:42:15.868 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:42:15.869 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:42:15.870 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:42:16.364 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:42:16.383 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:42:16.383 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:42:16.408 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:42:16.413 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:42:16.500 [main            ] INFO  Application            - Started Application in 4.476 seconds (process running for 5.041)
+26-05-09.01:42:16.507 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:42:16.791 [RMI TCP Connection(2)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:42:16.791 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:42:16.793 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 2 ms
+26-05-09.01:42:45.172 [http-nio-8091-exec-6] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:42:49.699 [http-nio-8091-exec-7] INFO  SessionController      - 查询会话列表: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:42:50.607 [http-nio-8091-exec-8] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:43:10.090 [http-nio-8091-exec-10] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:44:01.763 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:44:03.231 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:44:03.957 [http-nio-8091-exec-4] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:44:35.106 [http-nio-8091-exec-10] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:47:20.702 [http-nio-8091-exec-6] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:47:21.839 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话列表: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:47:47.165 [http-nio-8091-exec-7] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:49:02.761 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:49:06.347 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:49:06.410 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 31020 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:49:06.411 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:49:07.175 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:49:07.177 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:49:07.229 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 41 ms. Found 0 Redis repository interfaces.
+26-05-09.01:49:07.987 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:49:07.995 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:49:07.995 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:49:07.995 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:49:08.032 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:49:08.032 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1596 ms
+26-05-09.01:49:08.321 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:49:08.336 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:49:08.470 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3fc051ce
+26-05-09.01:49:08.471 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.01:49:08.589 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.01:49:08.590 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.01:49:08.590 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.01:49:08.590 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.01:49:08.590 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.01:49:08.590 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.01:49:08.590 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.01:49:08.727 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:49:08.792 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:49:08.947 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:49:08.959 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:49:09.578 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:49:09.578 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:49:09.578 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:49:10.090 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:49:10.111 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:49:10.111 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:49:10.141 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:49:10.146 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:49:10.331 [main            ] INFO  Application            - Started Application in 4.346 seconds (process running for 4.823)
+26-05-09.01:49:10.338 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:49:10.758 [RMI TCP Connection(1)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:49:10.758 [RMI TCP Connection(1)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:49:10.760 [RMI TCP Connection(1)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 2 ms
+26-05-09.01:49:20.250 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:49:23.133 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:49:23.810 [http-nio-8091-exec-4] ERROR GlobalExceptionHandler - 系统异常
+java.lang.IllegalArgumentException: Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag.
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.updateNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:186)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.getNamedValueInfo(AbstractNamedValueMethodArgumentResolver.java:161)
+	at org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.resolveArgument(AbstractNamedValueMethodArgumentResolver.java:107)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:226)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:180)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.01:52:09.553 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.01:52:14.870 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.01:52:14.923 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 31231 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.01:52:14.923 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.01:52:15.686 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.01:52:15.688 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.01:52:15.749 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 48 ms. Found 0 Redis repository interfaces.
+26-05-09.01:52:16.592 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.01:52:16.601 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.01:52:16.602 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.01:52:16.602 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.01:52:16.640 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.01:52:16.640 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1689 ms
+26-05-09.01:52:16.939 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.01:52:16.953 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.01:52:17.075 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3fc051ce
+26-05-09.01:52:17.076 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.01:52:17.194 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.01:52:17.194 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.01:52:17.195 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.01:52:17.332 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.01:52:17.400 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.01:52:17.562 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:52:17.573 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.01:52:18.005 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.01:52:18.006 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.01:52:18.006 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.01:52:18.458 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.01:52:18.478 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.01:52:18.479 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.01:52:18.506 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.01:52:18.511 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.01:52:18.595 [main            ] INFO  Application            - Started Application in 4.073 seconds (process running for 4.559)
+26-05-09.01:52:18.602 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.01:52:18.820 [RMI TCP Connection(4)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.01:52:18.820 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.01:52:18.821 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms
+26-05-09.01:52:26.887 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:52:28.133 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话列表: agentId=fb31f375-9fee-4579-85eb-0df64e229a56
+26-05-09.01:52:29.341 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=521eb00e-dce0-4528-a6dc-0c7f1c676525
+26-05-09.01:54:25.394 [http-nio-8091-exec-6] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:54:29.505 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:54:30.232 [http-nio-8091-exec-7] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:54:31.368 [http-nio-8091-exec-9] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:54:31.751 [http-nio-8091-exec-8] INFO  SessionController      - 查询会话消息: sessionId=7e4c6735-7847-4e6e-a926-4dd2e07de0d5
+26-05-09.01:54:32.426 [http-nio-8091-exec-1] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:54:41.000 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:54:41.494 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:54:41.917 [http-nio-8091-exec-6] INFO  SessionController      - 查询会话消息: sessionId=7e4c6735-7847-4e6e-a926-4dd2e07de0d5
+26-05-09.01:54:42.484 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话消息: sessionId=1c214dba-a614-43a6-a0c5-9dc8b4b85d61
+26-05-09.01:54:43.193 [http-nio-8091-exec-7] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:55:08.257 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.01:55:24.497 [http-nio-8091-exec-10] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:55:25.661 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:55:26.187 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:55:27.765 [http-nio-8091-exec-6] INFO  SessionController      - 查询会话消息: sessionId=7536f2e3-67c4-41c0-920d-d102ee446a8a
+26-05-09.01:55:28.815 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:55:42.476 [http-nio-8091-exec-7] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:56:24.254 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:56:24.767 [http-nio-8091-exec-1] INFO  SessionController      - 查询会话消息: sessionId=7e4c6735-7847-4e6e-a926-4dd2e07de0d5
+26-05-09.01:56:25.239 [http-nio-8091-exec-10] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:56:27.096 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:56:50.434 [http-nio-8091-exec-8] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:56:54.804 [http-nio-8091-exec-9] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:56:57.220 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:56:58.886 [http-nio-8091-exec-1] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:56:59.236 [http-nio-8091-exec-10] INFO  SessionController      - 查询会话消息: sessionId=7e4c6735-7847-4e6e-a926-4dd2e07de0d5
+26-05-09.01:57:00.298 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:57:01.637 [http-nio-8091-exec-3] INFO  ChatFacade             - 创建会话: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405, name=null, agentId=null, mode=MULTI_TURN, engine=CHAT
+26-05-09.01:57:03.296 [http-nio-8091-exec-6] INFO  SessionController      - 查询会话消息: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405
+26-05-09.01:57:14.769 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话消息: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405
+26-05-09.01:57:16.271 [http-nio-8091-exec-1] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:57:21.275 [http-nio-8091-exec-10] INFO  SessionController      - 查询会话消息: sessionId=32138ae6-0937-4e9e-91f0-fa401567c09b
+26-05-09.01:57:23.312 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:57:29.883 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话消息: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405
+26-05-09.01:57:32.398 [http-nio-8091-exec-7] INFO  SessionController      - 查询会话消息: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405
+26-05-09.01:58:33.306 [http-nio-8091-exec-9] INFO  SessionController      - 查询会话消息: sessionId=cdc0a1f4-eec3-4dc9-b115-5e75ad70491c
+26-05-09.01:58:37.437 [http-nio-8091-exec-8] INFO  SessionController      - 查询会话消息: sessionId=7e4c6735-7847-4e6e-a926-4dd2e07de0d5
+26-05-09.01:58:38.891 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话消息: sessionId=fa4316d9-b8ef-489e-9ec3-15c436274f76
+26-05-09.01:58:39.152 [http-nio-8091-exec-1] INFO  SessionController      - 查询会话消息: sessionId=1c214dba-a614-43a6-a0c5-9dc8b4b85d61
+26-05-09.01:58:39.721 [http-nio-8091-exec-10] INFO  SessionController      - 查询会话消息: sessionId=fa4316d9-b8ef-489e-9ec3-15c436274f76
+26-05-09.01:58:40.209 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话消息: sessionId=7536f2e3-67c4-41c0-920d-d102ee446a8a
+26-05-09.01:58:40.708 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话消息: sessionId=7536f2e3-67c4-41c0-920d-d102ee446a8a
+26-05-09.01:58:41.516 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话消息: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405
+26-05-09.01:58:44.397 [http-nio-8091-exec-7] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:58:52.850 [http-nio-8091-exec-4] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:58:56.848 [http-nio-8091-exec-5] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.01:59:07.458 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=classifier
+26-05-09.02:19:46.048 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=58s654ms).
+26-05-09.02:35:34.631 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete

@@ -78,6 +78,7 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <compilerVersion>${java.version}</compilerVersion>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>

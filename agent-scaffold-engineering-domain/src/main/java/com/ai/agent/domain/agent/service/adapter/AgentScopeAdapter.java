@@ -1,5 +1,6 @@
 package com.ai.agent.domain.agent.service.adapter;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.AgentscopeAgentConfig;
@@ -290,13 +291,22 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                         ? config.getOutputKey() : "agent_" + i;
 
                 List<ToolCallback> tools = resolveTools(config, asDef);
-
-                var agentBuilder = ReactAgent.builder()
+                com.alibaba.cloud.ai.graph.agent.Builder agentBuilder;
+                if(CollectionUtil.isEmpty(tools)){
+                    agentBuilder = ReactAgent.builder()
+                        .name(agentName)
+                        .model(chatModel)
+                        .instruction(instruction != null ? instruction : "你是一个有用的助手。")
+                        .outputKey(outputKey);
+                } else {
+                    agentBuilder = ReactAgent.builder()
                         .name(agentName)
                         .model(chatModel)
                         .instruction(instruction != null ? instruction : "你是一个有用的助手。")
                         .tools(tools)
                         .outputKey(outputKey);
+                }
+
 
                 // 注入 enableThinking（通过 chatOptions）
                 if (enableThinking) {

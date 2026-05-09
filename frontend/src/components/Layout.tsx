@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/app';
+import { useChatStore } from '@/stores/chat';
 
 /** 导航标签页配置 */
 const NAV_TABS = [
@@ -21,6 +22,7 @@ function Layout() {
   const location = useLocation();
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
+  const clearMessages = useChatStore((s) => s.clearMessages);
   const navigate = useNavigate();
 
   /** 当前语言是否为中文 */
@@ -88,7 +90,7 @@ function Layout() {
           <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/50 p-0.5">
             <button
               type="button"
-              onClick={() => { setMode('simple'); navigate('/simple'); }}
+              onClick={() => { setMode('simple'); clearMessages(); navigate('/simple'); }}
               className={cn(
                 'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
                 mode === 'simple'
@@ -103,6 +105,7 @@ function Layout() {
               type="button"
               onClick={() => {
                 setMode('expert');
+                clearMessages();
                 // 在对话页切换时留在对话页，其他页面回到工作台
                 navigate(location.pathname === '/simple' ? '/chat' : '/');
               }}

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +63,7 @@ public class AgentDefinitionConverter {
                     .modelConfig(modelConfig)
                     .mcpServers(mcpServers)
                     .agentscopePipelineType(dto.getAgentscopePipelineType())
-                    .agentscopeAgents(convertAgentscopeAgentsToDomain(dto.getAgentscopeAgents(), dto.getAgentId()))
+                    .agentscopeAgents(convertAgentscopeAgentsToDomain(dto.getAgentscopeAgents()))
                     .build();
 
             case HYBRID -> HybridAgentDefinition.builder()
@@ -140,13 +141,16 @@ public class AgentDefinitionConverter {
                 .collect(Collectors.toList());
     }
 
-    private static List<AgentscopeAgentConfig> convertAgentscopeAgentsToDomain(List<AgentscopeAgentConfigDTO> dtos, String agentId) {
+    private static List<AgentscopeAgentConfig> convertAgentscopeAgentsToDomain(List<AgentscopeAgentConfigDTO> dtos) {
         if (dtos == null) {
             return List.of();
         }
         return dtos.stream()
                 .map(d -> AgentscopeAgentConfig.builder()
-                        .agentId(agentId)
+                        .agentId(d.getAgentId() != null && !d.getAgentId().isBlank()
+                                ? d.getAgentId()
+                                : UUID.randomUUID().toString())
+                        .name(d.getName())
                         .instruction(d.getInstruction())
                         .mcpServers(convertMcpServersToDomain(d.getMcpServers()))
                         .enableTools(d.getEnableTools())
@@ -233,6 +237,7 @@ public class AgentDefinitionConverter {
         return agents.stream()
                 .map(a -> AgentscopeAgentConfigDTO.builder()
                         .agentId(a.getAgentId())
+                        .name(a.getName())
                         .instruction(a.getInstruction())
                         .mcpServers(convertMcpServersToDTO(a.getMcpServers()))
                         .enableTools(a.getEnableTools())

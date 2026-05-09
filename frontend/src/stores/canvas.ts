@@ -273,6 +273,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         const d = n.data as any;
         return {
           agentId: d.agentId || undefined,
+          name: d.label || undefined,
           instruction: d.instruction || undefined,
           mcpServers: d.mcpServers || undefined,
           enableTools: d.enableTools || undefined,

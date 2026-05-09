@@ -17,6 +17,9 @@ public class AgentAgentscopeConfigPO {
     /** 配置智能体ID */
     private String configAgentId;
 
+    /** Agent 名称 */
+    private String name;
+
     /** 内联指令（不依赖 AgentRegistry 查找） */
     private String instruction;
 

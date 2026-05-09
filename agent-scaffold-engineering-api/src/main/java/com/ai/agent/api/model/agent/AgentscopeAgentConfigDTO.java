@@ -16,6 +16,9 @@ public class AgentscopeAgentConfigDTO {
     /** Agent ID */
     private String agentId;
 
+    /** Agent 名称 */
+    private String name;
+
     /** Agent 指令（内联定义时直接传入，避免依赖 AgentRegistry 查找） */
     private String instruction;
 

@@ -71,6 +71,8 @@ export interface GraphEdge {
 export interface AgentscopeAgentConfig {
   /** Agent ID */
   agentId: string;
+  /** Agent 名称 */
+  name?: string;
   /** Agent 指令 */
   instruction?: string;
   /** MCP Server 配置列表 */
