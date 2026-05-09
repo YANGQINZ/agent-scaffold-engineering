@@ -69,7 +69,8 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
             // 3. 构建 ReactAgent 子 Agent 列表
-            String uniqueSuffix = String.valueOf(System.currentTimeMillis());
+            // 使用 UUID 保证每次执行名称绝对唯一，避免 ReactAgent 全局注册表冲突
+            String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
             List<Agent> agents = buildAgents(asDef, enableThinking, uniqueSuffix);
 
             // 4. 构建 SequentialAgent 并同步执行
@@ -78,6 +79,8 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             String pipelineName = "pipeline_" + (asDef.getAgentId() != null && !asDef.getAgentId().isBlank()
                     ? asDef.getAgentId() : "anon")
                     + "_" + uniqueSuffix;
+            log.info("AgentScopeAdapter构建SequentialAgent: pipelineName={}, agentNames={}, uniqueSuffix={}",
+                    pipelineName, agents.stream().map(Agent::name).toList(), uniqueSuffix);
             SequentialAgent pipeline = SequentialAgent.builder()
                     .name(pipelineName)
                     .subAgents(agents)
@@ -115,7 +118,7 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
         } catch (Exception e) {
             log.error("AgentScopeAdapter执行失败: agentId={}, error={}",
                     asDef.getAgentId(), e.getMessage(), e);
-            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                     "AgentScope编排执行失败: " + e.getMessage(), e);
         }
     }
@@ -138,8 +141,8 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
                 // 构建 ReactAgent 子 Agent 列表
-                // 生成唯一后缀，避免 ReactAgent 全局注册表名称冲突
-                String uniqueSuffix = String.valueOf(System.currentTimeMillis());
+                // 使用 UUID 保证每次执行名称绝对唯一，避免 ReactAgent 全局注册表冲突
+                String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
                 List<Agent> agents = buildAgents(asDef, enableThinking, uniqueSuffix);
 
                 // 构建 SequentialAgent 并流式执行
@@ -148,6 +151,8 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 String pipelineName = "pipeline_" + (asDef.getAgentId() != null && !asDef.getAgentId().isBlank()
                         ? asDef.getAgentId() : "anon")
                         + "_" + uniqueSuffix;
+                log.info("AgentScopeAdapter构建流式SequentialAgent: pipelineName={}, agentNames={}, uniqueSuffix={}",
+                        pipelineName, agents.stream().map(Agent::name).toList(), uniqueSuffix);
                 SequentialAgent pipeline = SequentialAgent.builder()
                         .name(pipelineName)
                         .subAgents(agents)
@@ -163,12 +168,17 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 return pipeline.stream(content)
                         .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId,
                                 textAccumulator, thinkingAccumulator, lastAgentName))
-                        .concatWith(buildDoneFlux(
-                                textAccumulator[0].isEmpty() ? "（无输出）" : textAccumulator[0],
-                                thinkingAccumulator[0], agentId, sessionId, ctx));
+                        .concatWith(Flux.defer(() -> {
+                            String finalContent = textAccumulator[0].isEmpty()
+                                    ? "（无输出）" : textAccumulator[0];
+                            log.info("AgentScopeAdapter流式完成: finalContent长度={}, hasThinking={}",
+                                    finalContent.length(), thinkingAccumulator[0] != null);
+                            return buildDoneFlux(finalContent, thinkingAccumulator[0],
+                                    agentId, sessionId, ctx);
+                        }));
             } catch (Exception e) {
                 log.error("AgentScopeAdapter流式执行失败: {}", e.getMessage(), e);
-                throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+                throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                         "AgentScope流式执行失败: " + e.getMessage(), e);
             }
         }, agentId, ctx.getSessionId());

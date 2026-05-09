@@ -83,7 +83,7 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
         } catch (Exception e) {
             log.error("HybridEngineAdapter执行失败: agentId={}, error={}",
                     hyDef.getAgentId(), e.getMessage(), e);
-            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                     "Hybrid编排执行失败: " + e.getMessage(), e);
         }
     }
@@ -105,11 +105,21 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                 Map<String, NodeAction> actions = buildHybridActions(hyDef, ctx, enableThinking);
                 Set<String> leafIds = identifyLeafNodes(hyDef.getGraphNodes(), hyDef.getGraphEdges());
 
+                // 路由诊断日志
+                List<String> nodeInfos = hyDef.getGraphNodes().stream()
+                        .map(n -> n.getId() + "(subEngine=" + n.getSubEngine() + ")")
+                        .toList();
+                log.info("Hybrid路由决策: nodes={}, edges={}, leafIds={}, graphStart={}",
+                        nodeInfos,
+                        hyDef.getGraphEdges() != null ? hyDef.getGraphEdges().size() : 0,
+                        leafIds, hyDef.getGraphStart());
+
                 if (leafIds.size() == 1) {
                     String leafId = leafIds.iterator().next();
                     WorkflowNode leafNode = hyDef.getGraphNodes().stream()
                             .filter(n -> n.getId().equals(leafId)).findFirst().orElseThrow();
                     EngineType leafEngine = resolveSubEngine(leafNode);
+                    log.info("Hybrid单叶子路由: leafId={}, leafEngine={}", leafId, leafEngine);
 
                     if (leafEngine == EngineType.GRAPH) {
                         return executeWithLeafStreaming(hyDef.getGraphNodes(), hyDef.getGraphStart(),
@@ -118,11 +128,12 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                         return executeWithAgentscopeLeaf(hyDef, enrichedInput, ctx, enableThinking, leafNode, actions);
                     }
                 } else {
+                    log.info("Hybrid多叶子路由: leafCount={}", leafIds.size());
                     return executeWithNodeProgress(hyDef.getGraphNodes(), hyDef.getGraphStart(),
                             hyDef.getGraphEdges(), enrichedInput, ctx, enableThinking, agentId, actions);
                 }
             } catch (Exception e) {
-                throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+                throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                         "Hybrid编排流式执行失败: " + e.getMessage(), e);
             }
         }, agentId, ctx.getSessionId());
@@ -170,6 +181,8 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                     String nodeName = nodeOutput.node();
                     String output = (String) nodeOutput.state().value("output").orElse("");
 
+                    log.info("Hybrid Phase1: 节点完成 nodeName={}, outputLength={}", nodeName, output.length());
+
                     if (!output.isBlank()) {
                         intermediateOutput[0] = output;
                     }
@@ -179,10 +192,14 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                             StreamEvent.nodeStart(nodeName, sessionId),
                             StreamEvent.nodeEnd(nodeName, sessionId)
                     );
-                });
+                })
+                .doOnComplete(() -> log.info("Hybrid Phase1完成: intermediateOutputLength={}",
+                        intermediateOutput[0].length()));
 
         // Phase 2: 叶子节点 token 级流式（委托 AgentScopeAdapter.executeStream）
         Flux<StreamEvent> leafFlux = Flux.defer(() -> {
+            log.info("Hybrid Phase2: 开始叶子节点AGENTSCOPE流式, leafNodeId={}, intermediateOutputLength={}",
+                    leafNodeId, intermediateOutput[0].length());
             String leafInput = nodeRagService.enhancePrompt(intermediateOutput[0], leafNode);
             AgentMessage subInput = AgentMessage.builder()
                     .senderId("hybrid_" + leafNodeId)
@@ -198,6 +215,7 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                     .concatWith(
                             agentscopeAdapter.executeStream(subDef, subInput, ctx)
                                     .doOnNext(event -> {
+                                        log.debug("Hybrid Phase2: 收到AgentScope事件: type={}", event.getType());
                                         if ("TEXT_DELTA".equals(event.getType().name()) && event.getData() != null) {
                                             Object text = event.getData().get("text");
                                             if (text instanceof String t) {
@@ -213,7 +231,9 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                                         }
                                     })
                     )
-                    .concatWith(Flux.just(StreamEvent.nodeEnd(leafNodeId, sessionId)));
+                    .concatWith(Flux.just(StreamEvent.nodeEnd(leafNodeId, sessionId)))
+                    .doOnComplete(() -> log.info("Hybrid Phase2完成: textLength={}, hasThinking={}",
+                            textAccumulator[0].length(), thinkingContent[0] != null));
         });
 
         // Phase 3: 完成阶段（所有事件流结束后发射）
@@ -233,17 +253,19 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
 
     /**
      * 构建 Hybrid 所有节点的 Action 映射
+     *
+     * <p>所有子节点统一使用 buildNodeAction（直接调用 ChatModel），
+     * 避免嵌套 StateGraph 执行导致的线程池死锁：
+     * 外层并行图与内层 AgentScope SequentialAgent 共用同一 ForkJoinPool，
+     * 并行场景下会发生线程饥饿死锁。</p>
+     *
+     * <p>buildNodeAction 已支持 MCP 工具调用和 enableThinking，功能完整。</p>
      */
     private Map<String, NodeAction> buildHybridActions(HybridAgentDefinition hyDef, ContextStore ctx,
                                                         boolean enableThinking) {
         Map<String, NodeAction> actions = new HashMap<>();
         for (WorkflowNode node : hyDef.getGraphNodes()) {
-            EngineType subEngine = resolveSubEngine(node);
-            if (subEngine == EngineType.AGENTSCOPE) {
-                actions.put(node.getId(), wrapAsGraphAction(hyDef, node, ctx, enableThinking));
-            } else {
-                actions.put(node.getId(), buildNodeAction(node, enableThinking));
-            }
+            actions.put(node.getId(), buildNodeAction(node, enableThinking));
         }
         return actions;
     }
@@ -267,7 +289,7 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
             String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
 
-            log.info("Hybrid子节点委托AgentScope: nodeId={}", nodeId);
+            log.info("Hybrid子节点委托AgentScope开始: nodeId={}, inputLength={}", nodeId, input.length());
 
             // 节点级 RAG 增强
             input = nodeRagService.enhancePrompt(input, node);
@@ -283,6 +305,9 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
             // 委托 AgentScopeAdapter 执行
             AgentDefinition subDef = findSubAgentDef(hyDef, node);
             AgentMessage result = agentscopeAdapter.execute(subDef, subInput, ctx);
+
+            log.info("Hybrid子节点委托AgentScope完成: nodeId={}, outputLength={}",
+                    nodeId, result.getContent() != null ? result.getContent().length() : 0);
 
             // 写回 state
             Map<String, Object> resultMap = new HashMap<>();

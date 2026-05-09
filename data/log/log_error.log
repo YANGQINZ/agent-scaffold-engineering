@@ -2569,3 +2569,433 @@ org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 	at java.base/java.lang.Thread.run(Thread.java:833)
 26-05-09.19:31:04.457 [boundedElastic-1] WARN  SessionContext         - 记忆写入降级: sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a, error=400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"d7b0ffe7-52e4-9720-8508-6d4b2900bab8","request_id":"d7b0ffe7-52e4-9720-8508-6d4b2900bab8"}
+26-05-09.19:51:07.548 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.19:51:08.703 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.19:51:08.704 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.19:52:26.533 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.19:52:29.958 [parallel-node-action-thread-2] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"0b434ecd-c4a0-9c75-9ff6-d4b25c6b620c","request_id":"0b434ecd-c4a0-9c75-9ff6-d4b25c6b620c"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.ContextAssembler.assemble(ContextAssembler.java:57)
+	at com.ai.agent.domain.memory.service.MemoryFacade.assembleContext(MemoryFacade.java:80)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.assembleMemoryContext(SessionContext.java:135)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.buildInputContent(AgentScopeAdapter.java:374)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.execute(AgentScopeAdapter.java:65)
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$wrapAsGraphAction$10(HybridEngineAdapter.java:285)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeAction.lambda$node_async$0(AsyncNodeAction.java:50)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$of$1(AsyncNodeActionWithConfig.java:59)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.evalNodeActionSync(ParallelNode.java:291)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.lambda$evalNodeActionAsync$1(ParallelNode.java:314)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run$$$capture(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.19:52:29.960 [parallel-node-action-thread-2] WARN  ContextAssembler       - 语义检索失败 sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"0b434ecd-c4a0-9c75-9ff6-d4b25c6b620c","request_id":"0b434ecd-c4a0-9c75-9ff6-d4b25c6b620c"}
+26-05-09.19:52:30.412 [parallel-node-action-thread-2] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"0c8cf1f2-79ec-938d-8ce7-878db315d222","request_id":"0c8cf1f2-79ec-938d-8ce7-878db315d222"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.MemoryFacade.onMessageCreated(MemoryFacade.java:52)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.appendHistory(SessionContext.java:120)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.execute(AgentScopeAdapter.java:69)
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$wrapAsGraphAction$10(HybridEngineAdapter.java:285)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeAction.lambda$node_async$0(AsyncNodeAction.java:50)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$of$1(AsyncNodeActionWithConfig.java:59)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.evalNodeActionSync(ParallelNode.java:291)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.lambda$evalNodeActionAsync$1(ParallelNode.java:314)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run$$$capture(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.19:52:30.412 [parallel-node-action-thread-2] WARN  SessionContext         - 记忆写入降级: sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a, error=400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"0c8cf1f2-79ec-938d-8ce7-878db315d222","request_id":"0c8cf1f2-79ec-938d-8ce7-878db315d222"}
+26-05-09.19:52:30.414 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.19:53:01.602 [boundedElastic-2] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"082f3835-ae3c-9b88-b829-1bb1e04fdec5","request_id":"082f3835-ae3c-9b88-b829-1bb1e04fdec5"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.MemoryFacade.onMessageCreated(MemoryFacade.java:52)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.appendHistory(SessionContext.java:120)
+	at com.ai.agent.domain.agent.service.adapter.AbstractEngineAdapter.lambda$buildDoneFlux$3(AbstractEngineAdapter.java:150)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.Flux.subscribe(Flux.java:8891)
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.onComplete(FluxConcatArray.java:238)
+	at reactor.core.publisher.FluxFlatMap$FlatMapMain.checkTerminated(FluxFlatMap.java:850)
+	at reactor.core.publisher.FluxFlatMap$FlatMapMain.drainLoop(FluxFlatMap.java:612)
+	at reactor.core.publisher.FluxFlatMap$FlatMapMain.drain(FluxFlatMap.java:592)
+	at reactor.core.publisher.FluxFlatMap$FlatMapMain.request(FluxFlatMap.java:349)
+	at reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber.request(FluxConcatArray.java:256)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.lambda$requestUpstream$0(FluxSubscribeOn.java:135)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.19:53:01.608 [boundedElastic-2] WARN  SessionContext         - 记忆写入降级: sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a, error=400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"082f3835-ae3c-9b88-b829-1bb1e04fdec5","request_id":"082f3835-ae3c-9b88-b829-1bb1e04fdec5"}
+26-05-09.20:14:31.347 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.20:14:32.426 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.20:14:32.427 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.20:14:40.840 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.20:14:42.594 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.20:33:51.650 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.20:33:52.754 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.20:33:52.754 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.20:34:07.884 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.20:34:10.922 [parallel-node-action-thread-2] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"9090248a-07af-9c20-b0d1-a3a117237fe9","request_id":"9090248a-07af-9c20-b0d1-a3a117237fe9"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.ContextAssembler.assemble(ContextAssembler.java:57)
+	at com.ai.agent.domain.memory.service.MemoryFacade.assembleContext(MemoryFacade.java:80)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.assembleMemoryContext(SessionContext.java:135)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.buildInputContent(AgentScopeAdapter.java:384)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.execute(AgentScopeAdapter.java:65)
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$wrapAsGraphAction$12(HybridEngineAdapter.java:294)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeAction.lambda$node_async$0(AsyncNodeAction.java:50)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$of$1(AsyncNodeActionWithConfig.java:59)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.evalNodeActionSync(ParallelNode.java:291)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.lambda$evalNodeActionAsync$1(ParallelNode.java:314)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run$$$capture(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.20:34:10.925 [parallel-node-action-thread-2] WARN  ContextAssembler       - 语义检索失败 sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"9090248a-07af-9c20-b0d1-a3a117237fe9","request_id":"9090248a-07af-9c20-b0d1-a3a117237fe9"}
+26-05-09.20:34:11.186 [parallel-node-action-thread-2] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"4e60f1eb-d5fc-90d8-a5d2-62870f98bbaf","request_id":"4e60f1eb-d5fc-90d8-a5d2-62870f98bbaf"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.MemoryFacade.onMessageCreated(MemoryFacade.java:52)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.appendHistory(SessionContext.java:120)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.execute(AgentScopeAdapter.java:69)
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$wrapAsGraphAction$12(HybridEngineAdapter.java:294)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeAction.lambda$node_async$0(AsyncNodeAction.java:50)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$of$1(AsyncNodeActionWithConfig.java:59)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.evalNodeActionSync(ParallelNode.java:291)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.lambda$evalNodeActionAsync$1(ParallelNode.java:314)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run$$$capture(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.20:34:11.186 [parallel-node-action-thread-2] WARN  SessionContext         - 记忆写入降级: sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a, error=400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"4e60f1eb-d5fc-90d8-a5d2-62870f98bbaf","request_id":"4e60f1eb-d5fc-90d8-a5d2-62870f98bbaf"}
+26-05-09.20:34:11.188 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.21:00:30.551 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.21:00:31.774 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.21:00:31.775 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.21:00:42.321 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.21:00:44.333 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.21:18:30.134 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Retrograde clock change detected (housekeeper delta=29s704ms), soft-evicting connections from pool.
+26-05-09.21:46:33.797 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.21:46:34.888 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.21:46:34.889 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.21:46:56.266 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.21:46:58.622 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.21:52:24.260 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.21:52:25.458 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.21:52:25.459 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.21:52:34.266 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.21:52:36.931 [parallel-node-action-thread-2] WARN  RetryUtils             - Retry error. Retry count:1
+org.springframework.ai.retry.NonTransientAiException: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"14c95db7-6ce9-9afd-94b8-6c7bfb5119fb","request_id":"14c95db7-6ce9-9afd-94b8-6c7bfb5119fb"}
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:73)
+	at org.springframework.ai.retry.RetryUtils$1.handleError(RetryUtils.java:57)
+	at org.springframework.web.client.StatusHandler.lambda$fromErrorHandler$1(StatusHandler.java:71)
+	at org.springframework.web.client.StatusHandler.handle(StatusHandler.java:146)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.applyStatusHandlers(DefaultRestClient.java:826)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$readBody$4(DefaultRestClient.java:815)
+	at org.springframework.web.client.DefaultRestClient.readWithMessageConverters(DefaultRestClient.java:215)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.readBody(DefaultRestClient.java:814)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.lambda$toEntityInternal$2(DefaultRestClient.java:770)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:574)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:535)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:677)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:809)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntityInternal(DefaultRestClient.java:769)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.toEntity(DefaultRestClient.java:765)
+	at org.springframework.ai.openai.api.OpenAiApi.embeddings(OpenAiApi.java:327)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$1(OpenAiEmbeddingModel.java:175)
+	at org.springframework.retry.support.RetryTemplate.doExecute(RetryTemplate.java:357)
+	at org.springframework.retry.support.RetryTemplate.execute(RetryTemplate.java:230)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.lambda$call$3(OpenAiEmbeddingModel.java:175)
+	at io.micrometer.observation.Observation.observe(Observation.java:564)
+	at org.springframework.ai.openai.OpenAiEmbeddingModel.call(OpenAiEmbeddingModel.java:173)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:83)
+	at org.springframework.ai.embedding.EmbeddingModel.embed(EmbeddingModel.java:49)
+	at com.ai.agent.infrastructure.persistent.repository.EmbeddingServiceImpl.embed(EmbeddingServiceImpl.java:22)
+	at com.ai.agent.domain.memory.service.ContextAssembler.assemble(ContextAssembler.java:57)
+	at com.ai.agent.domain.memory.service.MemoryFacade.assembleContext(MemoryFacade.java:86)
+	at com.ai.agent.domain.agent.model.aggregate.SessionContext.assembleMemoryContext(SessionContext.java:135)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.buildInputContent(AgentScopeAdapter.java:384)
+	at com.ai.agent.domain.agent.service.adapter.AgentScopeAdapter.execute(AgentScopeAdapter.java:65)
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$wrapAsGraphAction$13(HybridEngineAdapter.java:305)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeAction.lambda$node_async$0(AsyncNodeAction.java:50)
+	at com.alibaba.cloud.ai.graph.action.AsyncNodeActionWithConfig.lambda$of$1(AsyncNodeActionWithConfig.java:59)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.evalNodeActionSync(ParallelNode.java:291)
+	at com.alibaba.cloud.ai.graph.internal.node.ParallelNode$AsyncParallelNodeAction.lambda$evalNodeActionAsync$1(ParallelNode.java:314)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run$$$capture(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.21:52:36.933 [parallel-node-action-thread-2] WARN  ContextAssembler       - 语义检索失败 sessionId=test-125e46f5-b106-48e3-996a-434bc652e19a: 400 - {"error":{"message":"Range of input length should be [1, 8192]","type":"InvalidParameter","param":null,"code":"InvalidParameter"},"id":"14c95db7-6ce9-9afd-94b8-6c7bfb5119fb","request_id":"14c95db7-6ce9-9afd-94b8-6c7bfb5119fb"}
+26-05-09.21:52:37.433 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.22:00:44.404 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.22:00:45.458 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.22:00:45.459 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.22:00:51.942 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.22:00:53.433 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.22:03:37.053 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.22:03:38.135 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.22:03:38.136 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.22:04:42.150 [boundedElastic-2] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.22:04:43.031 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.22:19:35.735 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.22:19:36.789 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.22:19:36.790 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.22:19:46.519 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.22:19:47.342 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.22:30:40.459 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.22:30:41.639 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.22:30:41.640 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.22:31:02.289 [parallel-node-action-thread-2] ERROR McpToolProvider        - MCP客户端创建失败: name=baidu, error=Transport must be configured
+26-05-09.22:31:12.087 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.22:36:09.732 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.22:36:10.812 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.22:36:10.813 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.22:36:18.574 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.22:37:54.127 [boundedElastic-1] ERROR AbstractEngineAdapter  - HYBRID流式输出未处理异常: agentId=, error=Agent编排执行失败
+com.ai.agent.types.exception.AgentException: Agent编排执行失败
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$executeStream$4(HybridEngineAdapter.java:137)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.22:54:11.160 [boundedElastic-2] ERROR AbstractEngineAdapter  - HYBRID流式输出未处理异常: agentId=, error=Agent编排执行失败
+com.ai.agent.types.exception.AgentException: Agent编排执行失败
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$executeStream$4(HybridEngineAdapter.java:137)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.22:54:45.357 [boundedElastic-2] ERROR AbstractEngineAdapter  - HYBRID流式输出未处理异常: agentId=, error=Agent编排执行失败
+com.ai.agent.types.exception.AgentException: Agent编排执行失败
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$executeStream$4(HybridEngineAdapter.java:137)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.22:57:54.123 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.22:57:55.254 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.22:57:55.255 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.22:58:18.998 [boundedElastic-1] ERROR AbstractEngineAdapter  - HYBRID流式输出未处理异常: agentId=, error=Hybrid编排流式执行失败: parallel node [agent_1778337414468] must have only one target, but [agent_1778337446363, agent_1778337432628] have been found!
+com.ai.agent.types.exception.AgentException: Hybrid编排流式执行失败: parallel node [agent_1778337414468] must have only one target, but [agent_1778337446363, agent_1778337432628] have been found!
+	at com.ai.agent.domain.agent.service.adapter.HybridEngineAdapter.lambda$executeStream$4(HybridEngineAdapter.java:137)
+	at reactor.core.publisher.FluxDefer.subscribe(FluxDefer.java:46)
+	at reactor.core.publisher.FluxSubscribeOn$SubscribeOnSubscriber.run(FluxSubscribeOn.java:194)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:84)
+	at reactor.core.scheduler.WorkerTask.call(WorkerTask.java:37)
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+26-05-09.22:58:19.001 [boundedElastic-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!

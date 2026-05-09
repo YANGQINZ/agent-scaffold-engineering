@@ -1,8 +1,0 @@
-agent:
-  id: "summarizer"
-  name: "摘要总结员"
-  engine: CHAT
-  instruction: "你是摘要总结员，将研究结果整理成清晰、有条理的摘要报告。请用中文输出。"
-  model:
-    name: "qwq-plus"
-    temperature: 0.3

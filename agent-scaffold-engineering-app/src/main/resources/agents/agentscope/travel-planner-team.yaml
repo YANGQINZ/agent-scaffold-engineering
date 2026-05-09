@@ -1,0 +1,129 @@
+# ═══════════════════════════════════════════════════════════════
+# 旅行规划团队 — AGENTSCOPE 引擎完整示例
+#
+# SequentialAgent 顺序流水线:
+#   信息收集员 → 路线搜索员 → 天气查询员 → 行程生成员
+#
+# 执行路径:
+#   AgentScopeAdapter.buildAgents() 遍历 agentscope.agents[]
+#   → 每个 config 构建一个 ReactAgent
+#   → 包装为 SequentialAgent 顺序执行
+#   → 前 Agent 的 outputKey 结果可被后 Agent 通过模板变量引用
+#   → 只有最后一个 Agent 发射 TEXT_DELTA/THINKING 流式事件
+#
+# 依赖的已注册 Agent (需先注册):
+#   chat/info-collector.yaml   → 信息收集员
+#   chat/route-searcher.yaml   → 路线搜索员 (有 searchRoute 工具)
+#   chat/weather-assistant.yaml → 天气助手 (有 getWeather 工具)
+#   chat/plan-generator.yaml   → 行程生成员
+#
+# 写入表: agent_definition (1行) + agent_agentscope_config (4行)
+# 不写入: agent_workflow_node, agent_graph_edge
+# ═══════════════════════════════════════════════════════════════
+agent:
+  # ─────────────────────────────────────────────────────────────
+  # agent_definition 表 (1行)
+  # 所有列: agent_id, name, engine, instruction,
+  #         model_config, mcp_servers, graph_start,
+  #         agentscope_pipeline_type, sub_engines
+  # ─────────────────────────────────────────────────────────────
+  id: "travel-planner-team"                # agent_id               varchar(64)  NOT NULL UNIQUE
+  name: "旅行规划团队"                      # name                   varchar(128) NOT NULL
+  engine: AGENTSCOPE                       # engine                 varchar(32)  NOT NULL
+  instruction: "你是一个旅行规划团队，通过多角色协作完成旅行规划。依次收集需求、搜索路线、查询天气、生成行程。"
+                                           # instruction            text
+  model:
+    name: "qwq-plus"                      # model_config           JSONB → '{"name":"qwq-plus","temperature":0.5,"maxTokens":2000}'
+    temperature: 0.5
+    maxTokens: 2000
+  mcpServers: []                           # mcp_servers            JSONB → '[]' (定义级工具，也作为子Agent级回退)
+                                           # graph_start            varchar(64) → NULL (AGENTSCOPE 不使用)
+                                           # sub_engines            JSONB → NULL (AGENTSCOPE 不使用)
+
+  # ─────────────────────────────────────────────────────────────
+  # agentscope 配置
+  # ─────────────────────────────────────────────────────────────
+  agentscope:
+    pipeline: "sequential"                 # agentscope_pipeline_type varchar(32) → 写入 agent_definition.agentscope_pipeline_type
+
+    # ───────────────────────────────────────────────────────────
+    # agent_agentscope_config 表 (4行)
+    # 所有列: config_agent_id, name, instruction,
+    #         mcp_servers, enable_tools, output_key, sort_order
+    #
+    # resolveAgentInstruction 优先级:
+    #   1. config.instruction (内联) → 非空则直接使用
+    #   2. config.agentId → agentRegistry.get(agentId).getInstruction()
+    #   3. asDef.getInstruction() (定义级)
+    #
+    # resolveTools 优先级:
+    #   1. config.mcpServers → 非空则使用
+    #   2. asDef.getMcpServers() (定义级回退)
+    # ───────────────────────────────────────────────────────────
+    agents:
+
+      # ── 子Agent 1: 信息收集员 ──
+      # instruction=null → 回退到 agentId="info-collector" 对应 agent 的 instruction
+      # mcpServers=[] → 无工具，纯对话收集
+      - agentId: "info-collector"           # config_agent_id  varchar(64) NOT NULL
+        name: "信息收集员"                    # name             varchar(128)
+        instruction: null                   # instruction      text → null, 回退到 info-collector 的 instruction
+        mcpServers: []                      # mcp_servers      JSONB → '[]' 无MCP工具
+        enableTools: []                     # enable_tools     JSONB → '[]' 空列表=全部工具
+        outputKey: "collected_info"         # output_key       varchar(255)
+
+      # ── 子Agent 2: 路线搜索员 ──
+      # instruction=内联提示词 → 覆盖 agentId 对应 agent 的 instruction
+      # mcpServers=自定义搜索工具 → 节点级 MCP, 不使用 agentId 对应 agent 的工具
+      - agentId: "route-searcher"           # config_agent_id
+        name: "路线搜索员"                    # name
+        instruction: >-                     # instruction      text → 内联覆盖
+          你是一位专业的旅行路线搜索员。
+          基于收集到的旅行需求信息 {collected_info}，
+          搜索从出发地到目的地的所有可选交通方式，
+          比较价格、时长和便捷度，推荐最优路线方案。
+        mcpServers:                         # mcp_servers      JSONB → 节点级 MCP 工具
+          - name: "map-search"
+            transport: "stdio"
+            command: "npx"
+            args:
+              - "-y"
+              - "@anthropic/mcp-server-websearch"
+        enableTools: []                     # enable_tools     JSONB → '[]'
+        outputKey: "route_options"          # output_key
+
+      # ── 子Agent 3: 天气查询员 ──
+      # instruction=内联提示词 → 覆盖 agentId 对应 agent 的 instruction
+      # mcpServers=天气查询工具 → 节点级 MCP
+      - agentId: "weather-assistant"        # config_agent_id
+        name: "天气查询员"                    # name
+        instruction: >-                     # instruction
+          你是一位旅行天气顾问。
+          基于目的地信息 {collected_info} 和选定路线 {route_options}，
+          查询目的地未来几天的天气情况，
+          给出穿衣建议和出行提醒。
+        mcpServers:                         # mcp_servers      JSONB → 节点级 MCP 工具
+          - name: "weather-api"
+            transport: "stdio"
+            command: "npx"
+            args:
+              - "-y"
+              - "@anthropic/mcp-server-websearch"
+        enableTools: []                     # enable_tools     JSONB → '[]'
+        outputKey: "weather_info"           # output_key
+
+      # ── 子Agent 4: 行程生成员 (最后一个 Agent) ──
+      # 最后一个 Agent 是唯一发射 TEXT_DELTA/THINKING 流式事件的 Agent
+      # instruction=内联 → 整合前面所有 Agent 的输出
+      - agentId: "plan-generator"           # config_agent_id
+        name: "行程生成员"                    # name
+        instruction: >-                     # instruction
+          你是一位资深旅行规划师。
+          请综合以下信息，生成一份完整的旅行行程计划：
+          - 用户需求: {collected_info}
+          - 推荐路线: {route_options}
+          - 天气情况: {weather_info}
+          行程计划应包含：每日安排、交通详情、住宿建议、预算估算和注意事项。
+        mcpServers: []                      # mcp_servers      JSONB → '[]' 无工具
+        enableTools: []                     # enable_tools     JSONB → '[]'
+        outputKey: "travel_plan"            # output_key

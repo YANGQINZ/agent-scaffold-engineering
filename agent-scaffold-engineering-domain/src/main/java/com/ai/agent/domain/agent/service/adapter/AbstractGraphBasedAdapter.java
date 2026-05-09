@@ -218,6 +218,9 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
             WorkflowNode leafNode, String agentId,
             Map<String, NodeAction> baseActions) throws GraphStateException {
 
+        log.info("{}executeWithLeafStreaming: leafNodeId={}, nodes={}", getType().name(), leafNode.getId(),
+                nodes.stream().map(WorkflowNode::getId).toList());
+
         String sessionId = ctx.getSessionId();
         String leafNodeId = leafNode.getId();
 
@@ -247,6 +250,8 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
                     String nodeName = nodeOutput.node();
                     String output = (String) nodeOutput.state().value("output").orElse("");
 
+                    log.info("{}LeafStreaming中间节点: nodeName={}, outputLength={}", getType().name(), nodeName, output.length());
+
                     if (nodeName.equals(leafNodeId)) {
                         intermediateOutput[0] = output;
                         return Flux.just(
@@ -264,10 +269,14 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
                             StreamEvent.nodeStart(nodeName, sessionId),
                             StreamEvent.nodeEnd(nodeName, sessionId)
                     );
-                });
+                })
+                .doOnComplete(() -> log.info("{}LeafStreaming Phase1完成: intermediateOutputLength={}",
+                        getType().name(), intermediateOutput[0].length()));
 
         // Phase 2: 叶子节点 token 级流式
         Flux<StreamEvent> leafFlux = Flux.defer(() -> {
+            log.info("{}LeafStreaming Phase2: 开始叶子节点流式, leafNodeId={}, inputLength={}",
+                    getType().name(), leafNodeId, intermediateOutput[0].length());
             String leafInput = nodeRagService.enhancePrompt(intermediateOutput[0], leafNode);
             return streamLeafNodeTokens(leafNode, leafInput, enableThinking,
                     sessionId, leafFullText, thinkingContent);
@@ -277,6 +286,8 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
         Flux<StreamEvent> doneFlux = Flux.defer(() -> {
             String finalContent = leafFullText[0].isEmpty()
                     ? intermediateOutput[0] : leafFullText[0];
+            log.info("{}LeafStreaming完成: finalContentLength={}, hasThinking={}",
+                    getType().name(), finalContent.length(), thinkingContent[0] != null);
             return buildDoneFlux(finalContent, thinkingContent[0], agentId, sessionId, ctx);
         });
 
@@ -301,41 +312,117 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
             String enrichedInput, ContextStore ctx, boolean enableThinking,
             String agentId, Map<String, NodeAction> baseActions) throws GraphStateException {
 
+        Set<String> leafIds = identifyLeafNodes(nodes, edges);
+        log.info("{}executeWithNodeProgress入口: nodes={}, leafIds={}, inputLength={}, hasEdges={}",
+                getType().name(),
+                nodes.stream().map(WorkflowNode::getId).toList(),
+                leafIds, enrichedInput.length(),
+                edges != null && !edges.isEmpty());
+
         String sessionId = ctx.getSessionId();
+
+        // 无边（独立节点）：每个叶子节点 token 级流式，实现真正的流式输出
+        if (edges == null || edges.isEmpty()) {
+            return executeIndependentNodesStreaming(nodes, enrichedInput,
+                    enableThinking, agentId, sessionId, ctx);
+        }
+
+        // 有边（有依赖的图）：invoke 同步执行（compiled.stream() 对并行节点不发射单个节点事件）
+        return executeGraphWithEdges(nodes, startNodes, edges, enrichedInput,
+                enableThinking, agentId, sessionId, ctx, baseActions, leafIds);
+    }
+
+    /**
+     * 独立节点流式执行 — 每个叶子节点 token 级流式，顺序执行
+     * 适用于无边（无依赖）的多节点场景，提供逐 token 的流式体验
+     */
+    private Flux<StreamEvent> executeIndependentNodesStreaming(
+            List<WorkflowNode> nodes, String enrichedInput,
+            boolean enableThinking, String agentId, String sessionId,
+            ContextStore ctx) {
+
+        String[] finalAnswer = {""};
+        String[] finalThinking = {null};
+
+        List<Flux<StreamEvent>> nodeFluxes = new ArrayList<>();
+        for (WorkflowNode node : nodes) {
+            String nodeId = node.getId();
+            String[] textAcc = {""};
+            String[] thinkAcc = {null};
+
+            Flux<StreamEvent> nodeFlux = Flux.defer(() -> {
+                log.info("{}独立节点流式开始: nodeId={}", getType().name(), nodeId);
+                String input = nodeRagService.enhancePrompt(enrichedInput, node);
+                return Flux.just(StreamEvent.nodeStart(nodeId, sessionId))
+                        .concatWith(streamLeafNodeTokens(node, input, enableThinking,
+                                sessionId, textAcc, thinkAcc))
+                        .doOnComplete(() -> {
+                            if (!textAcc[0].isBlank()) {
+                                finalAnswer[0] = textAcc[0];
+                            }
+                            if (thinkAcc[0] != null) {
+                                finalThinking[0] = thinkAcc[0];
+                            }
+                            log.info("{}独立节点流式完成: nodeId={}, outputLength={}, hasThinking={}",
+                                    getType().name(), nodeId, textAcc[0].length(), thinkAcc[0] != null);
+                        })
+                        .concatWith(Flux.just(StreamEvent.nodeEnd(nodeId, sessionId)));
+            });
+            nodeFluxes.add(nodeFlux);
+        }
+
+        return Flux.concat(nodeFluxes)
+                .concatWith(Flux.defer(() ->
+                        buildDoneFlux(finalAnswer[0], finalThinking[0], agentId, sessionId, ctx)));
+    }
+
+    /**
+     * 有依赖的图执行 — invoke 同步执行后一次性输出
+     * compiled.stream() 对并行节点只发射 __START__/__END__，不发射单个节点事件
+     */
+    private Flux<StreamEvent> executeGraphWithEdges(
+            List<WorkflowNode> nodes, List<String> startNodes, List<GraphEdge> edges,
+            String enrichedInput, boolean enableThinking, String agentId,
+            String sessionId, ContextStore ctx, Map<String, NodeAction> baseActions,
+            Set<String> leafIds) throws GraphStateException {
+
         StateGraph graph = buildGraphBase(nodes, startNodes, edges, enableThinking, baseActions);
         CompiledGraph compiled = graph.compile();
+        log.info("{}executeWithNodeProgress图构建完成(有边), 开始invoke执行", getType().name());
         RunnableConfig config = buildRunnableConfig(sessionId);
         Map<String, Object> graphInput = new HashMap<>();
         graphInput.put("output", enrichedInput);
 
-        String[] finalAnswer = {enrichedInput};
-        String[] finalThinking = {null};
+        Optional<OverAllState> result;
+        try {
+            result = compiled.invoke(graphInput, config);
+        } catch (Exception e) {
+            log.error("{}executeWithNodeProgress invoke失败: {}", getType().name(), e.getMessage(), e);
+            return Flux.just(StreamEvent.done(false, Map.of("error", e.getMessage()), sessionId));
+        }
 
-        Set<String> leafIds = identifyLeafNodes(nodes, edges);
+        String finalAnswer = result.map(s -> (String) s.value("output").orElse("")).orElse("");
+        String finalThinking = result.map(s -> {
+            Object tc = s.value("thinkingContent").orElse(null);
+            return tc != null ? tc.toString() : null;
+        }).orElse(null);
 
-        return compiled.stream(graphInput, config)
-                .flatMap(nodeOutput -> {
-                    String nodeName = nodeOutput.node();
-                    String output = (String) nodeOutput.state().value("output").orElse("");
-                    if (!output.isBlank()) {
-                        finalAnswer[0] = output;
-                    }
-                    nodeOutput.state().value("thinkingContent")
-                            .ifPresent(tc -> finalThinking[0] = tc.toString());
+        log.info("{}executeWithNodeProgress invoke完成: finalAnswer长度={}, hasThinking={}",
+                getType().name(), finalAnswer.length(), finalThinking != null);
 
-                    if (leafIds.contains(nodeName)) {
-                        return Flux.just(
-                                StreamEvent.nodeStart(nodeName, sessionId),
-                                StreamEvent.textDelta(output, sessionId),
-                                StreamEvent.nodeEnd(nodeName, sessionId)
-                        );
-                    }
-                    return Flux.just(
-                            StreamEvent.nodeStart(nodeName, sessionId),
-                            StreamEvent.nodeEnd(nodeName, sessionId)
-                    );
-                })
-                .concatWith(buildDoneFlux(finalAnswer[0], finalThinking[0], agentId, sessionId, ctx));
+        List<StreamEvent> events = new ArrayList<>();
+        for (WorkflowNode node : nodes) {
+            String nodeId = node.getId();
+            events.add(StreamEvent.nodeStart(nodeId, sessionId));
+            if (leafIds.contains(nodeId) && !finalAnswer.isBlank()) {
+                events.add(StreamEvent.textDelta(finalAnswer, sessionId));
+            }
+            events.add(StreamEvent.nodeEnd(nodeId, sessionId));
+        }
+
+        return Flux.fromIterable(events)
+                .concatWith(Flux.defer(() ->
+                        buildDoneFlux(finalAnswer, finalThinking, agentId, sessionId, ctx)));
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -363,12 +450,16 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
             String input = (String) state.value("output").orElse("");
             String nodeId = node.getId();
 
-            log.info("{}节点执行: nodeId={}, agentId={}", getType().name(), nodeId, node.getAgentId());
+            log.info("{}节点执行开始: nodeId={}, agentId={}, inputLength={}",
+                    getType().name(), nodeId, node.getAgentId(), input.length());
 
             // 节点级 RAG 增强
             input = nodeRagService.enhancePrompt(input, node);
 
             NodeExecuteResult execResult = executeWithRetry(node, input, nodeId, enableThinking);
+
+            log.info("{}节点执行完成: nodeId={}, outputLength={}, hasThinking={}",
+                    getType().name(), nodeId, execResult.textContent().length(), execResult.hasThinking());
 
             Map<String, Object> result = new HashMap<>();
             result.put("output", execResult.textContent());
@@ -604,11 +695,11 @@ public abstract class AbstractGraphBasedAdapter extends AbstractEngineAdapter {
      */
     protected void validateGraphConfig(List<WorkflowNode> nodes, List<String> startNodes, String agentId) {
         if (nodes == null || nodes.isEmpty()) {
-            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                     getType().name() + "配置不完整: 缺少节点定义, agentId=" + agentId);
         }
         if (startNodes == null || startNodes.isEmpty()) {
-            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                     getType().name() + "配置不完整: 缺少起始节点, agentId=" + agentId);
         }
     }

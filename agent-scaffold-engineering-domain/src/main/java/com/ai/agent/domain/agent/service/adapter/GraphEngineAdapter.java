@@ -78,7 +78,7 @@ public class GraphEngineAdapter extends AbstractGraphBasedAdapter {
         } catch (Exception e) {
             log.error("GraphEngineAdapter执行失败: agentId={}, error={}",
                     graphDef.getAgentId(), e.getMessage(), e);
-            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                     "Graph编排执行失败: " + e.getMessage(), e);
         }
     }
@@ -110,7 +110,7 @@ public class GraphEngineAdapter extends AbstractGraphBasedAdapter {
                             graphDef.getGraphEdges(), enrichedInput, ctx, enableThinking, agentId, actions);
                 }
             } catch (GraphStateException e) {
-                throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+                throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                         "Graph编排流式执行失败: " + e.getMessage(), e);
             }
         }, agentId, ctx.getSessionId());
@@ -141,7 +141,7 @@ public class GraphEngineAdapter extends AbstractGraphBasedAdapter {
                     graphDef.getGraphEdges(), false, actions);
             return graph.compile();
         } catch (GraphStateException e) {
-            throw new AgentException(ErrorCodeEnum.AGENT_FAILED,
+            throw new AgentException(ErrorCodeEnum.AGENT_FAILED.getErrorCode(),
                     "StateGraph编译失败: " + e.getMessage(), e);
         }
     }

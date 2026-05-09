@@ -1,0 +1,154 @@
+# ═══════════════════════════════════════════════════════════════
+# 智能调研助手 — HYBRID 引擎完整示例
+# 外层 Graph 编排 + 叶子节点委托 AGENTSCOPE 内层引擎
+#
+# 图结构 (fan-out / fan-in):
+#
+#   requirement_analyst (GRAPH)
+#          ├──→ market_scout      (GRAPH) ──┐
+#          └──→ tech_scout        (GRAPH) ──┤──→ deep_investigator (AGENTSCOPE leaf) → END
+#
+# 执行路径:
+#   Phase 1: 中间节点 (GRAPH) 由 buildNodeAction → ChatModel 直接调用
+#   Phase 2: 叶子节点 (AGENTSCOPE) 由 executeWithAgentscopeLeaf → AgentScopeAdapter
+#            findSubAgentDef 通过 reactAgentId="deep-research-team" 查找已注册的
+#            AgentscopeAgentDefinition (含 agentscopeAgents 配置)
+#            → AgentScopeAdapter.buildAgents 创建 SequentialAgent:
+#               子Agent1=搜索分析员(ReactAgent+MCP工具) → 子Agent2=报告撰写员(ReactAgent)
+#   Phase 3: 历史追加 + DONE 事件
+#
+# 依赖的 Agent 定义 (需预先注册):
+#   agentscope/deep-research-team.yaml → agent_agentscope_config 表有 2 行配置
+#   chat/deep-researcher.yaml          → 搜索分析员引用的子 Agent
+#   chat/summarizer.yaml               → 报告撰写员引用的子 Agent
+#
+# 写入表: agent_definition (1行) + agent_workflow_node (4行) + agent_graph_edge (4行)
+# ═══════════════════════════════════════════════════════════════
+agent:
+  # ─────────────────────────────────────────────────────────────
+  # agent_definition 表 (1行)
+  # ─────────────────────────────────────────────────────────────
+  id: "intelligence-researcher"            # agent_id               varchar(64)  NOT NULL UNIQUE
+  name: "智能调研助手"                      # name                   varchar(128) NOT NULL
+  engine: HYBRID                           # engine                 varchar(32)  NOT NULL
+  instruction: "你是一个企业级智能调研助手，能够分析需求、多维度调研并生成深度报告。"
+                                           # instruction            text
+  model:
+    name: "qwen-plus"                      # model_config → JSONB
+    temperature: 0.7
+    maxTokens: 2000
+  mcpServers: []                           # mcp_servers → JSONB (定义级工具，也作为节点级回退)
+                                           # graph_start            varchar(64) → '["requirement_analyst"]'
+                                           # agentscope_pipeline_type varchar(32) → NULL (HYBRID不使用)
+                                           # sub_engines            JSONB
+
+  graph:
+    start:
+      - "requirement_analyst"
+
+    # ─────────────────────────────────────────────────────────
+    # agent_workflow_node 表 (4行)
+    # 所有列: node_id, agent_id, react_agent_id, next_node_id,
+    #         rag_enabled, knowledge_base_id, instruction,
+    #         sub_engine, mcp_servers, sort_order
+    # ─────────────────────────────────────────────────────────
+    nodes:
+      - id: "requirement_analyst"                       # node_id           varchar(64) NOT NULL
+        agentId: "intelligence-researcher"              # agent_id          varchar(64) → 父级 agentId
+        reactAgentId: null                              # react_agent_id    varchar(64) → 引用已注册 Agent
+        next: null                                      # next_node_id      varchar(64) → DAG 模式下为 null
+        ragEnabled: false                               # rag_enabled       boolean DEFAULT false
+        knowledgeBaseId: null                           # knowledge_base_id varchar(64)
+        instruction: >-                                 # instruction       text
+          你是一位企业需求分析专家。根据用户的调研需求，分析并输出结构化的调研框架：
+          1. 明确调研目标
+          2. 拆分为市场维度和技术维度的调研方向
+          3. 列出每个维度需要回答的关键问题
+          请以结构化格式输出，便于后续分维度调研。
+        subEngine: "GRAPH"                              # sub_engine        varchar(32)
+        mcpServers: []                                  # mcp_servers       JSONB
+
+      - id: "market_scout"
+        agentId: "intelligence-researcher"
+        reactAgentId: null
+        next: null
+        ragEnabled: false
+        knowledgeBaseId: null
+        instruction: >-
+          你是一位资深市场分析师。根据上一步输出的市场维度调研方向，撰写市场分析报告，包括：
+          - 市场规模与增长趋势
+          - 竞争格局与主要玩家
+          - 用户需求与痛点分析
+          - 市场机会与风险提示
+        subEngine: "GRAPH"
+        mcpServers: []
+
+      - id: "tech_scout"
+        agentId: "intelligence-researcher"
+        reactAgentId: null
+        next: null
+        ragEnabled: false
+        knowledgeBaseId: null
+        instruction: >-
+          你是一位技术架构师。根据上一步输出的技术维度调研方向，撰写技术分析报告，包括：
+          - 核心技术栈与演进趋势
+          - 开源方案对比与选型建议
+          - 技术风险与应对策略
+          - 创新技术机会点
+        subEngine: "GRAPH"
+        mcpServers: []
+
+      # 叶子节点: 委托 AGENTSCOPE 内层引擎
+      # reactAgentId → "deep-research-team" 引用已注册的 AGENTSCOPE Agent
+      # 该 Agent 的 agentscopeAgents 配置在 agent_agentscope_config 表中 (2行)
+      # 内部执行: 搜索分析员(ReactAgent+MCP工具) → 报告撰写员(ReactAgent)
+      - id: "deep_investigator"
+        agentId: "intelligence-researcher"
+        reactAgentId: "deep-research-team"              # react_agent_id → 引用 AGENTSCOPE Agent 定义
+        next: null
+        ragEnabled: false
+        knowledgeBaseId: null
+        instruction: >-
+          你是一位深度调研员，拥有网络搜索能力。
+          你将收到市场分析和技术分析两份报告作为输入。
+          请综合两份报告，使用搜索工具补充最新的行业数据和新闻，
+          然后输出一份完整的深度调研报告，要求：
+          1. 数据有出处，标注信息来源
+          2. 观点有依据，引用具体数据
+          3. 建议可落地，给出明确的行动项
+        subEngine: "AGENTSCOPE"                         # sub_engine → AGENTSCOPE=委托 AgentScopeAdapter
+        mcpServers:                                     # mcp_servers → 节点级 MCP (findSubAgentDef 回退用)
+          - name: "web-search"
+            transport: "stdio"
+            command: "npx"
+            args:
+              - "-y"
+              - "@anthropic/mcp-server-websearch"
+
+    # ─────────────────────────────────────────────────────────
+    # agent_graph_edge 表 (4行)
+    # 所有列: from_node, to_node, condition_expr, sort_order
+    # ─────────────────────────────────────────────────────────
+    edges:
+      - from: "requirement_analyst"                     # from_node      varchar(64) NOT NULL
+        to: "market_scout"                              # to_node        varchar(64) NOT NULL
+        condition: null                                 # condition_expr text → 无条件=并行分支
+
+      - from: "requirement_analyst"
+        to: "tech_scout"
+        condition: null
+
+      - from: "market_scout"
+        to: "deep_investigator"
+        condition: null
+
+      - from: "tech_scout"
+        to: "deep_investigator"
+        condition: null
+
+  # sub_engines → JSONB
+  subEngines:
+    requirement_analyst: GRAPH
+    market_scout: GRAPH
+    tech_scout: GRAPH
+    deep_investigator: AGENTSCOPE

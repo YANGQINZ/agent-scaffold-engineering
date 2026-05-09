@@ -62,6 +62,8 @@ public abstract class AbstractEngineAdapter implements EngineAdapter {
             String sessionId) {
         return Flux.defer(innerSupplier)
                 .subscribeOn(Schedulers.boundedElastic())
+                .doOnNext(event -> log.info("{}流式发射事件: type={}, sessionId={}",
+                        engineType.name(), event.getType(), event.getSessionId()))
                 .doOnError(e -> {
                     if (e instanceof java.io.IOException || (e.getMessage() != null
                             && e.getMessage().contains("Broken pipe"))) {
@@ -75,6 +77,10 @@ public abstract class AbstractEngineAdapter implements EngineAdapter {
                 .onErrorResume(java.util.concurrent.TimeoutException.class, e -> {
                     log.warn("{}流式输出: 执行超时, agentId={}", engineType.name(), agentId);
                     return Flux.just(StreamEvent.done(false, Map.of("error", "timeout"), sessionId));
+                })
+                .onErrorResume(Exception.class, e -> {
+                    log.error("{}流式输出未处理异常: agentId={}, error={}", engineType.name(), agentId, e.getMessage(), e);
+                    return Flux.just(StreamEvent.done(false, Map.of("error", e.getMessage()), sessionId));
                 });
     }
 
@@ -146,8 +152,17 @@ public abstract class AbstractEngineAdapter implements EngineAdapter {
     protected Flux<StreamEvent> buildDoneFlux(String finalContent, String thinkingContent,
                                                String agentId, String sessionId, ContextStore ctx) {
         return Flux.defer(() -> {
-            AgentMessage response = toAgentMessage(finalContent, thinkingContent, agentId, sessionId);
-            ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+            log.info("{}buildDoneFlux开始: contentLength={}, hasThinking={}, agentId={}",
+                    engineType.name(), finalContent != null ? finalContent.length() : 0,
+                    thinkingContent != null, agentId);
+            try {
+                AgentMessage response = toAgentMessage(finalContent, thinkingContent, agentId, sessionId);
+                ctx.appendHistory(response.getSenderId(), response.getContent(), response.getMetadata());
+                log.info("{}buildDoneFlux历史追加完成", engineType.name());
+            } catch (Exception e) {
+                log.error("{}buildDoneFlux历史追加失败（不影响输出）: agentId={}, error={}",
+                        engineType.name(), agentId, e.getMessage(), e);
+            }
 
             Flux<StreamEvent> thinkingFlux = Flux.empty();
             if (thinkingContent != null && !thinkingContent.isBlank()) {

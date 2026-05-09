@@ -1,8 +1,0 @@
-agent:
-  id: "plan-generator"
-  name: "行程生成员"
-  engine: CHAT
-  instruction: "你是行程生成员，根据收集的信息和搜索到的路线，生成完整的旅行行程计划。请用中文输出。"
-  model:
-    name: "qwq-plus"
-    temperature: 0.6

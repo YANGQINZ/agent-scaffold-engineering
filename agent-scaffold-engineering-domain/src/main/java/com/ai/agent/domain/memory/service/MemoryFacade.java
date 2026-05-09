@@ -39,6 +39,9 @@ public class MemoryFacade implements MemoryPort {
     @Value("${memory.compression.keep-recent:3}")
     private int keepRecentN;
 
+    /** 嵌入最大字符数（DashScope text-embedding-v3 上限约 8192 token，保守截断） */
+    private static final int EMBED_MAX_CHARS = 6000;
+
     @Override
     public void onMessageCreated(String sessionId, String content, String role) {
         if (sessionId == null || sessionId.isBlank() || content == null || content.isBlank()) {
@@ -49,7 +52,10 @@ public class MemoryFacade implements MemoryPort {
             role = "assistant";
         }
         int estimatedTokens = HotContext.estimateTokens(content);
-        float[] embedding = embeddingService.embed(content);
+        // 截断过长内容以避免嵌入 API 400 错误（内容用于嵌入检索，截断不影响语义召回）
+        String embedContent = content.length() > EMBED_MAX_CHARS
+                ? content.substring(0, EMBED_MAX_CHARS) : content;
+        float[] embedding = embeddingService.embed(embedContent);
 
         // 1. 冷层写入 chat_message
         ChatMessage msg = ChatMessage.builder()

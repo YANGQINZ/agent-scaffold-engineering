@@ -34,6 +34,12 @@ public class BaseBizException extends RuntimeException {
         this.errorMsg = baseErrorCodeEnum.getErrorMsg();
     }
 
+    public BaseBizException(String errorCode, String errorMsg, Throwable cause) {
+        super(errorMsg, cause);
+        this.errorCode = errorCode;
+        this.errorMsg = errorMsg;
+    }
+
     public BaseBizException(String errorCode, String errorMsg, Object... arguments) {
         super(MessageFormat.format(errorMsg, arguments));
         this.errorCode = errorCode;

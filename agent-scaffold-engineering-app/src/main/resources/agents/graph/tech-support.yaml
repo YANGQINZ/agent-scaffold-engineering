@@ -1,0 +1,183 @@
+# ═══════════════════════════════════════════════════════════════
+# 技术支持系统 — GRAPH 引擎完整示例
+# 预定义有向图执行任务流转，支持条件分支
+#
+# 图结构:
+#
+#   triage (分类路由)
+#     ├── condition: "type==bug"       → bug_handler ──┐
+#     ├── condition: "type==feature"   → feature_handler ─┤→ resolver (leaf) → END
+#     └── condition: "type==question"  → faq_handler ────┘
+#
+# 执行路径:
+#   1. triage 节点调用 ChatModel 分析用户输入，输出分类结果 (如 "type==bug")
+#   2. ConditionEvaluator 评估条件:
+#      - "type==bug"      → 精确匹配 (== 运算符)
+#      - "type==feature"  → 精确匹配
+#      - "type==question" → 精确匹配
+#   3. 匹配的分支执行对应的 handler 节点
+#   4. 所有分支汇聚到 resolver 叶子节点，生成最终回复
+#
+# 条件表达式写法 (ConditionEvaluator):
+#   "key==value"          → 精确匹配
+#   "score>0.8"           → 数值比较 (>, >=, <, <=)
+#   "llm:intent:research" → LLM 语义判断
+#   "简单文本"             → 包含匹配 (降级方案)
+#
+# 写入表: agent_definition (1行) + agent_workflow_node (5行) + agent_graph_edge (7行)
+# 不写入: agent_agentscope_config
+# ═══════════════════════════════════════════════════════════════
+agent:
+  # ─────────────────────────────────────────────────────────────
+  # agent_definition 表 (1行)
+  # 所有列: agent_id, name, engine, instruction,
+  #         model_config, mcp_servers, graph_start,
+  #         agentscope_pipeline_type, sub_engines
+  # ─────────────────────────────────────────────────────────────
+  id: "tech-support"                       # agent_id               varchar(64)  NOT NULL UNIQUE
+  name: "技术支持系统"                      # name                   varchar(128) NOT NULL
+  engine: GRAPH                            # engine                 varchar(32)  NOT NULL
+  instruction: "你是技术支持系统，根据用户问题类型路由到对应的处理节点。"
+                                           # instruction            text
+  model:
+    name: "qwq-plus"                      # model_config           JSONB
+    temperature: 0.3
+    maxTokens: 2000
+  mcpServers: []                           # mcp_servers            JSONB → '[]'
+                                           # agentscope_pipeline_type varchar(32) → NULL (GRAPH 不使用)
+                                           # sub_engines            JSONB → NULL (GRAPH 不使用)
+
+  # ─────────────────────────────────────────────────────────────
+  # graph 结构
+  # ─────────────────────────────────────────────────────────────
+  graph:
+    # graph_start → varchar(64) → '["triage"]'
+    start:
+      - "triage"
+
+    # ───────────────────────────────────────────────────────────
+    # agent_workflow_node 表 (5行)
+    # 所有列: node_id, agent_id, react_agent_id, next_node_id,
+    #         rag_enabled, knowledge_base_id, instruction,
+    #         sub_engine, mcp_servers, sort_order
+    #
+    # resolveSystemPrompt 优先级:
+    #   1. node.instruction → 非空则直接使用
+    #   2. node.agentId → agentRegistry.get(agentId).getInstruction()
+    #   3. 默认 "你是一个有用的助手。"
+    # ───────────────────────────────────────────────────────────
+    nodes:
+
+      # 节点1: 分类路由 — 分析用户问题并输出分类标签
+      # 输出格式决定后续条件分支走向
+      - id: "triage"                                    # node_id           varchar(64) NOT NULL
+        agentId: "tech-support"                         # agent_id          varchar(64) → 父级 agentId
+        reactAgentId: null                              # react_agent_id    varchar(64) → NULL
+        next: null                                      # next_node_id      varchar(64) → DAG模式 NULL
+        ragEnabled: false                               # rag_enabled       boolean DEFAULT false
+        knowledgeBaseId: null                           # knowledge_base_id varchar(64)
+        instruction: >-                                 # instruction       text
+          你是技术支持分类器。分析用户的问题并判断类型，只输出分类标签：
+          - 如果是缺陷/Bug报告，输出 "type==bug"
+          - 如果是功能需求/建议，输出 "type==feature"
+          - 如果是使用问题/咨询，输出 "type==question"
+          只输出一个标签，不要解释。
+        subEngine: null                                 # sub_engine        varchar(32) → GRAPH不使用
+        mcpServers: []                                  # mcp_servers       JSONB
+
+      # 节点2: Bug 处理员 (条件分支1: type==bug)
+      - id: "bug_handler"
+        agentId: "tech-support"
+        reactAgentId: null
+        next: null
+        ragEnabled: false
+        knowledgeBaseId: null
+        instruction: >-
+          你是一位资深Bug分析师。根据用户报告的Bug信息：
+          1. 分析可能的根本原因
+          2. 评估严重等级 (P0-P3)
+          3. 给出排查步骤和临时解决方案
+          4. 输出结构化的Bug分析报告
+        subEngine: null
+        mcpServers: []
+
+      # 节点3: 需求处理员 (条件分支2: type==feature)
+      - id: "feature_handler"
+        agentId: "tech-support"
+        reactAgentId: null
+        next: null
+        ragEnabled: false
+        knowledgeBaseId: null
+        instruction: >-
+          你是一位产品需求分析师。根据用户提出的功能需求：
+          1. 分析需求的价值和优先级
+          2. 评估技术可行性
+          3. 建议实现方案和里程碑
+          4. 输出结构化的需求分析报告
+        subEngine: null
+        mcpServers: []
+
+      # 节点4: FAQ 处理员 (条件分支3: type==question)
+      - id: "faq_handler"
+        agentId: "tech-support"
+        reactAgentId: null
+        next: null
+        ragEnabled: true                                # rag_enabled → 启用 RAG 知识库检索
+        knowledgeBaseId: "kb-tech-faq"                  # knowledge_base_id → 关联知识库
+        instruction: >-
+          你是一位技术咨询顾问。根据用户的问题，结合知识库中的技术文档，
+          给出准确、详细的解答。如果知识库中没有相关信息，基于专业知识回答并标注"非官方建议"。
+        subEngine: null
+        mcpServers: []
+
+      # 节点5: 汇总处理员 (叶子节点，所有分支汇聚)
+      - id: "resolver"
+        agentId: "tech-support"
+        reactAgentId: null
+        next: null
+        ragEnabled: false
+        knowledgeBaseId: null
+        instruction: >-
+          你是一位技术支持主管。根据前面的分析结果，
+          生成一份用户友好的回复，要求：
+          1. 用通俗易懂的语言总结技术分析
+          2. 给出明确的下一步行动建议
+          3. 如有临时解决方案，优先提供
+          4. 标注预计解决时间（如适用）
+        subEngine: null
+        mcpServers: []
+
+    # ───────────────────────────────────────────────────────────
+    # agent_graph_edge 表 (7行)
+    # 所有列: from_node, to_node, condition_expr, sort_order
+    #
+    # 边类型:
+    #   无 condition → 无条件边 (直接流转)
+    #   有 condition → 条件边 (ConditionEvaluator 评估)
+    # ───────────────────────────────────────────────────────────
+    edges:
+      # 条件分支: triage → 三个处理员
+      - from: "triage"                                 # from_node      varchar(64) NOT NULL
+        to: "bug_handler"                               # to_node        varchar(64) NOT NULL
+        condition: "type==bug"                          # condition_expr text → 精确匹配
+
+      - from: "triage"
+        to: "feature_handler"
+        condition: "type==feature"                      # condition_expr → 精确匹配
+
+      - from: "triage"
+        to: "faq_handler"
+        condition: "type==question"                     # condition_expr → 精确匹配
+
+      # 汇聚: 三个处理员 → resolver
+      - from: "bug_handler"
+        to: "resolver"
+        condition: null                                 # condition_expr → NULL 无条件边
+
+      - from: "feature_handler"
+        to: "resolver"
+        condition: null
+
+      - from: "faq_handler"
+        to: "resolver"
+        condition: null
