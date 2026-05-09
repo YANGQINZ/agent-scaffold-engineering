@@ -5,6 +5,7 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/app';
 import { useChatStore } from '@/stores/chat';
@@ -24,6 +25,13 @@ function Layout() {
   const setMode = useAppStore((s) => s.setMode);
   const clearMessages = useChatStore((s) => s.clearMessages);
   const navigate = useNavigate();
+
+  /** 根据 URL 路径同步 mode 状态（修复刷新后 toggle 不同步问题） */
+  useEffect(() => {
+    if (location.pathname === '/simple' && mode !== 'simple') {
+      setMode('simple');
+    }
+  }, []); // 仅挂载时执行一次
 
   /** 当前语言是否为中文 */
   const isZh = i18n.language === 'zh';

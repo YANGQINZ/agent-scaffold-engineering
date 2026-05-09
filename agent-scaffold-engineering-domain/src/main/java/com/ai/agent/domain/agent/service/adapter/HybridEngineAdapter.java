@@ -1,6 +1,7 @@
 package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.HybridAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.McpServerConfig;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
@@ -308,11 +309,24 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
 
     /**
      * 查找子 Agent 定义
+     * 当节点无 agentId 时，根据节点的 subEngine 类型构造对应子类实例，避免 ClassCastException
      */
     private AgentDefinition findSubAgentDef(HybridAgentDefinition hyDef, WorkflowNode node) {
         if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
             AgentDefinition subDef = agentRegistry.get(node.getAgentId());
-            return subDef != null ? subDef : hyDef;
+            if (subDef != null) {
+                return subDef;
+            }
+        }
+        // 无 agentId 或 registry 中未找到：根据子引擎类型构造对应定义
+        EngineType subEngine = resolveSubEngine(node);
+        if (subEngine == EngineType.AGENTSCOPE) {
+            return AgentscopeAgentDefinition.builder()
+                    .agentId(node.getId())
+                    .name(node.getId())
+                    .instruction(node.getInstruction())
+                    .mcpServers(node.getMcpServers() != null ? node.getMcpServers() : hyDef.getMcpServers())
+                    .build();
         }
         return hyDef;
     }

@@ -69,11 +69,15 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             ctx.appendHistory(input.getSenderId(), input.getContent(), input.getMetadata());
 
             // 3. 构建 ReactAgent 子 Agent 列表
-            List<Agent> agents = buildAgents(asDef, enableThinking);
+            String uniqueSuffix = String.valueOf(System.currentTimeMillis());
+            List<Agent> agents = buildAgents(asDef, enableThinking, uniqueSuffix);
 
             // 4. 构建 SequentialAgent 并同步执行
-            String pipelineName = (asDef.getAgentId() != null && !asDef.getAgentId().isBlank())
-                    ? asDef.getAgentId() : "pipeline_" + System.currentTimeMillis();
+            // SequentialAgent 会将自身名称作为起始节点、子Agent名称作为工作节点，
+            // 因此 pipeline 名称不能与任何子Agent 名称重复，统一使用 "pipeline_" 前缀 + 唯一后缀
+            String pipelineName = "pipeline_" + (asDef.getAgentId() != null && !asDef.getAgentId().isBlank()
+                    ? asDef.getAgentId() : "anon")
+                    + "_" + uniqueSuffix;
             SequentialAgent pipeline = SequentialAgent.builder()
                     .name(pipelineName)
                     .subAgents(agents)
@@ -134,11 +138,16 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 boolean enableThinking = Boolean.TRUE.equals(input.getMetadataValue("enableThinking"));
 
                 // 构建 ReactAgent 子 Agent 列表
-                List<Agent> agents = buildAgents(asDef, enableThinking);
+                // 生成唯一后缀，避免 ReactAgent 全局注册表名称冲突
+                String uniqueSuffix = String.valueOf(System.currentTimeMillis());
+                List<Agent> agents = buildAgents(asDef, enableThinking, uniqueSuffix);
 
                 // 构建 SequentialAgent 并流式执行
-                String pipelineName = (asDef.getAgentId() != null && !asDef.getAgentId().isBlank())
-                        ? asDef.getAgentId() : "pipeline_" + System.currentTimeMillis();
+                // SequentialAgent 会将自身名称作为起始节点、子Agent名称作为工作节点，
+                // 因此 pipeline 名称不能与任何子Agent 名称重复，统一使用 "pipeline_" 前缀 + 唯一后缀
+                String pipelineName = "pipeline_" + (asDef.getAgentId() != null && !asDef.getAgentId().isBlank()
+                        ? asDef.getAgentId() : "anon")
+                        + "_" + uniqueSuffix;
                 SequentialAgent pipeline = SequentialAgent.builder()
                         .name(pipelineName)
                         .subAgents(agents)
@@ -148,8 +157,8 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 String[] textAccumulator = {""};
                 String[] thinkingAccumulator = {null};
 
-                // 只有最后一个 Agent 发射 THINKING/TEXT_DELTA，中间 Agent 只发进度
-                String lastAgentName = resolveLastAgentName(asDef);
+                // 使用同一个 uniqueSuffix 确保 lastAgentName 与 buildAgents 中的名称一致
+                String lastAgentName = resolveLastAgentName(asDef, uniqueSuffix);
 
                 return pipeline.stream(content)
                         .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId,
@@ -277,8 +286,10 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
     /**
      * 根据 AgentDefinition 构建 spring-ai-alibaba ReactAgent 列表
      * 每个子 Agent 通过 outputKey 将输出存入 OverAllState，后续 Agent 通过模板变量引用
+     *
+     * @param uniqueSuffix 唯一后缀，避免 ReactAgent 全局注册表名称冲突
      */
-    private List<Agent> buildAgents(AgentscopeAgentDefinition asDef, boolean enableThinking) {
+    private List<Agent> buildAgents(AgentscopeAgentDefinition asDef, boolean enableThinking, String uniqueSuffix) {
         List<Agent> agents = new ArrayList<>();
 
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
@@ -286,7 +297,7 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             for (int i = 0; i < configs.size(); i++) {
                 AgentscopeAgentConfig config = configs.get(i);
                 String instruction = resolveAgentInstruction(asDef, config);
-                String agentName = resolveAgentName(asDef, config, i);
+                String agentName = resolveAgentName(asDef, config, i, uniqueSuffix);
                 String outputKey = (config.getOutputKey() != null && !config.getOutputKey().isBlank())
                         ? config.getOutputKey() : "agent_" + i;
 
@@ -323,8 +334,12 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
         } else {
             List<ToolCallback> tools = mcpToolProvider.buildGraphTools(asDef.getMcpServers());
 
+            // 单 Agent 场景：名称追加唯一后缀，避免全局注册表冲突
+            String singleAgentName = (asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
+                    + "_" + uniqueSuffix;
+
             var agentBuilder = ReactAgent.builder()
-                    .name(asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
+                    .name(singleAgentName)
                     .model(chatModel)
                     .instruction(asDef.getInstruction() != null ? asDef.getInstruction() : "你是一个有用的助手。")
                     .tools(tools)
@@ -388,37 +403,47 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
 
     /**
      * 解析最后一个 Agent 的名称 — 与 buildAgents() 中最后一个 Agent 的 .name() 保持一致
+     * 使用同一个 uniqueSuffix 保证名称匹配
      */
-    private String resolveLastAgentName(AgentscopeAgentDefinition asDef) {
+    private String resolveLastAgentName(AgentscopeAgentDefinition asDef, String uniqueSuffix) {
         if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
             int lastIdx = asDef.getAgentscopeAgents().size() - 1;
             AgentscopeAgentConfig lastConfig = asDef.getAgentscopeAgents().get(lastIdx);
-            return resolveAgentName(asDef, lastConfig, lastIdx);
+            return resolveAgentName(asDef, lastConfig, lastIdx, uniqueSuffix);
         }
         // 单 Agent 场景：与 buildAgents() 中单 Agent 的 .name() 逻辑一致
-        String name = asDef.getName();
-        if (name != null && !name.isBlank()) {
-            return name;
-        }
-        String agentId = asDef.getAgentId();
-        return (agentId != null && !agentId.isBlank()) ? agentId : "agent_0";
+        return (asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
+                + "_" + uniqueSuffix;
     }
 
-    private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config, int index) {
+    /**
+     * 解析 Agent 名称 — 每次调用追加唯一后缀，避免 ReactAgent 全局注册表名称冲突
+     * spring-ai-alibaba 的 ReactAgent 内部维护全局节点注册表，相同 name 重复注册会抛出
+     * GraphStateException: node with id: xxx already exist!
+     *
+     * @param uniqueSuffix 唯一后缀，由调用方统一生成，保证 buildAgents 和 resolveLastAgentName 名称一致
+     */
+    private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config, int index, String uniqueSuffix) {
+        String baseName;
         // 优先使用 config.agentId → registry 查找 name
         if (config.getAgentId() != null && !config.getAgentId().isBlank()) {
             AgentDefinition subDef = agentRegistry.get(config.getAgentId());
             if (subDef != null && subDef.getName() != null && !subDef.getName().isBlank()) {
-                return subDef.getName();
+                baseName = subDef.getName();
+            } else {
+                baseName = config.getAgentId();
             }
-            return config.getAgentId();
+        } else {
+            // 回退到 definition name，若也为空则用 agent_N
+            String fallback = asDef.getName();
+            if (fallback != null && !fallback.isBlank()) {
+                baseName = fallback;
+            } else {
+                baseName = "agent_" + index;
+            }
         }
-        // 回退到 definition name，若也为空则用 agent_N
-        String fallback = asDef.getName();
-        if (fallback != null && !fallback.isBlank()) {
-            return fallback;
-        }
-        return "agent_" + index;
+        // 追加唯一后缀，防止全局注册表名称冲突
+        return baseName + "_" + uniqueSuffix;
     }
 
     private String resolveAgentInstruction(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config) {
