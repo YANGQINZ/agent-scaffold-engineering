@@ -5,6 +5,7 @@
  */
 import { memo, useCallback, useRef, useEffect, useState } from 'react';
 import { Bot, User, Plus, Database, Brain } from 'lucide-react';
+import ThinkingBlock from '@/features/chat/ThinkingBlock';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useChatStore } from '@/stores/chat';
@@ -187,6 +188,10 @@ function SimpleChatPage() {
                       : 'bg-gray-100 text-gray-800 rounded-bl-sm',
                   )}
                 >
+                  {/* 思考过程（深度思考模式） */}
+                  {msg.role === 'assistant' && msg.thinkingContent && (
+                    <ThinkingBlock content={msg.thinkingContent} />
+                  )}
                   {msg.content || (isStreaming && msg.role === 'assistant' ? (
                     <span className="flex items-center gap-1.5">
                       <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:0ms]" />

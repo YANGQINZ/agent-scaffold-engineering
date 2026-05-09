@@ -2390,3 +2390,124 @@ Please, configure an AsyncTaskExecutor through the WebMvc config.
 26-05-09.01:59:07.458 [http-nio-8091-exec-2] INFO  SessionController      - 查询会话列表: agentId=classifier
 26-05-09.02:19:46.048 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=58s654ms).
 26-05-09.02:35:34.631 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.14:00:22.506 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.14:00:22.570 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 35463 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.14:00:22.570 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.14:00:23.369 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.14:00:23.371 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.14:00:23.423 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 41 ms. Found 0 Redis repository interfaces.
+26-05-09.14:00:24.399 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.14:00:24.412 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.14:00:24.414 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.14:00:24.414 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.14:00:24.460 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.14:00:24.461 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1869 ms
+26-05-09.14:00:24.796 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.14:00:24.811 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.14:00:24.938 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@125a8ab6
+26-05-09.14:00:24.939 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.14:00:25.060 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.14:00:25.061 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.14:00:25.214 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.14:00:25.286 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.14:00:25.448 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.14:00:25.459 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.14:00:25.904 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.14:00:25.905 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.14:00:25.905 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.14:00:26.337 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.14:00:26.358 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.14:00:26.359 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.14:00:26.389 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.14:00:26.395 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.14:00:26.669 [main            ] INFO  Application            - Started Application in 4.556 seconds (process running for 5.773)
+26-05-09.14:00:26.678 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.14:00:27.213 [RMI TCP Connection(4)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.14:00:27.213 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.14:00:27.214 [RMI TCP Connection(4)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms
+26-05-09.14:00:51.838 [http-nio-8091-exec-3] INFO  SessionController      - 查询会话消息: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405
+26-05-09.14:01:11.281 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.14:35:26.672 [scheduling-1    ] INFO  ContextStoreFactory    - 会话上下文TTL淘汰: sessionId=714f70ec-ff30-4b90-823c-00134a1a7405, 空闲时长=2030937ms
+26-05-09.15:27:50.635 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s889ms).
+26-05-09.15:43:46.375 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s741ms).
+26-05-09.16:00:12.023 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s623ms).
+26-05-09.16:16:07.795 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s772ms).
+26-05-09.16:32:02.718 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s923ms).
+26-05-09.16:47:57.676 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s958ms).
+26-05-09.17:04:23.313 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s633ms).
+26-05-09.17:12:23.582 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=8m269ms).
+26-05-09.17:28:44.493 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m50s902ms).
+26-05-09.17:44:39.070 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s577ms).
+26-05-09.17:57:39.460 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=13m390ms).
+26-05-09.18:20:42.137 [SpringApplicationShutdownHook] INFO  GracefulShutdown       - Commencing graceful shutdown. Waiting for active requests to complete
+26-05-09.18:20:42.140 [tomcat-shutdown ] INFO  GracefulShutdown       - Graceful shutdown complete
+26-05-09.18:20:42.167 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown initiated...
+26-05-09.18:20:42.178 [SpringApplicationShutdownHook] INFO  HikariDataSource       - HikariPool-1 - Shutdown completed.
+26-05-09.18:22:40.607 [background-preinit] INFO  Version                - HV000001: Hibernate Validator 8.0.2.Final
+26-05-09.18:22:40.665 [main            ] INFO  Application            - Starting Application using Java 17.0.7 with PID 37847 (/Users/yangqinz/dev-ops/agent-scaffold-engineering/agent-scaffold-engineering-app/target/classes started by yangqinz in /Users/yangqinz/dev-ops/agent-scaffold-engineering)
+26-05-09.18:22:40.665 [main            ] INFO  Application            - The following 1 profile is active: "dev"
+26-05-09.18:22:41.464 [main            ] INFO  RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+26-05-09.18:22:41.466 [main            ] INFO  RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+26-05-09.18:22:41.525 [main            ] INFO  RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 41 ms. Found 0 Redis repository interfaces.
+26-05-09.18:22:42.340 [main            ] INFO  TomcatWebServer        - Tomcat initialized with port 8091 (http)
+26-05-09.18:22:42.351 [main            ] INFO  Http11NioProtocol      - Initializing ProtocolHandler ["http-nio-8091"]
+26-05-09.18:22:42.352 [main            ] INFO  StandardService        - Starting service [Tomcat]
+26-05-09.18:22:42.352 [main            ] INFO  StandardEngine         - Starting Servlet engine: [Apache Tomcat/10.1.36]
+26-05-09.18:22:42.394 [main            ] INFO  [/]                    - Initializing Spring embedded WebApplicationContext
+26-05-09.18:22:42.394 [main            ] INFO  ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1700 ms
+26-05-09.18:22:42.723 [main            ] INFO  AgentRegistry          - AgentRegistry初始化 - 从数据库加载Agent定义...
+26-05-09.18:22:42.737 [main            ] INFO  HikariDataSource       - HikariPool-1 - Starting...
+26-05-09.18:22:42.864 [main            ] INFO  HikariPool             - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3c5bb37d
+26-05-09.18:22:42.866 [main            ] INFO  HikariDataSource       - HikariPool-1 - Start completed.
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=classifier, name=意图分类器, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=faq-bot, name=FAQ机器人, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=human-agent, name=人工代理, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=deep-researcher, name=深度研究员, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=summarizer, name=摘要总结员, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=weather-assistant, name=天气助手, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=info-collector, name=信息收集员, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=route-searcher, name=路线搜索员, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=plan-generator, name=行程生成员, engine=CHAT
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=customer-service, name=客服系统, engine=GRAPH
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-team, name=研究团队, engine=AGENTSCOPE
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=research-hybrid, name=研究助手, engine=HYBRID
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=, name=testagent, engine=GRAPH
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=fb31f375-9fee-4579-85eb-0df64e229a56, name=testagentff, engine=GRAPH
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - 加载数据库Agent定义: agentId=dc2aad3c-f3bd-47b5-9e74-4a7e38a84f2f, name=Authorization, engine=AGENTSCOPE
+26-05-09.18:22:42.994 [main            ] INFO  AgentRegistry          - AgentRegistry初始化完成: 共加载15个Agent定义
+26-05-09.18:22:43.142 [main            ] INFO  Version                - Redisson 3.27.2
+26-05-09.18:22:43.223 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.18:22:43.399 [redisson-netty-1-4] INFO  ConnectionsHolder      - 1 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.18:22:43.412 [redisson-netty-1-13] INFO  ConnectionsHolder      - 5 connections initialized for 127.0.0.1/127.0.0.1:16379
+26-05-09.18:22:43.876 [main            ] INFO  PgVectorStore          - Using the vector table name: document_chunk. Is empty: false
+26-05-09.18:22:43.877 [main            ] INFO  PgVectorStore          - Initializing PGVectorStore schema for table: document_chunk in schema: public
+26-05-09.18:22:43.877 [main            ] INFO  PgVectorStore          - vectorTableValidationsEnabled false
+26-05-09.18:22:44.326 [main            ] INFO  EndpointLinksResolver  - Exposing 1 endpoint beneath base path '/actuator'
+26-05-09.18:22:44.348 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.18:22:44.349 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.18:22:44.377 [main            ] INFO  Http11NioProtocol      - Starting ProtocolHandler ["http-nio-8091"]
+26-05-09.18:22:44.382 [main            ] INFO  TomcatWebServer        - Tomcat started on port 8091 (http) with context path '/'
+26-05-09.18:22:44.523 [main            ] INFO  Application            - Started Application in 4.329 seconds (process running for 5.027)
+26-05-09.18:22:44.529 [main            ] INFO  AgentYamlLoader        - Agent定义已由AgentRegistry从数据库加载，YAML加载已跳过
+26-05-09.18:22:44.911 [RMI TCP Connection(2)-127.0.0.1] INFO  [/]                    - Initializing Spring DispatcherServlet 'dispatcherServlet'
+26-05-09.18:22:44.912 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Initializing Servlet 'dispatcherServlet'
+26-05-09.18:22:44.913 [RMI TCP Connection(2)-127.0.0.1] INFO  DispatcherServlet      - Completed initialization in 1 ms

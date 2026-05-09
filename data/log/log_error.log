@@ -1603,3 +1603,26 @@ Please, configure an AsyncTaskExecutor through the WebMvc config.
 -------------------------------
 !!!
 26-05-09.02:19:46.048 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=58s654ms).
+26-05-09.14:00:25.286 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.14:00:26.358 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.14:00:26.359 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found
+26-05-09.14:01:11.281 [ForkJoinPool.commonPool-worker-1] WARN  RequestMappingHandlerAdapter - !!!
+Performing asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.
+This executor is not suitable for production use under load.
+Please, configure an AsyncTaskExecutor through the WebMvc config.
+-------------------------------
+!!!
+26-05-09.15:27:50.635 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s889ms).
+26-05-09.15:43:46.375 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s741ms).
+26-05-09.16:00:12.023 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s623ms).
+26-05-09.16:16:07.795 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s772ms).
+26-05-09.16:32:02.718 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s923ms).
+26-05-09.16:47:57.676 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s958ms).
+26-05-09.17:04:23.313 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s633ms).
+26-05-09.17:12:23.582 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=8m269ms).
+26-05-09.17:28:44.493 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m50s902ms).
+26-05-09.17:44:39.070 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s577ms).
+26-05-09.17:57:39.460 [HikariPool-1 housekeeper] WARN  HikariPool             - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=13m390ms).
+26-05-09.18:22:43.223 [main            ] WARN  DnsServerAddressStreamProviders - Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
+26-05-09.18:22:44.348 [main            ] WARN  SyncMcpSamplingProvider - No sampling methods found
+26-05-09.18:22:44.349 [main            ] WARN  SyncMcpElicitationProvider - No elicitation methods found

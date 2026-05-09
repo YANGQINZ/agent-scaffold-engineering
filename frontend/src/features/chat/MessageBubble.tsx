@@ -2,11 +2,10 @@
  * 聊天消息气泡组件
  * 用户消息：右对齐、靛蓝色背景、白色文字
  * 助手消息：左对齐、白色背景、灰色边框
- * 专家模式下展示思考过程和 RAG 来源
+ * 展示思考过程和 RAG 来源
  */
 import { memo } from 'react';
 import { Bot, User } from 'lucide-react';
-import { useAppStore } from '@/stores/app';
 import type { Message } from '@/stores/chat';
 import ThinkingBlock from './ThinkingBlock';
 import RagSourceBadge from './RagSourceBadge';
@@ -18,7 +17,6 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble({ message }: MessageBubbleProps) {
-  const mode = useAppStore((s) => s.mode);
   const isUser = message.role === 'user';
 
   return (
@@ -44,8 +42,8 @@ function MessageBubble({ message }: MessageBubbleProps) {
             : 'border border-gray-200 bg-white text-gray-800',
         )}
       >
-        {/* 专家模式：思考过程（仅助手消息） */}
-        {!isUser && mode === 'expert' && message.thinkingContent && (
+        {/* 思考过程（仅助手消息） */}
+        {!isUser && message.thinkingContent && (
           <ThinkingBlock content={message.thinkingContent} />
         )}
 
