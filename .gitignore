@@ -42,10 +42,12 @@ build/
 /.claude
 /.idea
 .env.example
-/docs/dev-ops
+/docs/dev-ops/app
+/docs/dev-ops/environment
 /docs/superpowers
 /.specify
 /specs
+/data
 
 ### Frontend ###
 frontend/node_modules/

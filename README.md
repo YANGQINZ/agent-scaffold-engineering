@@ -11,7 +11,7 @@
 - [3. 技术栈](#3-技术栈)
 - [4. 项目结构](#4-项目结构)
 - [5. 核心功能详解](#5-核心功能详解)
-- [6. 入门指南](#6-入门指南)
+- [6. 前端工作流构建](#6-前端工作流构建)
 
 ---
 
@@ -528,3 +528,94 @@ MultipartFile
 
 ---
 
+## 6. 前端工作流构建
+
+前端工作流画布（专家模式）支持可视化编排 Agent 节点和边，导出为后端可执行的 Agent 定义。
+
+### 6.1 引擎类型自动推断
+
+画布根据所有节点的 `subEngine` 属性自动推断引擎类型（`inferEngineType()`）：
+
+| 节点 subEngine 组合 | 推断引擎 | 对应后端 Adapter |
+|---------------------|---------|-----------------|
+| 全部为空（默认）或 `GRAPH` | `GRAPH` | GraphEngineAdapter |
+| 全部为 `AGENTSCOPE` | `AGENTSCOPE` | AgentScopeAdapter |
+| 混合（部分 GRAPH + 部分 AGENTSCOPE） | `HYBRID` | HybridEngineAdapter |
+
+单节点画布（无边、无连接）自动降级为 `CHAT` 引擎。
+
+### 6.2 工作流连接模式
+
+#### GRAPH 工作流
+
+所有节点使用 ChatModel 直接调用，通过 StateGraph 编排 DAG 执行：
+
+```
+__start__ → [节点A] → [节点B] → [节点C] → __end__
+                  ↘ [节点D] ↗
+```
+
+- **起始节点**：固定为 `__start__`，自动注入用户输入
+- **终止节点**：固定为 `__end__`，收集最终输出
+- **中间节点**：每个节点代表一次 ChatModel 调用，配置 `instruction` 作为系统提示
+- **条件边**：支持 SpEL 表达式路由，如 `#decision.contains('技术')` 根据上游输出决定下一步
+
+#### HYBRID 工作流
+
+外层结构与 GRAPH 相同（StateGraph DAG），但部分节点标记为 `AGENTSCOPE` 子引擎，执行时委托给 AgentScopeAdapter：
+
+```
+__start__ → [分析节点(GRAPH)] → [深度研究(AGENTSCOPE)] → [总结节点(GRAPH)] → __end__
+```
+
+- **GRAPH 子节点**：直接调用 ChatModel，轻量快速
+- **AGENTSCOPE 子节点**：委托给 AgentScopeAdapter，支持 MCP 工具调用和多 Agent 协作
+- AGENTSCOPE 子节点通常作为叶子节点（无下游依赖），以避免嵌套图执行的性能开销
+
+### 6.3 节点属性配置
+
+| 属性 | 说明 | 示例 |
+|------|------|------|
+| `id` | 节点唯一标识，自动生成 | `node_1` |
+| `label` | 显示名称 | `信息收集` |
+| `instruction` | 系统提示词 / Agent 指令 | `你是一个技术支持专家...` |
+| `subEngine` | 子引擎类型（`GRAPH` / `AGENTSCOPE`） | `AGENTSCOPE` |
+| `outputKey` | 输出写入 StateGraph 的哪个 key | `output`（默认） |
+| `mcpServers` | MCP 工具服务器配置列表 | 见 YAML 示例 |
+| `agentId` | 引用已注册的 Agent 定义（可选） | `travel-planner` |
+
+### 6.4 边与条件路由
+
+边定义节点间的执行顺序和数据流：
+
+- **普通边**：无条件，上游执行完直接到下游
+- **条件边**：配置 SpEL 表达式，根据上游 `decision` 字段值路由到不同下游节点
+
+常用 SpEL 表达式：
+
+```spel
+#decision.contains('关键词')          // 输出包含指定文字
+#decision == '选项A'                  // 精确匹配
+#decision.matches('.*技术.*')         // 正则匹配
+true                                  // 无条件（等同于普通边）
+```
+
+### 6.5 操作步骤
+
+1. **进入专家模式** → 打开工作流画布
+2. **添加节点** → 拖拽或点击添加，填写 `instruction` 和 `label`
+3. **连接节点** → 从节点输出端口拖拽到目标节点输入端口，创建边
+4. **设置条件**（可选） → 点击边，配置 SpEL 路由表达式
+5. **切换子引擎**（可选） → 选中节点，将 `subEngine` 改为 `AGENTSCOPE`，画布自动推断为 HYBRID 引擎
+6. **测试运行** → 点击"运行"，未保存画布会以临时 Agent 方式执行（`testRun=true`）
+7. **保存画布** → 将画布定义持久化到数据库
+
+### 6.6 注意事项
+
+- **AGENTSCOPE 节点建议作为叶子节点**：HybridEngineAdapter 的流式优化仅对叶子节点启用 token 级流式，中间节点同步执行发进度保活
+- **条件边格式**：必须使用合法的 SpEL 表达式，`#decision` 变量引用上游节点的输出内容
+- **无边单节点**：自动使用 CHAT 引擎，不经过 StateGraph 编排
+- **画布无前端验证**：引擎类型、节点配置的正确性由后端启动时校验，前端不会阻止非法配置
+- **未保存画布测试**：通过 `agentDefinition` 字段直接传递完整定义，`testRun=true` 标记为临时执行
+
+---

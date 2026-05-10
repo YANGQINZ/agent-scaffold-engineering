@@ -2,6 +2,7 @@ package com.ai.agent.domain.agent.service.adapter;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.AgentscopeAgentDefinition;
+import com.ai.agent.domain.agent.model.aggregate.GraphAgentDefinition;
 import com.ai.agent.domain.agent.model.aggregate.HybridAgentDefinition;
 import com.ai.agent.domain.agent.model.entity.McpServerConfig;
 import com.ai.agent.domain.agent.model.entity.WorkflowNode;
