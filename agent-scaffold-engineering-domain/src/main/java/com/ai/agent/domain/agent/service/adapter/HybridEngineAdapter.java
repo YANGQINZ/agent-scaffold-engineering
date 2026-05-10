@@ -337,14 +337,16 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
      * 当节点无 agentId 时，根据节点的 subEngine 类型构造对应子类实例，避免 ClassCastException
      */
     private AgentDefinition findSubAgentDef(HybridAgentDefinition hyDef, WorkflowNode node) {
+        EngineType subEngine = resolveSubEngine(node);
+
+        // 尝试从 registry 查找，但必须类型匹配子引擎
         if (node.getAgentId() != null && !node.getAgentId().isBlank()) {
             AgentDefinition subDef = agentRegistry.get(node.getAgentId());
-            if (subDef != null) {
+            if (subDef != null && isCompatibleType(subDef, subEngine)) {
                 return subDef;
             }
         }
-        // 无 agentId 或 registry 中未找到：根据子引擎类型构造对应定义
-        EngineType subEngine = resolveSubEngine(node);
+        // 无 agentId、registry 未找到、或类型不匹配：根据子引擎类型构造对应定义
         if (subEngine == EngineType.AGENTSCOPE) {
             return AgentscopeAgentDefinition.builder()
                     .agentId(node.getId())
@@ -354,5 +356,16 @@ public class HybridEngineAdapter extends AbstractGraphBasedAdapter {
                     .build();
         }
         return hyDef;
+    }
+
+    /**
+     * 检查 AgentDefinition 类型是否与子引擎类型兼容
+     */
+    private boolean isCompatibleType(AgentDefinition def, EngineType engine) {
+        return switch (engine) {
+            case AGENTSCOPE -> def instanceof AgentscopeAgentDefinition;
+            case GRAPH -> def instanceof GraphAgentDefinition;
+            default -> true;
+        };
     }
 }
