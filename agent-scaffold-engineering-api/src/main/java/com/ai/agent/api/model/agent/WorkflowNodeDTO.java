@@ -20,12 +20,6 @@ public class WorkflowNodeDTO {
     /** 节点绑定的Agent ID */
     private String agentId;
 
-    /** 引用的React Agent ID */
-    private String reactAgentId;
-
-    /** 下一个节点ID */
-    private String next;
-
     /** 是否启用RAG */
     private Boolean ragEnabled;
 

@@ -162,12 +162,21 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
                 String[] textAccumulator = {""};
                 String[] thinkingAccumulator = {null};
 
-                // 使用同一个 uniqueSuffix 确保 lastAgentName 与 buildAgents 中的名称一致
-                String lastAgentName = resolveLastAgentName(asDef, uniqueSuffix);
+                // SequentialAgent 的 stream() 会将每个 ReactAgent 子Agent 的内部图事件
+                // 直接传播到外层流中，内部节点名为常量（如 _AGENT_MODEL_），
+                // 而非 ReactAgent 自身的 name（如 plan-generator_091e0323），
+                // 因此不能用 nodeName 匹配 lastAgentName。
+                // 改用计数器：SequentialAgent 按顺序执行子Agent，
+                // 每当收到 AGENT_MODEL_FINISHED 表示一个子Agent完成，
+                // 当 completedAgentCount == totalAgents - 1 时，后续事件来自最后一个 Agent。
+                int totalAgents = agents.size();
+                int[] completedAgentCount = {0};
+
 
                 return pipeline.stream(content)
                         .flatMap(nodeOutput -> convertNodeOutput(nodeOutput, sessionId,
-                                textAccumulator, thinkingAccumulator, lastAgentName))
+                                textAccumulator, thinkingAccumulator,
+                                totalAgents, completedAgentCount))
                         .concatWith(Flux.defer(() -> {
                             String finalContent = textAccumulator[0].isEmpty()
                                     ? "（无输出）" : textAccumulator[0];
@@ -194,25 +203,32 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
      * <p>多 Agent 场景下，只有最后一个 Agent 发射 THINKING/TEXT_DELTA，
      * 中间 Agent 只发射 NODE_START/NODE_END 进度事件，避免思考与文本交替输出。</p>
      *
-     * @param nodeOutput       SequentialAgent 发射的节点输出
-     * @param sessionId        会话ID
-     * @param textAccumulator  文本累积器
-     * @param thinkingAccumulator 思考内容累积器
-     * @param lastAgentName    最后一个 Agent 的名称
+     * <p>由于 SequentialAgent.stream() 将每个 ReactAgent 子Agent 的内部图事件
+     * （节点名为 _AGENT_MODEL_ 等常量）直接传播到外层流，无法通过 nodeName 匹配
+     * 最后一个 Agent。改用计数器：每收到 AGENT_MODEL_FINISHED 表示一个子Agent完成，
+     * 当 completedAgentCount == totalAgents - 1 时，后续事件来自最后一个 Agent。</p>
+     *
+     * @param nodeOutput            SequentialAgent 发射的节点输出
+     * @param sessionId             会话ID
+     * @param textAccumulator       文本累积器
+     * @param thinkingAccumulator   思考内容累积器
+     * @param totalAgents           子Agent总数
+     * @param completedAgentCount   已完成子Agent计数器（单元素数组）
      */
     private Flux<StreamEvent> convertNodeOutput(NodeOutput nodeOutput, String sessionId,
                                                  String[] textAccumulator,
                                                  String[] thinkingAccumulator,
-                                                 String lastAgentName) {
+                                                 int totalAgents,
+                                                 int[] completedAgentCount) {
         String nodeName = nodeOutput.node();
-        boolean isLastAgent = nodeName.equals(lastAgentName);
 
         // StreamingOutput：包含流式内容（模型 token 或工具结果）
         if (nodeOutput instanceof StreamingOutput<?> streaming) {
             OutputType outputType = streaming.getOutputType();
 
             if (outputType == OutputType.AGENT_MODEL_STREAMING) {
-                // 中间 Agent：跳过 token 级事件，不发射 THINKING/TEXT_DELTA
+                // 只有最后一个 Agent 发射 TEXT_DELTA/THINKING
+                boolean isLastAgent = completedAgentCount[0] >= totalAgents - 1;
                 if (!isLastAgent) {
                     return Flux.empty();
                 }
@@ -238,10 +254,13 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
             }
 
             if (outputType == OutputType.AGENT_MODEL_FINISHED) {
+                boolean isLastAgent = completedAgentCount[0] >= totalAgents - 1;
                 // 只有最后一个 Agent 累积思考内容
                 if (isLastAgent) {
                     extractThinkingFromStreaming(streaming, sessionId, thinkingAccumulator);
                 }
+                // 计数：一个子Agent的模型执行完毕
+                completedAgentCount[0]++;
                 return Flux.just(StreamEvent.nodeEnd(nodeName, sessionId));
             }
 
@@ -412,26 +431,11 @@ public class AgentScopeAdapter extends AbstractEngineAdapter {
     }
 
     /**
-     * 解析最后一个 Agent 的名称 — 与 buildAgents() 中最后一个 Agent 的 .name() 保持一致
-     * 使用同一个 uniqueSuffix 保证名称匹配
-     */
-    private String resolveLastAgentName(AgentscopeAgentDefinition asDef, String uniqueSuffix) {
-        if (asDef.getAgentscopeAgents() != null && !asDef.getAgentscopeAgents().isEmpty()) {
-            int lastIdx = asDef.getAgentscopeAgents().size() - 1;
-            AgentscopeAgentConfig lastConfig = asDef.getAgentscopeAgents().get(lastIdx);
-            return resolveAgentName(asDef, lastConfig, lastIdx, uniqueSuffix);
-        }
-        // 单 Agent 场景：与 buildAgents() 中单 Agent 的 .name() 逻辑一致
-        return (asDef.getName() != null ? asDef.getName() : asDef.getAgentId())
-                + "_" + uniqueSuffix;
-    }
-
-    /**
      * 解析 Agent 名称 — 每次调用追加唯一后缀，避免 ReactAgent 全局注册表名称冲突
      * spring-ai-alibaba 的 ReactAgent 内部维护全局节点注册表，相同 name 重复注册会抛出
      * GraphStateException: node with id: xxx already exist!
      *
-     * @param uniqueSuffix 唯一后缀，由调用方统一生成，保证 buildAgents 和 resolveLastAgentName 名称一致
+     * @param uniqueSuffix 唯一后缀，由调用方统一生成，保证 buildAgents 名称一致
      */
     private String resolveAgentName(AgentscopeAgentDefinition asDef, AgentscopeAgentConfig config, int index, String uniqueSuffix) {
         String baseName;

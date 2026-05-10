@@ -41,6 +41,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
       abortRef.current = null;
     }
     setIsStreaming(false);
+    useChatStore.getState().setIsStreaming(false);
   }, []);
 
   /** 发起流式对话 */
@@ -50,6 +51,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
       stopStream();
       clearNodeStatuses();
       setIsStreaming(true);
+      useChatStore.getState().setIsStreaming(true);
 
       // 处理 SSE 事件
       const controller = streamChat(params, (event: StreamEvent) => {
@@ -59,6 +61,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
           console.warn('[SSE] 请求错误:', detail);
           appendToLastMessage('对话请求失败，请检查配置后重试');
           setIsStreaming(false);
+          useChatStore.getState().setIsStreaming(false);
           abortRef.current = null;
           return;
         }
@@ -67,6 +70,7 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
           console.warn('[SSE] 业务错误:', detail);
           appendToLastMessage('对话请求失败，请检查配置后重试');
           setIsStreaming(false);
+          useChatStore.getState().setIsStreaming(false);
           abortRef.current = null;
           return;
         }
@@ -136,8 +140,8 @@ export function useSSE(onEvent?: (event: StreamEvent) => void): UseSSEReturn {
               setActiveSessionId(event.sessionId);
             }
             setIsStreaming(false);
+            useChatStore.getState().setIsStreaming(false);
             abortRef.current = null;
-            break;
           }
           default:
             break;

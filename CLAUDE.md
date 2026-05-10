@@ -49,7 +49,7 @@ ChatFacade → ModeRouter → ChatStrategy (strategy pattern). Three modes via `
 **RagDecorator** wraps any ChatStrategy when `ragEnabled=true`; gracefully degrades on failure.
 
 ### agent (`domain.agent`)
-AgentRegistry (`ConcurrentHashMap`) holds AgentDefinition aggregates loaded from YAML at startup by `AgentYamlLoader`. TaskRuntime routes to `EngineAdapter` implementations via `EngineType` enum:
+AgentRegistry (`ConcurrentHashMap`) holds AgentDefinition aggregates. Loading order: YAML first (`AgentYamlLoader` ApplicationRunner order=1), then database (`AgentDbLoader` ApplicationRunner order=2, overwrites same agentId). TaskRuntime routes to `EngineAdapter` implementations via `EngineType` enum:
 - `CHAT` → direct ChatModel calls
 - `GRAPH` → GraphEngineAdapter (Spring AI Alibaba StateGraph, DAG with conditional edges)
 - `AGENTSCOPE` → AgentScopeAdapter (spring-ai-alibaba SequentialAgent, multi-agent sequential pipelines)
@@ -67,7 +67,7 @@ MemoryFacade (three-tier): cold layer (PostgreSQL chat messages), hot layer (Red
 
 - **Strategy + Router**: ChatStrategy / EngineAdapter interfaces with enum-keyed dispatch (no if-else routing).
 - **Decorator**: RagDecorator wraps any ChatStrategy to inject RAG.
-- **Registry**: AgentRegistry loaded from YAML, validated for cross-references at startup.
+- **Registry**: AgentRegistry dual-source loading (YAML first, database overwrites), validated for cross-references at startup.
 - **Facade**: ChatFacade (unified chat entry), MemoryFacade (unified memory entry).
 - **Repository interface in domain, impl in infrastructure**: e.g. IChatSessionRepository → ChatSessionRepositoryImpl.
 

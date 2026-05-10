@@ -2,7 +2,6 @@ package com.ai.agent.domain.agent.service;
 
 import com.ai.agent.domain.agent.model.aggregate.AgentDefinition;
 import com.ai.agent.domain.agent.repository.IAgentDefinitionRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Agent注册中心 — 管理AgentDefinition的注册与查找
  * <p>
- * 启动时从数据库加载所有Agent定义到内存ConcurrentHashMap。
  * 运行时支持动态注册/注销（CRUD操作触发）。
+ * 数据库加载由AgentDbLoader（ApplicationRunner order=2）完成，YAML加载由AgentYamlLoader（order=1）完成。
  */
 @Slf4j
 @Service
@@ -27,11 +26,11 @@ public class AgentRegistry {
     }
 
     /**
-     * 启动时从数据库加载所有Agent定义
+     * 从数据库加载所有Agent定义（由AgentDbLoader调用，在YAML加载之后执行）
+     * 数据库定义覆盖相同agentId的YAML定义（数据库优先）
      */
-    @PostConstruct
-    public void init() {
-        log.info("AgentRegistry初始化 - 从数据库加载Agent定义...");
+    public void loadFromRepository() {
+        log.info("AgentRegistry - 从数据库加载Agent定义（覆盖YAML同agentId定义）...");
         try {
             var definitions = agentDefinitionRepository.findAll();
             for (AgentDefinition definition : definitions) {
@@ -39,9 +38,9 @@ public class AgentRegistry {
                 log.info("加载数据库Agent定义: agentId={}, name={}, engine={}",
                         definition.getAgentId(), definition.getName(), definition.getEngine());
             }
-            log.info("AgentRegistry初始化完成: 共加载{}个Agent定义", registry.size());
+            log.info("AgentRegistry数据库加载完成: 共加载{}个Agent定义", definitions.size());
         } catch (Exception e) {
-            log.error("AgentRegistry初始化失败: {}", e.getMessage(), e);
+            log.error("AgentRegistry数据库加载失败: {}", e.getMessage(), e);
         }
     }
 

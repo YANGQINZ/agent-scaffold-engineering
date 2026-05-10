@@ -20,12 +20,6 @@ public class AgentWorkflowNodePO {
     /** 智能体ID */
     private String agentId;
 
-    /** React智能体ID */
-    private String reactAgentId;
-
-    /** 下一个节点ID */
-    private String nextNodeId;
-
     /** 是否启用RAG */
     private Boolean ragEnabled;
 

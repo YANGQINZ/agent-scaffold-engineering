@@ -57,7 +57,7 @@ agent:
 
     # ───────────────────────────────────────────────────────────
     # agent_workflow_node 表 (5行)
-    # 所有列: node_id, agent_id, react_agent_id, next_node_id,
+    # 所有列: node_id, agent_id,
     #         rag_enabled, knowledge_base_id, instruction,
     #         sub_engine, mcp_servers, sort_order
     #
@@ -72,8 +72,6 @@ agent:
       # 输出格式决定后续条件分支走向
       - id: "triage"                                    # node_id           varchar(64) NOT NULL
         agentId: "tech-support"                         # agent_id          varchar(64) → 父级 agentId
-        reactAgentId: null                              # react_agent_id    varchar(64) → NULL
-        next: null                                      # next_node_id      varchar(64) → DAG模式 NULL
         ragEnabled: false                               # rag_enabled       boolean DEFAULT false
         knowledgeBaseId: null                           # knowledge_base_id varchar(64)
         instruction: >-                                 # instruction       text
@@ -88,10 +86,7 @@ agent:
       # 节点2: Bug 处理员 (条件分支1: type==bug)
       - id: "bug_handler"
         agentId: "tech-support"
-        reactAgentId: null
-        next: null
         ragEnabled: false
-        knowledgeBaseId: null
         instruction: >-
           你是一位资深Bug分析师。根据用户报告的Bug信息：
           1. 分析可能的根本原因
@@ -104,10 +99,7 @@ agent:
       # 节点3: 需求处理员 (条件分支2: type==feature)
       - id: "feature_handler"
         agentId: "tech-support"
-        reactAgentId: null
-        next: null
         ragEnabled: false
-        knowledgeBaseId: null
         instruction: >-
           你是一位产品需求分析师。根据用户提出的功能需求：
           1. 分析需求的价值和优先级
@@ -120,10 +112,8 @@ agent:
       # 节点4: FAQ 处理员 (条件分支3: type==question)
       - id: "faq_handler"
         agentId: "tech-support"
-        reactAgentId: null
-        next: null
         ragEnabled: true                                # rag_enabled → 启用 RAG 知识库检索
-        knowledgeBaseId: "kb-tech-faq"                  # knowledge_base_id → 关联知识库
+        knowledgeBaseId: "2050102098263064578"                  # knowledge_base_id → 关联知识库
         instruction: >-
           你是一位技术咨询顾问。根据用户的问题，结合知识库中的技术文档，
           给出准确、详细的解答。如果知识库中没有相关信息，基于专业知识回答并标注"非官方建议"。
@@ -133,8 +123,6 @@ agent:
       # 节点5: 汇总处理员 (叶子节点，所有分支汇聚)
       - id: "resolver"
         agentId: "tech-support"
-        reactAgentId: null
-        next: null
         ragEnabled: false
         knowledgeBaseId: null
         instruction: >-

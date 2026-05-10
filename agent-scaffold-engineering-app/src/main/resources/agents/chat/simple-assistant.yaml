@@ -1,0 +1,27 @@
+# ═══════════════════════════════════════════════════════════════
+# 简单助手 — CHAT 引擎示例
+#
+# 最简单的 Agent 类型：无状态单轮对话，直接调用 ChatModel
+#
+# 执行路径:
+#   SimpleChatStrategy.chat() → ChatModel 直接调用 → 返回结果
+#
+# 写入表: agent_definition (1行)
+# 不写入: agent_workflow_node, agent_graph_edge, agent_agentscope_config
+# ═══════════════════════════════════════════════════════════════
+agent:
+  # ─────────────────────────────────────────────────────────────
+  # agent_definition 表 (1行)
+  # 所有列: agent_id, name, engine, instruction,
+  #         model_config, mcp_servers, graph_start,
+  #         agentscope_pipeline_type, sub_engines
+  # ─────────────────────────────────────────────────────────────
+  id: "simple-assistant"                  # agent_id               varchar(64)  NOT NULL UNIQUE
+  name: "简单助手"                        # name                   varchar(128) NOT NULL
+  engine: CHAT                            # engine                 varchar(32)  NOT NULL
+  instruction: "你是一个有用的助手，帮助用户解答问题。"  # instruction            text
+  model:
+    name: "qwen-plus"                     # model_config           JSONB → '{"name":"qwen-plus","temperature":0.7,"maxTokens":2000}'
+    temperature: 0.7
+    maxTokens: 2000
+  mcpServers: []                          # mcp_servers            JSONB → '[]'

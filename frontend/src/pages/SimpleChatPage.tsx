@@ -4,7 +4,7 @@
  * 使用 useChatSessionStore 管理会话、useChatStore 管理消息
  */
 import { memo, useCallback, useRef, useEffect, useState } from 'react';
-import { Bot, User, Plus, Database, Brain } from 'lucide-react';
+import { Bot, User, Plus, Database, Brain, Sparkles } from 'lucide-react';
 import ThinkingBlock from '@/features/chat/ThinkingBlock';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -193,11 +193,10 @@ function SimpleChatPage() {
                     <ThinkingBlock content={msg.thinkingContent} />
                   )}
                   {msg.content || (isStreaming && msg.role === 'assistant' ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:0ms]" />
-                      <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:150ms]" />
-                      <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:300ms]" />
-                    </span>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Sparkles className="size-4 animate-pulse text-indigo-400" />
+                      <span className="text-sm">AI 正在思考，请稍等~</span>
+                    </div>
                   ) : null)}
                 </div>
                 {msg.role === 'user' && (

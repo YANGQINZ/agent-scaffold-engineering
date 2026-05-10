@@ -22,12 +22,6 @@ public class WorkflowNode {
     /** 节点对应的AgentID */
     private String agentId;
 
-    /** 节点对应的ReAct AgentID */
-    private String reactAgentId;
-
-    /** 下一个节点ID */
-    private String next;
-
     /** 是否启用 RAG 增强检索 */
     @Builder.Default
     private Boolean ragEnabled = false;

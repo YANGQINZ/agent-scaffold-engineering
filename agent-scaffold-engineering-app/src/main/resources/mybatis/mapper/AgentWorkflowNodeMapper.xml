@@ -3,15 +3,15 @@
 <mapper namespace="com.ai.agent.infrastructure.persistent.dao.IAgentWorkflowNodeDao">
 
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO agent_workflow_node (agent_definition_id, node_id, agent_id, react_agent_id, next_node_id, rag_enabled, knowledge_base_id, instruction, sub_engine, mcp_servers, sort_order)
+        INSERT INTO agent_workflow_node (agent_definition_id, node_id, agent_id, rag_enabled, knowledge_base_id, instruction, sub_engine, mcp_servers, sort_order)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.agentDefinitionId}, #{item.nodeId}, #{item.agentId}, #{item.reactAgentId}, #{item.nextNodeId}, #{item.ragEnabled}, #{item.knowledgeBaseId}, #{item.instruction}, #{item.subEngine}, #{item.mcpServers}::jsonb, #{item.sortOrder})
+            (#{item.agentDefinitionId}, #{item.nodeId}, #{item.agentId}, #{item.ragEnabled}, #{item.knowledgeBaseId}, #{item.instruction}, #{item.subEngine}, #{item.mcpServers}::jsonb, #{item.sortOrder})
         </foreach>
     </insert>
 
     <select id="selectByAgentDefinitionId" resultType="com.ai.agent.infrastructure.persistent.po.AgentWorkflowNodePO">
-        SELECT id, agent_definition_id, node_id, agent_id, react_agent_id, next_node_id, rag_enabled, knowledge_base_id, instruction, sub_engine, mcp_servers, sort_order
+        SELECT id, agent_definition_id, node_id, agent_id, rag_enabled, knowledge_base_id, instruction, sub_engine, mcp_servers, sort_order
         FROM agent_workflow_node WHERE agent_definition_id = #{agentDefinitionId} ORDER BY sort_order ASC
     </select>
 

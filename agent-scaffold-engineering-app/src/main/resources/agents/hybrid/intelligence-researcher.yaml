@@ -11,7 +11,7 @@
 # 执行路径:
 #   Phase 1: 中间节点 (GRAPH) 由 buildNodeAction → ChatModel 直接调用
 #   Phase 2: 叶子节点 (AGENTSCOPE) 由 executeWithAgentscopeLeaf → AgentScopeAdapter
-#            findSubAgentDef 通过 reactAgentId="deep-research-team" 查找已注册的
+#            findSubAgentDef 通过 agentId 引用已注册的
 #            AgentscopeAgentDefinition (含 agentscopeAgents 配置)
 #            → AgentScopeAdapter.buildAgents 创建 SequentialAgent:
 #               子Agent1=搜索分析员(ReactAgent+MCP工具) → 子Agent2=报告撰写员(ReactAgent)
@@ -48,15 +48,13 @@ agent:
 
     # ─────────────────────────────────────────────────────────
     # agent_workflow_node 表 (4行)
-    # 所有列: node_id, agent_id, react_agent_id, next_node_id,
+    # 所有列: node_id, agent_id,
     #         rag_enabled, knowledge_base_id, instruction,
     #         sub_engine, mcp_servers, sort_order
     # ─────────────────────────────────────────────────────────
     nodes:
       - id: "requirement_analyst"                       # node_id           varchar(64) NOT NULL
         agentId: "intelligence-researcher"              # agent_id          varchar(64) → 父级 agentId
-        reactAgentId: null                              # react_agent_id    varchar(64) → 引用已注册 Agent
-        next: null                                      # next_node_id      varchar(64) → DAG 模式下为 null
         ragEnabled: false                               # rag_enabled       boolean DEFAULT false
         knowledgeBaseId: null                           # knowledge_base_id varchar(64)
         instruction: >-                                 # instruction       text
@@ -70,8 +68,6 @@ agent:
 
       - id: "market_scout"
         agentId: "intelligence-researcher"
-        reactAgentId: null
-        next: null
         ragEnabled: false
         knowledgeBaseId: null
         instruction: >-
@@ -85,8 +81,6 @@ agent:
 
       - id: "tech_scout"
         agentId: "intelligence-researcher"
-        reactAgentId: null
-        next: null
         ragEnabled: false
         knowledgeBaseId: null
         instruction: >-
@@ -99,13 +93,10 @@ agent:
         mcpServers: []
 
       # 叶子节点: 委托 AGENTSCOPE 内层引擎
-      # reactAgentId → "deep-research-team" 引用已注册的 AGENTSCOPE Agent
       # 该 Agent 的 agentscopeAgents 配置在 agent_agentscope_config 表中 (2行)
       # 内部执行: 搜索分析员(ReactAgent+MCP工具) → 报告撰写员(ReactAgent)
       - id: "deep_investigator"
         agentId: "intelligence-researcher"
-        reactAgentId: "deep-research-team"              # react_agent_id → 引用 AGENTSCOPE Agent 定义
-        next: null
         ragEnabled: false
         knowledgeBaseId: null
         instruction: >-
@@ -119,11 +110,10 @@ agent:
         subEngine: "AGENTSCOPE"                         # sub_engine → AGENTSCOPE=委托 AgentScopeAdapter
         mcpServers:                                     # mcp_servers → 节点级 MCP (findSubAgentDef 回退用)
           - name: "web-search"
-            transport: "stdio"
-            command: "npx"
-            args:
-              - "-y"
-              - "@anthropic/mcp-server-websearch"
+            transport: "streamableHttp"
+            url: https://qianfan.baidubce.com/v2/tools/web-search/mcp
+            headers:
+              Authorization: "Bearer bce-v3/ALTAK-HGZPLCOHFDh0qPYS8mDIi/66a8e0ba83e050e555c9a34f6ff9cba1327d112e"
 
     # ─────────────────────────────────────────────────────────
     # agent_graph_edge 表 (4行)

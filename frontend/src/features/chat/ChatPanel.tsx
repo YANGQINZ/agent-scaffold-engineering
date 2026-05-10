@@ -20,7 +20,6 @@ const genMsgId = () =>
 
 function ChatPanel({ context }: { context?: 'chat' | 'workspace' }) {
   const messages = useChatStore((s) => s.messages);
-  const isStreaming = useChatStore((s) => s.isStreaming);
   const addMessage = useChatStore((s) => s.addMessage);
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const selectedAgentId = useChatStore((s) => s.selectedAgentId);
@@ -143,16 +142,6 @@ function ChatPanel({ context }: { context?: 'chat' | 'workspace' }) {
             {messages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
-            {/* 流式输出时底部指示器 */}
-            {isStreaming && (
-              <div className="flex justify-start px-4 py-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:0ms]" />
-                  <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:150ms]" />
-                  <span className="inline-block size-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:300ms]" />
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

@@ -82,13 +82,7 @@ agent:
           基于收集到的旅行需求信息 {collected_info}，
           搜索从出发地到目的地的所有可选交通方式，
           比较价格、时长和便捷度，推荐最优路线方案。
-        mcpServers:                         # mcp_servers      JSONB → 节点级 MCP 工具
-          - name: "map-search"
-            transport: "stdio"
-            command: "npx"
-            args:
-              - "-y"
-              - "@anthropic/mcp-server-websearch"
+        mcpServers: []                      # mcp_servers      JSONB → 节点级 MCP 工具
         enableTools: []                     # enable_tools     JSONB → '[]'
         outputKey: "route_options"          # output_key
 
@@ -102,13 +96,7 @@ agent:
           基于目的地信息 {collected_info} 和选定路线 {route_options}，
           查询目的地未来几天的天气情况，
           给出穿衣建议和出行提醒。
-        mcpServers:                         # mcp_servers      JSONB → 节点级 MCP 工具
-          - name: "weather-api"
-            transport: "stdio"
-            command: "npx"
-            args:
-              - "-y"
-              - "@anthropic/mcp-server-websearch"
+        mcpServers: []                        # mcp_servers      JSONB → 节点级 MCP 工具
         enableTools: []                     # enable_tools     JSONB → '[]'
         outputKey: "weather_info"           # output_key
 

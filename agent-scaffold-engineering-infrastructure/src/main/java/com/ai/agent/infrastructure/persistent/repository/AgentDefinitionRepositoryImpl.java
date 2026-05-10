@@ -283,8 +283,6 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                     po.setAgentDefinitionId(definitionId);
                     po.setNodeId(node.getId());
                     po.setAgentId(node.getAgentId());
-                    po.setReactAgentId(node.getReactAgentId());
-                    po.setNextNodeId(node.getNext());
                     po.setRagEnabled(node.getRagEnabled());
                     po.setKnowledgeBaseId(node.getKnowledgeBaseId());
                     po.setInstruction(node.getInstruction());
@@ -355,8 +353,6 @@ public class AgentDefinitionRepositoryImpl implements IAgentDefinitionRepository
                 .map(po -> WorkflowNode.builder()
                         .id(po.getNodeId())
                         .agentId(po.getAgentId())
-                        .reactAgentId(po.getReactAgentId())
-                        .next(po.getNextNodeId())
                         .ragEnabled(po.getRagEnabled())
                         .knowledgeBaseId(po.getKnowledgeBaseId())
                         .instruction(po.getInstruction())

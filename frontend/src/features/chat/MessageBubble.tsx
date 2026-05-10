@@ -5,8 +5,9 @@
  * 展示思考过程和 RAG 来源
  */
 import { memo } from 'react';
-import { Bot, User } from 'lucide-react';
+import { Bot, User, Sparkles } from 'lucide-react';
 import type { Message } from '@/stores/chat';
+import { useChatStore } from '@/stores/chat';
 import ThinkingBlock from './ThinkingBlock';
 import RagSourceBadge from './RagSourceBadge';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,10 @@ interface MessageBubbleProps {
 
 function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === 'user';
+  const isStreaming = useChatStore((s) => s.isStreaming);
+
+  // 助手消息内容为空 + 正在流式输出 → 显示加载提示
+  const isLoading = !isUser && !message.content && isStreaming;
 
   return (
     <div
@@ -48,7 +53,14 @@ function MessageBubble({ message }: MessageBubbleProps) {
         )}
 
         {/* 消息正文 */}
-        <div className="whitespace-pre-wrap break-words">{message.content}</div>
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-gray-400">
+            <Sparkles className="size-4 animate-pulse text-indigo-400" />
+            <span className="text-sm">AI 正在思考，请稍等~</span>
+          </div>
+        ) : (
+          <div className="whitespace-pre-wrap break-words">{message.content}</div>
+        )}
 
         {/* RAG 来源（仅助手消息） */}
         {!isUser && message.sources && message.sources.length > 0 && (
